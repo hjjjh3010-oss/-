@@ -1,0 +1,47 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="problem-solution" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <!-- Section Header -->
+    <div class="problem-solution__header" {{ section_id }}>
+      <h2 class="problem-solution__title font-heading-center">{{ settings.problem_solution_title | default: 'Grooming Doesn't Have to Be a Struggle' }}</h2>
+      {% if settings.problem_solution_subtitle != blank %}
+        <p class="problem-solution__subtitle text-center text-secondary max-w-2xl mx-auto">{{ settings.problem_solution_subtitle }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Problem & Solution -->
+    <div class="problem-solution__content grid--2" {{ section_id }}>
+      <!-- Left: Description -->
+      <div class="problem-solution__description">
+        {% if settings.problem_solution_description != blank %}
+          <p>{{ settings.problem_solution_description }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Right: Benefits / Key Features -->
+      <div class="problem-solution__benefits">
+        {% if settings.problem_solution_features != blank %}
+          <ul class="problem-solution__features list--unstyled">
+            {% for feature in settings.problem_solution_features %}
+              <li>
+                <span class="problem-solution__feature-icon">
+                  {% render 'icon-check' %}
+                </span>
+                <span>{{ feature }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Usage Infographic -->
+    {% if settings.problem_solution_show_infographic %}
+      <div class="problem-solution__infographic container" {{ section_id }}>
+        <img src="{{ settings.problem_solution_infographic | img_url: width: 800 }}" alt="{{ settings.problem_solution_infographic_alt | default: 'How to use guide' }}" loading="lazy" class="problem-solution__infographic-img ratio--wide">
+      </div>
+    {% endif %}
+  </div>
+</div>

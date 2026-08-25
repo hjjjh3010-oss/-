@@ -1,0 +1,14 @@
+{
+  "name": "About Page",
+  "theme_id": "0",
+  "role": "page.about",
+  "settings": [
+    {
+      "type": "main-about",
+      "id": "main-about",
+      "settings": {
+        "section_id": "main-about"
+      }
+    }
+  ]
+}

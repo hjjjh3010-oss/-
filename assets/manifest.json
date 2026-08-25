@@ -1,0 +1,23 @@
+{
+  "name": "{{ shop.name }}",
+  "short_name": "{{ shop.name }}",
+  "description": "{{ shop.description }}",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "{{ settings.color_bg }}",
+  "theme_color": "{{ settings.color_accent }}",
+  "icons": [
+    {
+      "src": "{{ settings.favicon | image_url: width: 192 }}",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "{{ settings.favicon | image_url: width: 512 }}",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

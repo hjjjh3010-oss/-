@@ -1,0 +1,11 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+
+{% comment %} payment-icons.liquid - Display payment method icons {% endcomment %}
+
+<div class="payment-icons" {{ section_id }}>
+  {% render 'icon-visa' %}
+  {% render 'icon-mastercard' %}
+  {% render 'icon-american-express' %}
+  {% render 'icon-paypal' %}
+  {% render 'icon-apple-pay' %}
+</div>

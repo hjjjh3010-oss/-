@@ -1,0 +1,17 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+
+{% comment %} price.liquid - Display product price with compare-at price and sale badge {% endcomment %}
+
+<div class="price" {{ section_id }}>
+  {% if product.compare_at_price > product.price %}
+    <span class="price__current">{{ product.price | money }}</span>
+    <span class="price__compare">{{ product.compare_at_price | money }}</span>
+    <span class="price__sale badge badge--sale uppercase small">{{ 'product.on_sale' | t }}</span>
+  {% else %}
+    <span class="price__current">{{ product.price | money }}</span>
+  {% endif %}
+
+  {% if product.price_percent_off %}
+    <span class="price__discount small">{{ product.price_percent_off | remove: '%' }}% OFF</span>
+  {% endif %}
+</div>

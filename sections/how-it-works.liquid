@@ -1,0 +1,22 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="how-it-works" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <!-- Section Header -->
+    <div class="how-it-works__header text-center" {{ section_id }}>
+      <h2 class="how-it-works__title font-heading">{{ settings.how_it_works_title | default: 'How It Works' }}</h2>
+    </div>
+
+    <!-- Steps Grid -->
+    <div class="how-it-works__steps grid--3 grid--auto--sm" {{ section_id }}>
+      {% for i in (1..3) %}
+        <div class="how-it-works__step ratio ratio--portrait" {{ section_id }}>
+          <div class="how-it-works__step-number font-heading">{{ i }}</div>
+          <h4 class="how-it-works__step-title h4">{{ settings['how_it_works_step_' ~ i | replace: ' ', '_'] | default: 'Step ' ~ i }}</h4>
+          <p class="how-it-works__step-description text-secondary small">{{ settings['how_it_works_step_desc_' ~ i | replace: ' ', '_'] | default: 'Learn how our product works in simple steps.' }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

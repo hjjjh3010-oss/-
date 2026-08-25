@@ -1,0 +1,30 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="hero" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <div class="hero__inner flex--column flex--lg--space-between ratio ratio--wide--xl" {{ section_id }}>
+      <!-- Text Content -->
+      <div class="hero__text" {{ section_id }}>
+        <span class="hero__badge badge badge--new uppercase small">{{ settings.hero_badge | default: 'New Arrival' }}</span>
+        <h1 class="hero__title font-heading">{{ settings.hero_title | default: 'Transform Bath Time into Bonding Time' }}</h1>
+        <p class="hero__subtitle text-secondary large">{{ settings.hero_subtitle | default: 'The premium pet bathing solution that makes grooming effortless and enjoyable for both you and your furry friend.' }}</p>
+      </div>
+
+      <!-- CTA Buttons -->
+      <div class="hero__cta flex--column flex--sm--start gap-md" {{ section_id }}>
+        <a href="/collections/all" class="btn btn--primary hero__cta-primary">{{ 'home_page.cta_primary' | t }}</a>
+        <a href="/pages/about" class="btn btn--outline hero__cta-secondary">{{ 'home_page.cta_secondary' | t }}</a>
+      </div>
+    </div>
+
+    <!-- Hero Image -->
+    <div class="hero__image ratio ratio--portrait" {{ section_id }}>
+      {% if settings.hero_image != blank %}
+        <img src="{{ settings.hero_image | img_url: width: 1200 }}" alt="{{ settings.hero_image_alt | default: 'Premium pet bathing solution' }}" loading="lazy" class="hero__image-img ratio__img">
+      {% else %}
+        {% render 'icon-paw' %}
+      {% endif %}
+    </div>
+  </div>
+</div>

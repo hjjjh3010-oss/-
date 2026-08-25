@@ -1,0 +1,32 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<aside class="cart-drawer" id="cart-drawer" aria-hidden="true" {{ section_id }}>
+  <div class="cart-drawer__overlay" data-cart-drawer-close></div>
+  <div class="cart-drawer__container">
+    <header class="cart-drawer__header">
+      <h2 class="cart-drawer__title font-heading">{{ 'cart.title' | t }}</h2>
+      <button class="cart-drawer__close" aria-label="{{ 'accessibility.close' | t }}" data-cart-drawer-close>
+        {% render 'icon-close' %}
+      </button>
+    </header>
+
+    <div class="cart-drawer__content" id="cart-drawer-content">
+      <!-- Initial empty state - populated by JavaScript -->
+      <div class="cart-drawer__empty text-center">
+        {% render 'icon-cart' %}
+        <p class="text-secondary">{{ 'cart.empty' | t }}</p>
+        <a href="/collections/all" class="btn btn--primary mt-2">{{ 'cart.continue_shopping' | t }}</a>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  // Cart drawer is initialized by global.js
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.ShopifyCart && window.ShopifyCart.refresh) {
+      // Initial load will be triggered when drawer opens
+    }
+  });
+</script>

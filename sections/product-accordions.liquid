@@ -1,0 +1,107 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+
+<div class="product-accordions" {{ section_id }}>
+  {% render 'icon-chevron' %}
+
+  <!-- Shipping Time -->
+  <details class="accordion accordion--shipping">
+    <summary class="accordion__summary">
+      <span class="accordion__summary-icon">
+        {% render 'icon-truck' %}
+      </span>
+      <span class="accordion__summary-text">{{ 'product.shipping_time' | t }}</span>
+      <span class="accordion__summary-arrow">
+        {% render 'icon-chevron' %}
+      </span>
+    </summary>
+    <div class="accordion__content">
+      {% if product.shipping_policy %}
+        <p>{{ product.shipping_policy }}</p>
+      {% else %}
+        <p>{{ 'product.shipping_time_default' | t }}</p>
+      {% endif %}
+    </div>
+  </details>
+
+  <!-- Pet Compatibility -->
+  <details class="accordion accordion--pet-compatibility">
+    <summary class="accordion__summary">
+      <span class="accordion__summary-icon">
+        {% render 'icon-paw' %}
+      </span>
+      <span class="accordion__summary-text">{{ 'product.pet_compatibility' | t }}</span>
+      <span class="accordion__summary-arrow">
+        {% render 'icon-chevron' %}
+      </span>
+    </summary>
+    <div class="accordion__content">
+      {% if product.metafields and product.metafields.pet_compatibility %}
+        {{ product.metafields.pet_compatibility }}
+      {% else %}
+        <p>{{ 'product.pet_compatibility_default' | t }}</p>
+      {% endif %}
+    </div>
+  </details>
+
+  <!-- Guarantee -->
+  <details class="accordion accordion--guarantee">
+    <summary class="accordion__summary">
+      <span class="accordion__summary-icon">
+        {% render 'icon-check' %}
+      </span>
+      <span class="accordion__summary-text">{{ 'product.guarantee' | t }}</span>
+      <span class="accordion__summary-arrow">
+        {% render 'icon-chevron' %}
+      </span>
+    </summary>
+    <div class="accordion__content">
+      <p>{{ 'product.guarantee_desc' | t }}</p>
+    </div>
+  </details>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize accordions
+    const accordions = document.querySelectorAll('.accordion');
+
+    accordions.forEach(function(accordion) {
+      const summary = accordion.querySelector('.accordion__summary');
+      const content = accordion.querySelector('.accordion__content');
+
+      if (!summary || !content) return;
+
+      // Toggle on click
+      summary.addEventListener('click', function(e) {
+        // Close other accordions
+        accordions.forEach(function(other) {
+          if (other !== accordion) {
+            other.querySelector('.accordion__content').classList.add('hidden');
+            other.querySelector('.accordion__content').classList.remove('visible');
+            other.querySelector('.accordion__summary-arrow').innerHTML = '{% render "icon-chevron" %}';
+          }
+        });
+
+        // Toggle current
+        if (content.classList.contains('hidden')) {
+          content.classList.remove('hidden');
+          content.classList.add('visible');
+          summary.querySelector('.accordion__summary-arrow').innerHTML = '{% render "icon-chevron-up" %}';
+        } else {
+          content.classList.add('hidden');
+          content.classList.remove('visible');
+          summary.querySelector('.accordion__summary-arrow').innerHTML = '{% render "icon-chevron" %}';
+        }
+      });
+    });
+
+    // Initial open based on URL hash
+    const hash = window.location.hash;
+    if (hash) {
+      const initialAccordion = document.querySelector(hash + '.accordion__summary');
+      if (initialAccordion) {
+        initialAccordion.click();
+      }
+    }
+  });
+</script>

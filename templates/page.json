@@ -1,0 +1,14 @@
+{
+  "name": "Page",
+  "theme_id": "0",
+  "role": "page",
+  "settings": [
+    {
+      "type": "main-page",
+      "id": "main-page",
+      "settings": {
+        "section_id": "main-page"
+      }
+    }
+  ]
+}

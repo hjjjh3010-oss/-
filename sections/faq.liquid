@@ -1,0 +1,86 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+
+<div class="faq" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <!-- Section Header -->
+    <div class="faq__header" {{ section_id }}>
+      <h2 class="faq__title font-heading">{{ settings.faq_title | default: 'FAQS' }}</h2>
+    </div>
+
+    <!-- FAQ Content -->
+    <div class="faq__content container" {{ section_id }}>
+      {% if settings.faq_accordions != blank %}
+        {% for accordion in settings.faq_accordions %}
+          <div class="faq__item" {{ section_id }}>
+            <details class="faq__details">
+              <summary class="faq__summary">
+                {% if accordion.show_icon != false %}
+                  <span class="faq__icon">
+                    {% render 'icon-question' %}
+                  </span>
+                {% endif %}
+                <span class="faq__question">{{ accordion.question }}</span>
+                <span class="faq__arrow">
+                  {% render 'icon-chevron' %}
+                </span>
+              </summary>
+              <div class="faq__content-body">
+                {{ accordion.answer }}
+              </div>
+            </details>
+          </div>
+        {% endfor %}
+      {% else %}
+        <!-- Default FAQs -->
+        <div class="faq__item">
+          <details class="faq__details">
+            <summary class="faq__summary">
+              <span class="faq__icon">
+                {% render 'icon-question' %}
+              </span>
+              <span class="faq__question">Will my pet stay comfortable?</span>
+              <span class="faq__arrow">
+                {% render 'icon-chevron' %}
+              </span>
+            </summary>
+            <div class="faq__content-body">
+              <p>Yes, our product is designed with pet comfort in mind. The soft, breathable material ensures your pet stays comfortable during use.</p>
+            </div>
+          </details>
+        </div>
+        <div class="faq__item">
+          <details class="faq__details">
+            <summary class="faq__summary">
+              <span class="faq__icon">
+                {% render 'icon-question' %}
+              </span>
+              <span class="faq__question">How do I clean the product?</span>
+              <span class="faq__arrow">
+                {% render 'icon-chevron' %}
+              </span>
+            </summary>
+            <div class="faq__content-body">
+              <p>The product is machine washable on a gentle cycle with cold water. Tumble dry low or air dry. Do not use bleach.</p>
+            </div>
+          </details>
+        </div>
+        <div class="faq__item">
+          <details class="faq__details">
+            <summary class="faq__summary">
+              <span class="faq__icon">
+                {% render 'icon-question' %}
+              </span>
+              <span class="faq__question">Is the product safe for all animals?</span>
+              <span class="faq__arrow">
+                {% render 'icon-chevron' %}
+              </span>
+            </summary>
+            <div class="faq__content-body">
+              <p>The product is safe for dogs and cats. However, we recommend supervising your pet during initial use and consulting with your veterinarian if you have specific concerns.</p>
+            </div>
+          </details>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

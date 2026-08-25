@@ -1,0 +1,41 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="social-proof" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <!-- Section Header -->
+    <div class="social-proof__header text-center" {{ section_id }}>
+      <h2 class="social-proof__title font-heading">{{ settings.social_proof_title }}</h2>
+      {% if settings.social_proof_subtitle != blank %}
+        <p class="social-proof__subtitle text-secondary">{{ settings.social_proof_subtitle }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Customer Photos Grid -->
+    <div class="social-proof__grid grid--2 grid--3 grid--4--md" {{ section_id }}>
+      {% if section.blocks.size > 0 %}
+        {% for block in section.blocks %}
+          <div class="social-proof__item ratio--portrait" {{ section_id }}>
+            {% if block.settings.image != blank %}
+              <img src="{{ block.settings.image | img_url: width: 400 }}" alt="{{ block.settings.image_alt | default: 'Customer using product' }}" loading="lazy" class="social-proof__image ratio__img">
+            {% endif %}
+            {% if block.settings.customer_name != blank %}
+              <p class="social-proof__customer-name text-secondary small">{{ block.settings.customer_name }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <!-- Default placeholder if no blocks added -->
+        <div class="social-proof__empty">
+          {% render 'icon-image' %}
+          <p class="text-secondary small">{{ 'social_proof.no_photos' | t }}</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Add Review Button -->
+    <div class="social-proof__add-review text-center mt-3" {{ section_id }}>
+      <a href="/pages/write-a-review" class="btn btn--outline small">{{ 'product.write_review' | t }}</a>
+    </div>
+  </div>
+</div>

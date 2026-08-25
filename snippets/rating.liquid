@@ -1,0 +1,20 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+
+{% comment %} rating.liquid - Display product rating {% endcomment %}
+
+<div class="rating" {{ section_id }}>
+  {% assign rating_value = product.rating_value | default: 4.5 %}
+  {% assign rating_count = product.rating_count | default: 24 %}
+
+  <span class="rating__stars">
+    {% for i in (1..5) %}
+      {% if i <= rating_value | floor %}
+        {% render 'icon-star' %}
+      {% else %}
+        {% render 'icon-star--empty' %}
+      {% endif %}
+    {% endfor %}
+  </span>
+  <span class="rating__value">{{ rating_value }}</span>
+  <span class="rating__count">({{ rating_count }})</span>
+</div>

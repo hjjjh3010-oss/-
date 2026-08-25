@@ -1,0 +1,24 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="statistics" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <!-- Section Header -->
+    <div class="statistics__header text-center" {{ section_id }}>
+      <h2 class="statistics__title font-heading">{{ settings.statistics_title | default: 'The Difference Owners Notice' }}</h2>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="statistics__grid grid--3" {{ section_id }}>
+      {% for i in (1..3) %}
+        <div class="statistics__item" {{ section_id }}>
+          <div class="statistics__number ratio ratio--square" {{ section_id }}>
+            {{ settings['statistic_number_' ~ i] | default: i * 10 | percent }}
+          </div>
+          <h3 class="statistics__label font-heading">{{ settings['statistic_label_' ~ i] | default: 'Result ' ~ i }}</h3>
+          <p class="statistics__description text-secondary small">{{ settings['statistic_description_' ~ i] | default: 'of customers notice improvement' }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,63 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="announcement-bar" {{ section_id }} {{ section_settings }}>
+  <div class="announcement-bar__inner container">
+    <div class="announcement-bar__text{% if settings.announcement_link != blank %} announcement-bar__text--linked{% endif %}">
+      {{ settings.announcement_text }}
+      {% if settings.announcement_link != blank %}
+        <a href="{{ settings.announcement_link }}" class="announcement-bar__link">{{ 'announcement.read_more' | t }}</a>
+      {% endif %}
+    </div>
+
+    <div class="announcement-bar__countdown{% if !settings.announcement_countdown %} hidden{% endif %}">
+      <span>{{ 'announcement.days' | t }}</span>
+      <span id="days">{{ '' }}</span>
+      <span>{{ 'announcement.hours' | t }}</span>
+      <span id="hours">{{ '' }}</span>
+      <span>{{ 'announcement.minutes' | t }}</span>
+      <span id="minutes">{{ '' }}</span>
+      <span>{{ 'announcement.seconds' | t }}</span>
+      <span id="seconds">{{ '' }}</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const endDate = {{ settings.announcement_countdown_date | json }};
+    const daysEl = document.getElementById('days');
+    const hoursEl = document.getElementById('hours');
+    const minutesEl = document.getElementById('minutes');
+    const secondsEl = document.getElementById('seconds');
+
+    if (!daysEl || !hoursEl || !minutesEl || !secondsEl || !endDate) return;
+
+    function updateCountdown() {
+      const now = new Date();
+      const target = new Date(endDate);
+      const diff = target - now;
+
+      if (diff <= 0) {
+        if (daysEl) daysEl.parentElement.innerHTML = 'Ended';
+        if (hoursEl) hoursEl.parentElement.innerHTML = '';
+        if (minutesEl) minutesEl.parentElement.innerHTML = '';
+        if (secondsEl) secondsEl.parentElement.innerHTML = '';
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (daysEl) daysEl.textContent = days;
+      if (hoursEl) hoursEl.textContent = hours < 10 ? '0' + hours : hours;
+      if (minutesEl) minutesEl.textContent = minutes < 10 ? '0' + minutes : minutes;
+      if (secondsEl) secondsEl.textContent = seconds < 10 ? '0' + seconds : seconds;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  });
+</script>

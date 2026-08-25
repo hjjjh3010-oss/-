@@ -1,0 +1,31 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="featured-collection" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <!-- Section Header -->
+    <div class="featured-collection__header flex--column flex--sm--space-between" {{ section_id }}>
+      <div>
+        <span class="featured-collection__badge badge badge--custom uppercase small">{{ settings.featured_collection_badge | default: 'Best Sellers' }}</span>
+        <h2 class="featured-collection__title font-heading">{{ settings.featured_collection_title | default: 'Best Sellers' }}</h2>
+      </div>
+      <a href="/collections/all" class="featured-collection__view-all text-primary small">{{ 'home_page.view_all' | t }}</a>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="featured-collection__products grid--4 grid--2--md grid--1--sm" {{ section_id }}>
+      {% paginate collection.products by 8 %}
+        {% for product in collection.products %}
+          {% render 'product-card', product: product, show_vendor: settings.featured_collection_show_vendor, show_price: settings.featured_collection_show_price %}
+        {% endfor %}
+      {% endpaginate %}
+    </div>
+
+    <!-- Load More (optional) -->
+    {% if collection.products_count > 8 %}
+      <div class="featured-collection__load-more text-center">
+        <a href="/collections/all" class="text-primary small">{{ 'home_page.view_all' | t }}</a>
+      </div>
+    {% endif %}
+  </div>
+</div>

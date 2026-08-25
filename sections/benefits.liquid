@@ -1,0 +1,25 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="benefits" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <!-- Section Header -->
+    <div class="benefits__header text-center" {{ section_id }}>
+      <span class="benefits__badge badge badge--custom uppercase small">{{ settings.benefits_badge | default: 'Why Choose Us' }}</span>
+      <h2 class="benefits__title font-heading">{{ settings.benefits_title | default: 'Why Choose Us' }}</h2>
+    </div>
+
+    <!-- Benefits Grid -->
+    <div class="benefits__grid grid--3 grid--1--sm" {{ section_id }}>
+      {% for i in (1..3) %}
+        <div class="benefits__item" {{ section_id }}>
+          <div class="benefits__icon ratio ratio--square{{ settings['benefits_icon_style_' ~ i] | default: '' }}">
+            {% render 'icon-check' %}
+          </div>
+          <h3 class="benefits__title h4{{ settings['benefits_title_size_' ~ i] | default: '' }}">{{ settings['benefits_title_' ~ i] | default: 'Benefit ' ~ i }}</h3>
+          <p class="benefits__description text-secondary small{{ settings['benefits_description_size_' ~ i] | default: '' }}">{{ settings['benefits_description_' ~ i] | default: 'Benefit description ' ~ i }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

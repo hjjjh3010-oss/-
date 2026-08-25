@@ -1,0 +1,188 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="product-page" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <!-- Product Media Gallery -->
+    <div class="product-media-gallery grid--2{% if settings.product_gallery_layout == 'sidebar' %} grid--auto-sm{% endif %}" {{ section_id }}>
+      <!-- Main Image -->
+      <div class="product-media-gallery__main" {{ section_id }}>
+        {% assign media = product.media.size > 0 | first %}
+        {% if product.media.size > 0 %}
+          {% assign first_media = product.media.first %}
+          {% if first_media.image %}
+            <img src="{{ first_media.image | img_url: width: 800 }}" alt="{{ product.title }} - {{ first_media.alt | default: product.title }}" class="product-media-gallery__main-img ratio--portrait{% if first_media.aspect_ratio > 1 %} ratio--landscape{% endif %}" id="featured-image">
+          {% endif %}
+        {% endif %}
+      </div>
+
+      <!-- Thumbnails -->
+      <div class="product-media-gallery__thumbnails" {{ section_id }}>
+        {% if product.media.size > 0 %}
+          {% assign i = 0 %}
+          {% for media in product.media %}
+            {% assign i = i | plus: 1 %}
+            {% assign thumb_width = 80 %}
+            {% capture thumb_style %}style="width: {{ thumb_width }}px;height: {{ thumb_width | divided_by: aspect_ratio }}px"{% endcapture %}
+            {% if media.image %}
+              <button class="product-media-gallery__thumb{% if forloop.first %} product-media-gallery__thumb--active{% endif %}" data-media-index="{{ i | minus: 1 }}" {{ thumb_style }} aria-label="{{ 'product.select_product_image' | t }} {{ media.position }}">
+                <img src="{{ media.image | img_url: width: thumb_width }}" alt="{{ media.alt | default: product.title }}" loading="lazy">
+              </button>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Product Information -->
+    <div class="product-info container" {{ section_id }}>
+      <div class="flex--column gap-md">
+
+        <!-- Product Title -->
+        <h1 class="product-info__title font-heading">{{ product.title }}</h1>
+
+        <!-- Vendor -->
+        {% if settings.product_show_vendor %}
+          <div class="product-info__vendor text-secondary uppercase text-sm">
+            {{ product.vendor }}
+          </div>
+        {% endif %}
+
+        <!-- Price -->
+        <div class="product-info__price font-heading" {{ section_id }}>
+          {% if product.compare_at_price > product.price %}
+            <span class="product-info__price-current">{{ product.price | money }}</span>
+            <span class="product-info__price-compare">{{ product.compare_at_price | money }}</span>
+            <span class="product-info__badge badge badge--sale">{{ 'product.on_sale' | t }}</span>
+          {% else %}
+            <span class="product-info__price-current">{{ product.price | money }}</span>
+          {% endif %}
+        </div>
+
+        <!-- SKU (optional) -->
+        {% if settings.product_show_sku and product.sku %}
+          <div class="product-info__sku text-secondary small">
+            SKU: {{ product.sku }}
+          </div>
+        {% endif %}
+
+        <!-- Quantity Selector -->
+        <div class="product-info__quantity" {{ section_id }}>
+          <label class="text-secondary small" for="quantity">{{ 'product.quantity' | t }}</label>
+          <div class="quantity">
+            <button typebutton class="quantity__btn quantity__btn--minus" aria-label="{{ 'product.decrease_quantity' | t }}" data-action="decrease-quantity">
+              {% render 'icon-minus' %}
+            </button>
+            <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.available }}" class="quantity__input" data-action="set-quantity">
+            <button typebutton class="quantity__btn quantity__btn--plus" aria-label="{{ 'product.increase_quantity' | t }}" data-action="increase-quantity">
+              {% render 'icon-plus' %}
+            </button>
+          </div>
+        </div>
+
+        <!-- Product Form -->
+        <form class="product-form" action="/cart/add" method="post" enctype="multipart/form-data" {{ section_id }}>
+          <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+          <input type="hidden" name="quantity" value="1">
+
+          <!-- Product Variants -->
+          {% unless product.variants == 1 %}
+            <div class="product-info__variants">
+              <label class="text-secondary small" for="product-select">{{ 'product.select_variant' | t }}</label>
+              <select class="product-select select" id="product-select" name="variant" data-product-select>
+                {% for variant in product.variants %}
+                  <option value="{{ variant.id }}" {% if variant == product.variants.first %}selected{% endif %}>
+                    {{ variant.title }}
+                    {% if variant.sku %}: {{ variant.sku }}{% endif %}
+                    {% if variant.price > product.price %}({{ variant.price | money }}){% endif %}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endunless %}
+
+          <!-- Add to Cart Button -->
+          <div class="product-info__add-to-cart">
+            <button type="submit" class="btn btn--primary product-form__submit" name="add" value="{{ product.variants.first.id }}">
+              {% if product.available %}{{ 'product.add_to_cart' | t }}{% else %}{{ 'product.sold_out' | t }}{% endif %}
+            </button>
+
+            <!-- Buy Now Button (optional) -->
+            {% if settings.product_show_share %}
+              <a href="/cart/{{ product.variants.first.id }}" class="btn btn--outline product-form__buy-btn small">
+                {{ 'product.buy_now' | t }}
+              </a>
+            {% endif %}
+          </div>
+
+          <!-- Share -->
+          {% if settings.product_show_share %}
+            <div class="product-info__share small">
+              <button class="btn btn--icon icon--sm" aria-label="{{ 'product.share' | t }}">
+                {% render 'icon-share' %}
+              </button>
+            </div>
+          {% endif %}
+        </form>
+
+        <!-- Accordions (Shipping, Pet Compatibility, Guarantee) -->
+        {% render 'product-accordions' %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Thumbnail click handler
+    const thumbnails = document.querySelectorAll('.product-media-gallery__thumb');
+    const mainImage = document.getElementById('featured-image');
+
+    if (thumbnails.length > 0 && mainImage) {
+      thumbnails.forEach(function(thumb) {
+        thumb.addEventListener('click', function() {
+          // Remove active class from all thumbnails
+          thumbnails.forEach(function(t) { t.classList.remove('product-media-gallery__thumb--active'); });
+
+          // Add active class to clicked thumbnail
+          this.classList.add('product-media-gallery__thumb--active');
+
+          // Update main image (in a real implementation, would swap src)
+          // For now, just update alt text
+          const index = this.dataset.mediaIndex;
+          if (product.media[index]) {
+            mainImage.alt = product.media[index].alt || product.title;
+          }
+        });
+      });
+    }
+
+    // Quantity buttons
+    const decreaseBtns = document.querySelectorAll('[data-action="decrease-quantity"]');
+    const increaseBtns = document.querySelectorAll('[data-action="increase-quantity"]');
+    const quantityInput = document.querySelector('[data-action="set-quantity"]');
+
+    if (decreaseBtns.length > 0) {
+      decreaseBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          let value = parseInt(quantityInput.value);
+          if (value > 1) {
+            quantityInput.value = value - 1;
+          }
+        });
+      });
+    }
+
+    if (increaseBtns.length > 0) {
+      increaseBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          let value = parseInt(quantityInput.value);
+          const max = parseInt(quantityInput.max);
+          if (value < max) {
+            quantityInput.value = value + 1;
+          }
+        });
+      });
+    }
+  });
+</script>

@@ -1,0 +1,14 @@
+{
+  "name": "Contact Page",
+  "theme_id": "0",
+  "role": "page.contact",
+  "settings": [
+    {
+      "type": "main-contact",
+      "id": "main-contact",
+      "settings": {
+        "section_id": "main-contact"
+      }
+    }
+  ]
+}

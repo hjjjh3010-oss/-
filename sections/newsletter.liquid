@@ -1,0 +1,38 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="newsletter" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <!-- Newsletter Inner -->
+    <div class="newsletter__inner flex--column flex--lg--space-between ratio ratio--wide" {{ section_id }}>
+      <div class="newsletter__text" {{ section_id }}>
+        <h2 class="newsletter__title font-heading">{{ settings.newsletter_title | default: 'Join the Pack' }}</h2>
+        <p class="newsletter__subtitle text-secondary">{{ settings.newsletter_subtitle | default: 'Get exclusive offers, pet care tips, and new product alerts.' }}</p>
+      </div>
+
+      <!-- Newsletter Form -->
+      <form action="/cart/add" method="post" class="newsletter__form" novalidate {{ section_id }}>
+        <input type="hidden" name="updates[]" value="newsletter">
+        <div class="field">
+          <input type="email" name="email" class="field__input" placeholder="{{ settings.newsletter_placeholder | default: 'Enter your email' }}" required>
+          <button type="submit" class="btn btn--primary newsletter__form-btn">{{ settings.newsletter_submit | default: 'Subscribe' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('.newsletter__form');
+    forms.forEach(function(form) {
+      form.addEventListener('submit', function(e) {
+        const input = form.querySelector('input[type="email"]');
+        if (input && !input.validity.valid) {
+          e.preventDefault();
+          input.setCustomValidity('{{ 'Please enter a valid email' | t }}');
+        }
+      });
+    });
+  });
+</script>

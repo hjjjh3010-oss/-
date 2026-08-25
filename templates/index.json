@@ -1,0 +1,42 @@
+{
+  "name": "Homepage",
+  "theme_id": "0",
+  "role": "index",
+  "settings": [
+    {
+      "type": "header",
+      "id": "header"
+    },
+    {
+      "type": "hero",
+      "id": "hero"
+    },
+    {
+      "type": "featured-collection",
+      "id": "featured-collection",
+      "settings": {
+        "section_id": "featured-collection",
+        "title": "Best Sellers",
+        "show_vendor": true,
+        "show_price": true
+      }
+    },
+    {
+      "type": "benefits",
+      "id": "benefits",
+      "settings": {
+        "section_id": "benefits",
+        "badge": "Why Choose Us",
+        "title": "Why Choose Us"
+      }
+    },
+    {
+      "type": "newsletter",
+      "id": "newsletter"
+    },
+    {
+      "type": "footer",
+      "id": "footer"
+    }
+  ]
+}

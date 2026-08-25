@@ -1,0 +1,58 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+{% assign product_img = product.featured_image | img_url: width: 250 %}
+{% assign price_class = 'price--lg' %}
+
+<div class="product-card grid--2--ratio" {{ section_id }}>
+  {% if product.available %}
+    <a href="{{ product.url }}" class="product-card__link">
+      {% if product.images.size > 0 %}
+        <img src="{{ product_img }}" alt="{{ product.title }} - {{ product.images.first.alt | default: product.title }}" class="product-card__image ratio__img loading-lazy">
+      {% endif %}
+
+      <div class="product-card__info container">
+        <h3 class="product-card__title font-heading line-clamp-2">{{ product.title }}</h3>
+
+        {% if settings.product_card_show_price %}
+          <div class="product-card__price">
+            {% if product.compare_at_price > product.price %}
+              <span class="product-card__price-current {{ price_class }}">{{ product.price | money }}</span>
+              <span class="product-card__price-compare {{ price_class }}">{{ product.compare_at_price | money }}</span>
+              <span class="product-card__price-badge badge badge--sale small uppercase">{{ 'product.on_sale' | t }}</span>
+            {% else %}
+              <span class="product-card__price-current {{ price_class }}">{{ product.price | money }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if settings.product_card_show_vendor %}
+          <div class="product-card__vendor text-secondary text-small uppercase">{{ product.vendor }}</div>
+        {% endif %}
+      </div>
+    </a>
+  {% else %}
+    <div class="product-card__out-of-stock">
+      <span class="product-card__out-of-stock-text">{{ 'product.sold_out' | t }}</span>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Lazy load images
+    const images = document.querySelectorAll('.product-card__image');
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src || img.src;
+            observer.unobserve(img);
+          }
+        });
+      });
+      images.forEach(function(img) { observer.observe(img); });
+    }
+  });
+</script>

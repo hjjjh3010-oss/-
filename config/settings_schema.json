@@ -1,0 +1,498 @@
+{
+  "name": "Premium Dark Theme",
+  "version": "1.0.0",
+  "settings": [
+    {
+      "name": "Colors",
+      "settings": [
+        {
+          "type": "color",
+          "id": "color_bg",
+          "label": "Background",
+          "default": "#0a0a0a"
+        },
+        {
+          "type": "color",
+          "id": "color_bg_elevated",
+          "label": "Elevated Background",
+          "default": "#141414"
+        },
+        {
+          "type": "color",
+          "id": "color_border",
+          "label": "Border",
+          "default": "#2a2a2a"
+        },
+        {
+          "type": "color",
+          "id": "color_text",
+          "label": "Text Primary",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "color_text_secondary",
+          "label": "Text Secondary",
+          "default": "#a3a3a3"
+        },
+        {
+          "type": "color",
+          "id": "color_text_muted",
+          "label": "Text Muted",
+          "default": "#737373"
+        },
+        {
+          "type": "color",
+          "id": "color_accent",
+          "label": "Accent (Blue)",
+          "default": "#1e88e5"
+        },
+        {
+          "type": "color",
+          "id": "color_accent_hover",
+          "label": "Accent Hover",
+          "default": "#1565c0"
+        },
+        {
+          "type": "color",
+          "id": "color_accent_light",
+          "label": "Accent Light",
+          "default": "rgba(30, 136, 229, 0.1)"
+        },
+        {
+          "type": "color",
+          "id": "color_white",
+          "label": "Pure White",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "color_black",
+          "label": "Pure Black",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "color_error",
+          "label": "Error",
+          "default": "#ef4444"
+        },
+        {
+          "type": "color",
+          "id": "color_success",
+          "label": "Success",
+          "default": "#22c55e"
+        },
+        {
+          "type": "color",
+          "id": "color_warning",
+          "label": "Warning",
+          "default": "#f59e0b"
+        }
+      ]
+    },
+    {
+      "name": "Typography",
+      "settings": [
+        {
+          "type": "font_picker",
+          "id": "font_heading",
+          "label": "Heading Font",
+          "default": "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        },
+        {
+          "type": "font_picker",
+          "id": "font_body",
+          "label": "Body Font",
+          "default": "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        },
+        {
+          "type": "range",
+          "id": "font_size_base",
+          "label": "Base Font Size (px)",
+          "min": 14,
+          "max": 20,
+          "step": 1,
+          "default": 16
+        },
+        {
+          "type": "range",
+          "id": "font_scale_ratio",
+          "label": "Type Scale Ratio",
+          "min": 1.1,
+          "max": 1.5,
+          "step": 0.05,
+          "default": 1.25
+        }
+      ]
+    },
+    {
+      "name": "Spacing",
+      "settings": [
+        {
+          "type": "range",
+          "id": "spacing_unit",
+          "label": "Base Spacing Unit (px)",
+          "min": 4,
+          "max": 16,
+          "step": 1,
+          "default": 8
+        },
+        {
+          "type": "range",
+          "id": "container_max_width",
+          "label": "Container Max Width (px)",
+          "min": 1000,
+          "max": 1600,
+          "step": 50,
+          "default": 1280
+        },
+        {
+          "type": "range",
+          "id": "border_radius",
+          "label": "Border Radius (px)",
+          "min": 0,
+          "max": 24,
+          "step": 1,
+          "default": 12
+        },
+        {
+          "type": "range",
+          "id": "border_radius_sm",
+          "label": "Small Border Radius (px)",
+          "min": 0,
+          "max": 12,
+          "step": 1,
+          "default": 8
+        }
+      ]
+    },
+    {
+      "name": "Animation",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "enable_animations",
+          "label": "Enable Animations",
+          "default": true
+        },
+        {
+          "type": "range",
+          "id": "animation_duration",
+          "label": "Animation Duration (ms)",
+          "min": 100,
+          "max": 500,
+          "step": 50,
+          "default": 250
+        }
+      ]
+    },
+    {
+      "name": "Announcement Bar",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "announcement_enabled",
+          "label": "Show Announcement Bar",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "announcement_text",
+          "label": "Announcement Text",
+          "default": "Limited Time Offer - Free Shipping on Orders Over $50"
+        },
+        {
+          "type": "url",
+          "id": "announcement_link",
+          "label": "Announcement Link (optional)",
+          "default": ""
+        },
+        {
+          "type": "checkbox",
+          "id": "announcement_countdown",
+          "label": "Show Countdown Timer",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "announcement_countdown_date",
+          "label": "Countdown End Date (YYYY-MM-DD HH:MM:SS)",
+          "default": "2026-12-31 23:59:59"
+        }
+      ]
+    },
+    {
+      "name": "Header",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "header_sticky",
+          "label": "Sticky Header",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "header_transparent",
+          "label": "Transparent on Home",
+          "default": false
+        },
+        {
+          "type": "image_picker",
+          "id": "logo_image",
+          "label": "Logo Image"
+        },
+        {
+          "type": "text",
+          "id": "logo_text",
+          "label": "Logo Text (if no image)",
+          "default": "PetSpa"
+        },
+        {
+          "type": "range",
+          "id": "logo_width",
+          "label": "Logo Width (px)",
+          "min": 80,
+          "max": 250,
+          "step": 10,
+          "default": 140
+        }
+      ]
+    },
+    {
+      "name": "Footer",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "footer_about",
+          "label": "About Text",
+          "default": "<p>Premium pet care products designed for comfort and convenience.</p>"
+        },
+        {
+          "type": "checkbox",
+          "id": "footer_newsletter",
+          "label": "Show Newsletter Signup",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "footer_newsletter_title",
+          "label": "Newsletter Title",
+          "default": "Stay Updated"
+        },
+        {
+          "type": "text",
+          "id": "footer_newsletter_text",
+          "label": "Newsletter Description",
+          "default": "Subscribe for exclusive offers and pet care tips."
+        },
+        {
+          "type": "checkbox",
+          "id": "footer_social",
+          "label": "Show Social Icons",
+          "default": true
+        },
+        {
+          "type": "url",
+          "id": "social_facebook",
+          "label": "Facebook URL",
+          "default": ""
+        },
+        {
+          "type": "url",
+          "id": "social_instagram",
+          "label": "Instagram URL",
+          "default": ""
+        },
+        {
+          "type": "url",
+          "id": "social_tiktok",
+          "label": "TikTok URL",
+          "default": ""
+        },
+        {
+          "type": "url",
+          "id": "social_youtube",
+          "label": "YouTube URL",
+          "default": ""
+        },
+        {
+          "type": "checkbox",
+          "id": "footer_payment_icons",
+          "label": "Show Payment Icons",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "footer_copyright",
+          "label": "Copyright Text",
+          "default": "© {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved."
+        }
+      ]
+    },
+    {
+      "name": "Product Page",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "product_sticky_atc",
+          "label": "Sticky Add to Cart on Mobile",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "product_show_sku",
+          "label": "Show SKU",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "product_show_vendor",
+          "label": "Show Vendor/Brand",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "product_enable_zoom",
+          "label": "Enable Image Zoom",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "product_gallery_layout",
+          "label": "Gallery Layout",
+          "options": [
+            { "value": "stacked", "label": "Stacked (Thumbnails bottom)" },
+            { "value": "sidebar", "label": "Sidebar (Thumbnails side)" }
+          ],
+          "default": "stacked"
+        },
+        {
+          "type": "checkbox",
+          "id": "product_show_share",
+          "label": "Show Share Buttons",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "Collection Page",
+      "settings": [
+        {
+          "type": "select",
+          "id": "collection_layout",
+          "label": "Default Layout",
+          "options": [
+            { "value": "grid", "label": "Grid" },
+            { "value": "list", "label": "List" }
+          ],
+          "default": "grid"
+        },
+        {
+          "type": "range",
+          "id": "products_per_page",
+          "label": "Products Per Page",
+          "min": 12,
+          "max": 48,
+          "step": 4,
+          "default": 24
+        },
+        {
+          "type": "checkbox",
+          "id": "collection_show_sidebar",
+          "label": "Show Filter Sidebar",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "Cart",
+      "settings": [
+        {
+          "type": "select",
+          "id": "cart_type",
+          "label": "Cart Type",
+          "options": [
+            { "value": "drawer", "label": "Slide-out Drawer" },
+            { "value": "page", "label": "Cart Page" },
+            { "value": "popup", "label": "Popup" }
+          ],
+          "default": "drawer"
+        },
+        {
+          "type": "checkbox",
+          "id": "cart_show_notes",
+          "label": "Show Cart Notes",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "cart_enable_upsell",
+          "label": "Enable Cart Upsell",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "Social Proof",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "social_proof_enabled",
+          "label": "Enable Social Proof Section",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "social_proof_title",
+          "label": "Section Title",
+          "default": "They're Already Loving It"
+        },
+        {
+          "type": "text",
+          "id": "social_proof_subtitle",
+          "label": "Section Subtitle",
+          "default": "Real customers, real results"
+        }
+      ]
+    },
+    {
+      "name": "SEO & Performance",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "lazy_load_images",
+          "label": "Lazy Load Images",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "preload_fonts",
+          "label": "Preload Fonts",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "structured_data",
+          "label": "Enable Structured Data",
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "Favicon",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "favicon",
+          "label": "Favicon (32x32px)"
+        },
+        {
+          "type": "image_picker",
+          "id": "apple_touch_icon",
+          "label": "Apple Touch Icon (180x180px)"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Cart",
+  "theme_id": "0",
+  "role": "cart",
+  "settings": [
+    {
+      "type": "main-cart",
+      "id": "main-cart",
+      "settings": {
+        "section_id": "main-cart",
+        "cart_type": "drawer"
+      }
+    }
+  ]
+}

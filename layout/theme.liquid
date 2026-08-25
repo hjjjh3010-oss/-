@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="{{ request.locale.iso_code }}" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="{{ settings.color_bg }}">
+
+  <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+  <link rel="preconnect" href="https://shop.app" crossorigin>
+
+  {% if settings.favicon %}
+    <link rel="icon" href="{{ settings.favicon | image_url: width: 32 }}" sizes="32x32">
+  {% endif %}
+  {% if settings.apple_touch_icon %}
+    <link rel="apple-touch-icon" href="{{ settings.apple_touch_icon | image_url: width: 180 }}">
+  {% endif %}
+  <link rel="manifest" href="{{ 'manifest.json' | asset_url }}">
+
+  {% if settings.preload_fonts %}
+    <link rel="preload" as="style" href="{{ 'base.css' | asset_url }}">
+  {% endif %}
+
+  {{ content_for_header }}
+
+  <link rel="stylesheet" href="{{ 'base.css' | asset_url }}" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="{{ 'theme.css' | asset_url }}" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="{{ 'base.css' | asset_url }}">
+    <link rel="stylesheet" href="{{ 'theme.css' | asset_url }}">
+  </noscript>
+
+  {% if template == 'index' %}
+    <link rel="canonical" href="{{ shop.url }}">
+  {% elsif template == 'product' %}
+    <link rel="canonical" href="{{ canonical_url }}">
+  {% elsif template == 'collection' %}
+    <link rel="canonical" href="{{ canonical_url }}">
+  {% elsif template == 'page' %}
+    <link rel="canonical" href="{{ canonical_url }}">
+  {% elsif template == 'blog' %}
+    <link rel="canonical" href="{{ canonical_url }}">
+  {% elsif template == 'article' %}
+    <link rel="canonical" href="{{ canonical_url }}">
+  {% else %}
+    <link rel="canonical" href="{{ canonical_url }}">
+  {% endif %}
+
+  {% render 'seo-meta' %}
+
+  <script>
+    window.Shopify = window.Shopify || {};
+    window.Shopify.theme = {
+      name: 'Premium Dark Theme',
+      version: '1.0.0',
+      settings: {{ settings | json }},
+      routes: {
+        root: '{{ routes.root_url }}',
+        cart: '{{ routes.cart_url }}',
+        search: '{{ routes.search_url }}',
+        account: '{{ routes.account_url }}'
+      }
+    };
+  </script>
+</head>
+<body class="page-{{ template.name | handle }} {% if template.name == 'index' %}template-index{% endif %} {% if settings.header_sticky %}header-sticky{% endif %} {% if settings.header_transparent and template.name == 'index' %}header-transparent{% endif %}">
+  <a class="skip-link" href="#main-content">{{ 'accessibility.skip_to_content' | t }}</a>
+
+  {% section 'announcement-bar' %}
+
+  {% section 'header' %}
+
+  <main id="main-content" role="main" class="main-content">
+    {{ content_for_layout }}
+  </main>
+
+  {% section 'footer' %}
+
+  {% section 'cart-drawer' %}
+
+  <div id="cart-notification" class="cart-notification hidden" role="alert" aria-live="polite" data-cart-notification>
+    <div class="cart-notification__inner">
+      <div class="cart-notification__icon">
+        {% render 'icon-check' %}
+      </div>
+      <div class="cart-notification__content">
+        <p class="cart-notification__message">{{ 'cart.notification.added' | t }}</p>
+        <a href="{{ routes.cart_url }}" class="cart-notification__link">{{ 'cart.notification.view_cart' | t }}</a>
+      </div>
+      <button class="cart-notification__close" aria-label="{{ 'accessibility.close' | t }}" data-cart-notification-close>
+        {% render 'icon-close' %}
+      </button>
+    </div>
+  </div>
+
+  <script src="{{ 'theme.js' | asset_url }}" defer></script>
+  <script src="{{ 'global.js' | asset_url }}" defer></script>
+
+  {% if request.design_mode %}
+    <script src="{{ 'editor.js' | asset_url }}" defer></script>
+  {% endif %}
+</body>
+</html>

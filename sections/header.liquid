@@ -1,0 +1,99 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<header class="header" {{ section_id }} {{ section_settings }}>
+  <div class="header__inner container">
+    <!-- Logo -->
+    <div class="header__logo">
+      {% if settings.logo_image %}
+        <img src="{{ settings.logo_image | img_url: width: 200 }}" alt="{{ shop.name }}" class="header__logo-img" style="height: var(--logo-width); width: auto;">
+      {% else %}
+        <span class="header__logo-text">{{ settings.logo_text }}</span>
+      {% endif %}
+    </div>
+
+    <!-- Navigation -->
+    <nav class="header__nav" aria-label="{{ 'header.navigation' | t }}" role="navigation">
+      <ul class="header__nav-list">
+        <li class="header__nav-item">
+          <a href="{{ routes.root_url }}" class="header__nav-link{% if request.path == '/' %} header__nav-link--active{% endif %}">{{ 'header.shop' | t }}</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="/pages/contact" class="header__nav-link{% if request.path contains 'contact' %} header__nav-link--active{% endif %}">{{ 'header.contact' | t }}</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Icons (Search, Account, Cart) -->
+    <div class="header__icons">
+      <!-- Search -->
+      <button class="header__icon header__search-btn" aria-label="{{ 'header.search' | t }}" onclick="window.location='/search'">
+        {% render 'icon-search' %}
+      </button>
+
+      <!-- Account -->
+      <button class="header__icon header__account-btn" aria-label="{{ 'header.account' | t }}">
+        {% render 'icon-account' %}
+      </button>
+
+      <!-- Cart -->
+      <button class="header__icon header__cart-btn js-cart-btn" aria-label="{{ 'header.cart' | t }}" data-cart-action="open">
+        {% render 'icon-cart' %}
+        <span class="header__cart-count" id="header-cart-count">{{ 'cart.empty' | t }}</span>
+      </button>
+    </div>
+
+    <!-- Mobile Menu Button (hidden on desktop, shown via CSS) -->
+    <button class="header__menu-btn" aria-label="{% if state.mobileMenuOpen % 'header.close_menu' | t %}{% else % 'header.open_menu' | t %}{% endif %}" aria-expanded="{% if state.mobileMenuOpen % 'true' %}{% else % 'false' %}" onclick="ShopifyTheme.toggleSection('mobile-nav', {% if state.mobileMenuOpen % 'true' %}{% else % 'false' %})">
+      {% render 'icon-menu' %}
+    </button>
+  </div>
+</header>
+
+<script>
+  // Initialize theme state
+  window.ShopifyTheme = window.ShopifyTheme || {};
+  state = {
+    mobileMenuOpen: {% if mobile_menu %}true{% else %}false{% endif %},
+    cartDrawerOpen: false
+  };
+
+  // Mobile menu toggle
+  document.querySelectorAll('.header__menu-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      state.mobileMenuOpen = !state.mobileMenuOpen;
+      const nav = document.querySelector('.header__nav');
+      if (state.mobileMenuOpen) {
+        nav.classList.add('nav--open');
+        document.body.style.overflow = 'hidden';
+        btn.setAttribute('aria-expanded', 'true');
+        btn.setAttribute('aria-label', 'Close menu');
+      } else {
+        nav.classList.remove('nav--open');
+        document.body.style.overflow = '';
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-label', 'Open menu');
+      }
+    });
+  });
+
+  // Update cart count
+  function updateCartCount(count) {
+    const countEl = document.getElementById('header-cart-count');
+    if (countEl) {
+      countEl.textContent = count > 0 ? count : '';
+      if (count > 0) {
+        countEl.classList.remove('hidden');
+      } else {
+        countEl.classList.add('hidden');
+      }
+    }
+  }
+
+  // Listen for cart updates from cart drawer
+  document.addEventListener('cart-updated', function(e) {
+    if (e.detail && e.detail.count !== undefined) {
+      updateCartCount(e.detail.count);
+    }
+  });
+</script>

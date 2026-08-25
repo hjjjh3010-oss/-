@@ -1,0 +1,59 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="reviews" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <!-- Section Header -->
+    <div class="reviews__header text-center" {{ section_id }}>
+      <h2 class="reviews__title font-heading">{{ settings.reviews_title | default: 'Customer Reviews' }}</h2>
+      {% if settings.reviews_show_count != false %}
+        <p class="reviews__count text-secondary small">{{ product | number_of_reviews }} {{ 'reviews.reviews' | pluralize }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Reviews Grid -->
+    <div class="reviews__grid grid--1--md grid--2--lg" {{ section_id }}>
+      {% if product.reviews.size > 0 %}
+        {% for review in product.reviews %}
+          <div class="reviews__item ratio ratio--portrait" {{ section_id }}>
+            <div class="reviews__photo ratio__img" style="height: 200px;">
+              {% if review.customer_image %}
+                <img src="{{ review.customer_image | img_url: width: 400 }}" alt="Customer photo" loading="lazy">
+              {% else %}
+                {% render 'icon-user' %}
+              {% endif %}
+            </div>
+            <div class="reviews__info">
+              <div class="reviews__meta flex--column flex--sm--space-between">
+                <div class="reviews__name text-primary small">{{ review.customer.name }}</div>
+                <div class="reviews__date text-secondary extra-small">{{ review.date | date: '%b %d, %Y' }}</div>
+              </div>
+              <div class="reviews__rating">
+                {% for i in (1..5) %}
+                  {% if i <= review.rating %}
+                    {% render 'icon-star' %}
+                  {% else %}
+                    {% render 'icon-star--empty' %}
+                  {% endif %}
+                {% endfor %}
+                <span class="reviews__rating-count text-secondary small">{{ review.title }}</span>
+              </div>
+            </div>
+            <p class="reviews__text text-secondary small">{{ review.body | truncate: 100 }}</p>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="reviews__empty">
+          {% render 'icon-heart' %}
+          <p class="text-secondary small">{{ 'product.no_reviews_yet' | t }}</p>
+          <a href="/pages/write-a-review" class="text-primary small">{{ 'product.write_first_review' | t }}</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- CTA -->
+    <div class="reviews__cta text-center mt-3" {{ section_id }}>
+      <a href="/pages/write-a-review" class="btn btn--outline small">{{ 'product.write_review' | t }}</a>
+    </div>
+  </div>
+</div>

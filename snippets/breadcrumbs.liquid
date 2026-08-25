@@ -1,0 +1,28 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+
+{% comment %} breadcrumbs.liquid - Display breadcrumb navigation {% endcomment %}
+
+<nav class="breadcrumbs" aria-label="breadcrumb" {{ section_id }}>
+  <ol class="breadcrumbs__list">
+    <li class="breadcrumbs__item">
+      <a href="{{ routes.root_url }}" class="breadcrumbs__link">{{ 'general.home' | t }}</a>
+    </li>
+    
+    {% if collection %}
+      <li class="breadcrumbs__item">
+        <span class="breadcrumbs__current">{{ collection.title }}</span>
+      </li>
+    {% endif %}
+    
+    {% if product %}
+      {% unless collection %}
+        <li class="breadcrumbs__item">
+          <a href="/collections/all">{{ 'general.collections' | t }}</a>
+        </li>
+      {% endunless %}
+      <li class="breadcrumbs__item">
+        <span class="breadcrumbs__current">{{ product.title }}</span>
+      </li>
+    {% endif %}
+  </ol>
+</nav>

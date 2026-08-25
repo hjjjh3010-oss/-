@@ -1,0 +1,17 @@
+{
+  "name": "Collection",
+  "theme_id": "0",
+  "role": "collection",
+  "settings": [
+    {
+      "type": "main-collection",
+      "id": "main-collection",
+      "settings": {
+        "section_id": "main-collection",
+        "layout": "grid",
+        "products_per_page": 24,
+        "show_sidebar": true
+      }
+    }
+  ]
+}

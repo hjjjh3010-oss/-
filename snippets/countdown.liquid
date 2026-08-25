@@ -1,0 +1,57 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+
+{% comment %} countdown.liquid - Display countdown timer {% endcomment %}
+
+<div class="countdown" {{ section_id }}>
+  <div class="countdown__item">
+    <span class="countdown__value" id="days">{{ 'countdown.default_days' | t }}</span>
+    <span class="countdown__label">{{ 'countdown.days_label' | t }}</span>
+  </div>
+  <span class="countdown__separator">:</span>
+  <div class="countdown__item">
+    <span class="countdown__value" id="hours">{{ 'countdown.default_hours' | t }}</span>
+    <span class="countdown__label">{{ 'countdown.hours_label' | t }}</span>
+  </div>
+  <span class="countdown__separator">:</span>
+  <div class="countdown__item">
+    <span class="countdown__value" id="minutes">{{ 'countdown.default_minutes' | t }}</span>
+    <span class="countdown__label">{{ 'countdown.minutes_label' | t }}</span>
+  </div>
+  <span class="countdown__separator">:</span>
+  <div class="countdown__item">
+    <span class="countdown__value" id="seconds">{{ 'countdown.default_seconds' | t }}</span>
+    <span class="countdown__label">{{ 'countdown.seconds_label' | t }}</span>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const endDate = new Date({{ settings.countdown_end_date | default: '2026-12-31 23:59:59' | json }});
+    
+    function updateCountdown() {
+      const now = new Date();
+      const diff = endDate - now;
+      
+      if (diff <= 0) {
+        document.getElementById('days').textContent = '0';
+        document.getElementById('hours').textContent = '0';
+        document.getElementById('minutes').textContent = '0';
+        document.getElementById('seconds').textContent = '0';
+        return;
+      }
+      
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      document.getElementById('days').textContent = days;
+      document.getElementById('hours').textContent = hours < 10 ? '0' + hours : hours;
+      document.getElementById('minutes').textContent = minutes < 10 ? '0' + minutes : minutes;
+      document.getElementById('seconds').textContent = seconds < 10 ? '0' + seconds : seconds;
+    }
+    
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  });
+</script>

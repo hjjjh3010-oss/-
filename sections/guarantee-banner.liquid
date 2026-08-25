@@ -1,0 +1,20 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<div class="guarantee-banner" {{ section_id }} {{ section_settings }}>
+  <div class="container">
+    <div class="guarantee-banner__inner flex--column flex--center--md ratio ratio--square" {{ section_id }}>
+      <!-- Badge/Label -->
+      <span class="guarantee-banner__label badge badge--custom uppercase small">{{ settings.guarantee_banner_label | default: '60-DAY' }}</span>
+
+      <!-- Title -->
+      <h3 class="guarantee-banner__title font-heading text-center mt-2">{{ settings.guarantee_banner_title | default: '60-DAY MONEY-BACK GUARANTEE' }}</h3>
+
+      <!-- Text -->
+      <p class="guarantee-banner__text text-center text-secondary small">{{ settings.guarantee_banner_text | default: 'If you're not completely satisfied, return within 60 days for a full refund.' }}</p>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div class="divider divider--accent" {{ section_id }}></div>
+</div>

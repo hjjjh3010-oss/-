@@ -1,0 +1,104 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+{{ 'theme.css' | asset_url | stylesheet_tag }}
+
+<footer class="footer" {{ section_id }} {{ section_settings }}>
+  <div class="footer__inner container">
+    <div class="footer__grid">
+      <!-- Logo/About -->
+      <div class="footer__col">
+        {% if settings.logo_image %}
+          <img src="{{ settings.logo_image | img_url: width: 200 }}" alt="{{ shop.name }}" class="footer__logo" style="max-height: 40px;">
+        {% else %}
+          <span class="footer__logo-text">{{ settings.logo_text }}</span>
+        {% endif %}
+        <p class="footer__text">{{ settings.footer_about }}</p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer__col">
+        <h4 class="footer__heading">{{ 'footer.quick_links' | t }}</h4>
+        <ul class="footer__list">
+          <li class="footer__list-item"><a href="/pages/about" class="footer__list-link">{{ 'footer.about' | t }}</a></li>
+          <li class="footer__list-item"><a href="/pages/privacy-policy" class="footer__list-link">{{ 'footer.privacy_policy' | t }}</a></li>
+          <li class="footer__list-item"><a href="/pages/refund-policy" class="footer__list-link">{{ 'footer.refund_policy' | t }}</a></li>
+          <li class="footer__list-item"><a href="/pages/shipping-policy" class="footer__list-link">{{ 'footer.shipping_policy' | t }}</a></li>
+          <li class="footer__list-item"><a href="/pages/terms-of-service" class="footer__list-link">{{ 'footer.terms_of_service' | t }}</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div class="footer__col">
+        <h4 class="footer__heading">{{ 'footer.contact_us' | t }}</h4>
+        <ul class="footer__list">
+          <li class="footer__list-item"><a href="mailto:contact@petspa.com" class="footer__list-link">{{ 'footer.customer_service' | t }}</a></li>
+          <li class="footer__list-item"><a href="/pages/track-order" class="footer__list-link">{{ 'footer.track_order' | t }}</a></li>
+        </ul>
+      </div>
+
+      <!-- Newsletter -->
+      {% if settings.footer_newsletter %}
+        <div class="footer__col">
+          <h4 class="footer__heading">{{ settings.footer_newsletter_title }}</h4>
+          <p class="footer__text">{{ settings.footer_newsletter_text }}</p>
+          <form action="/cart/add" method="post" class="footer__newsletter-form" novalidate>
+            <input type="hidden" name="updates[]" value="newsletter">
+            <div class="field">
+              <input type="email" name="email" class="field__input" placeholder="{{ 'footer.newsletter_placeholder' | t }}" required>
+              <button type="submit" class="btn btn--sm btn--primary">{{ 'footer.newsletter_submit' | t }}</button>
+            </div>
+          </form>
+        </div>
+      {% endif %}
+
+      <!-- Social -->
+      {% if settings.footer_social %}
+        <div class="footer__col">
+          <h4 class="footer__heading">{{ 'footer.follow_us' | t }}</h4>
+          <div class="footer__social">
+            {% if settings.social_facebook != blank %}
+              <a href="{{ settings.social_facebook }}" target="_blank" class="footer__social-link" aria-label="Facebook" rel="noopener noreferrer">
+                {% render 'icon-facebook' %}
+              </a>
+            {% endif %}
+            {% if settings.social_instagram != blank %}
+              <a href="{{ settings.social_instagram }}" target="_blank" class="footer__social-link" aria-label="Instagram" rel="noopener noreferrer">
+                {% render 'icon-instagram' %}
+              </a>
+            {% endif %}
+            {% if settings.social_tiktok != blank %}
+              <a href="{{ settings.social_tiktok }}" target="_blank" class="footer__social-link" aria-label="TikTok" rel="noopener noreferrer">
+                {% render 'icon-tiktok' %}
+              </a>
+            {% endif %}
+            {% if settings.social_youtube != blank %}
+              <a href="{{ settings.social_youtube }}" target="_blank" class="footer__social-link" aria-label="YouTube" rel="noopener noreferrer">
+                {% render 'icon-youtube' %}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Copyright -->
+  <div class="footer__copyright">
+    {{ settings.footer_copyright }}
+  </div>
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize newsletter form
+    const forms = document.querySelectorAll('.footer__newsletter-form');
+    forms.forEach(function(form) {
+      form.addEventListener('submit', function(e) {
+        const input = form.querySelector('input[type="email"]');
+        if (input && !input.validity.valid) {
+          e.preventDefault();
+          input.setCustomValidity('Please enter a valid email');
+        }
+      });
+    });
+  });
+</script>

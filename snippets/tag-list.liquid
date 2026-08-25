@@ -1,0 +1,9 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+
+{% comment %} tag-list.liquid - Display product tags {% endcomment %}
+
+<div class="tag-list" {{ section_id }}>
+  {% for tag in collection.tags %}
+    <a href="/collections/all?tag={{ tag }}" class="tag-list__item">{{ tag }}</a>
+  {% endfor %}
+</div>

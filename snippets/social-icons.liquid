@@ -1,0 +1,26 @@
+{{ 'base.css' | asset_url | stylesheet_tag }}
+
+{% comment %} social-icons.liquid - Display social media icons {% endcomment %}
+
+<div class="social-icons" {{ section_id }}>
+  {% if settings.social_facebook != blank %}
+    <a href="{{ settings.social_facebook }}" target="_blank" class="social-icons__item" aria-label="Facebook" rel="noopener noreferrer">
+      {% render 'icon-facebook' %}
+    </a>
+  {% endif %}
+  {% if settings.social_instagram != blank %}
+    <a href="{{ settings.social_instagram }}" target="_blank" class="social-icons__item" aria-label="Instagram" rel="noopener noreferrer">
+      {% render 'icon-instagram' %}
+    </a>
+  {% endif %}
+  {% if settings.social_tiktok != blank %}
+    <a href="{{ settings.social_tiktok }}" target="_blank" class="social-icons__item" aria-label="TikTok" rel="noopener noreferrer">
+      {% render 'icon-tiktok' %}
+    </a>
+  {% endif %}
+  {% if settings.social_youtube != blank %}
+    <a href="{{ settings.social_youtube }}" target="_blank" class="social-icons__item" aria-label="YouTube" rel="noopener noreferrer">
+      {% render 'icon-youtube' %}
+    </a>
+  {% endif %}
+</div>
