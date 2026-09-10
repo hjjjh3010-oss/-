@@ -1,0 +1,50 @@
+{%- comment -%}
+  Atlas custom fonts — catalog + emit logic (see docs/superpowers/specs/2026-07-11-atlas-custom-font-per-section-design.md)
+
+  Each Atlas section renders this with a friendly font KEY from its own settings:
+    {% render 'a-atlas-fonts', font: section.settings.atlas_font %}
+
+  The key (e.g. 'work_sans') selects a curated definition from the catalog below and emits the
+  @font-face declarations + the --atlas-font-* override, scoped to .atlas-isolation-wrapper ONLY
+  (never :root) so host-theme templates like collection.liquid are never restyled. One emission
+  styles every Atlas section on the page (global selector); rendering from many sections is
+  redundant-but-safe and resilient.
+
+  Per-template: the KEY lives in each section's settings (in the template JSON), so a second
+  template with a different font never collides. The catalog here is a shared, font-agnostic
+  lookup (same for every template) — no collision, no per-section duplication of the CSS string.
+
+  To add a curated font: drop its .woff2 into assets/, add a `when` branch here, and add the
+  option to the `atlas_font` select in each section schema.
+
+  Params:
+  - font: a curated font key (from section.settings.atlas_font). Blank → nothing emitted.
+{%- endcomment -%}
+{%- liquid
+  assign faces = ''
+  assign vars = ''
+  case atlas_font
+    when 'work_sans'
+      assign faces = 'Work Sans|700|work-sans-700.woff2;Work Sans|400|work-sans-400.woff2'
+      assign vars = "--atlas-font-heading-family:'Work Sans', sans-serif;--atlas-font-heading-weight:700;--atlas-font-body-family:'Work Sans', sans-serif;--atlas-font-body-weight:400;--atlas-font-body-weight-bold:700;--atlas-font-button-family:'Work Sans', sans-serif;--atlas-font-button-weight:400;"
+    when 'inter'
+      # Inter ships as a variable woff2; the latin subset serves both weights from one file.
+      assign faces = 'Inter|700|inter.woff2;Inter|400|inter.woff2'
+      assign vars = "--atlas-font-heading-family:'Inter', sans-serif;--atlas-font-heading-weight:700;--atlas-font-body-family:'Inter', sans-serif;--atlas-font-body-weight:400;--atlas-font-body-weight-bold:700;--atlas-font-button-family:'Inter', sans-serif;--atlas-font-button-weight:400;"
+    when 'archivo'
+      # Archivo: Archivo (uppercase headings/labels/buttons) + Inter (body/price/numbers).
+      # Only Archivo 400/700 subsets ship; Medium/SemiBold labels resolve to the nearest (700).
+      assign faces = 'Archivo|700|archivo-700.woff2;Archivo|400|archivo-400.woff2;Inter|400|inter.woff2;Inter|700|inter.woff2'
+      assign vars = "--atlas-font-heading-family:'Archivo', sans-serif;--atlas-font-heading-weight:700;--atlas-font-body-family:'Inter', sans-serif;--atlas-font-body-weight:400;--atlas-font-body-weight-bold:700;--atlas-font-button-family:'Archivo', sans-serif;--atlas-font-button-weight:700;"
+  endcase
+-%}
+{%- if faces != blank -%}
+  {%- assign face_list = faces | split: ';' -%}
+  <style>
+    {%- for f in face_list -%}
+      {%- assign p = f | split: '|' -%}
+      @font-face{font-family:'{{ p[0] }}';font-style:normal;font-weight:{{ p[1] }};font-display:swap;src:url({{ p[2] | asset_url }}) format('woff2');}
+    {%- endfor -%}
+    .atlas-isolation-wrapper{ {{ vars }} }
+  </style>
+{%- endif -%}

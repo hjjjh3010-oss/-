@@ -1,0 +1,152 @@
+{%- comment -%}
+  Numbered reason — ONE standardized item in the numbered-reasons band.
+  heading (+ optional subtext) always; then EITHER a footnote line and/or an
+  optional image. Item numbering is automatic via a CSS counter defined on the
+  parent (_a-numbered-reasons); a non-blank `chip` overrides with custom text.
+  Text-only items leave `image`/`image_ratio` blank and render no media area.
+  Shared look (chip, typography, gaps, padding) comes from the parent's scope.
+{%- endcomment -%}
+{%- if block.settings.heading != blank or block.settings.text != blank or block.settings.footnote != blank or block.settings.image != blank -%}
+  <div class="nr-item nr-reason-{{ block.id }}" {{ block.shopify_attributes }}>
+    {%- if block.settings.chip_use_icon -%}
+      {%- capture nr_default_chip_icon -%}<svg viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.27251 5.55393V3.43746C8.28103 3.43746 9.22326 3.62685 10.0992 4.00564C10.9799 4.37969 11.7517 4.90052 12.4146 5.56814C13.0822 6.23575 13.603 7.0099 13.9771 7.89058C14.3558 8.76653 14.5452 9.70639 14.5452 10.7102C14.5452 11.714 14.3582 12.6562 13.9842 13.5369C13.6101 14.4128 13.0893 15.1846 12.4217 15.8522C11.754 16.5198 10.9799 17.043 10.0992 17.4218C9.22326 17.7959 8.28103 17.9829 7.27251 17.9829C6.26872 17.9829 5.32648 17.7959 4.4458 17.4218C3.56985 17.043 2.79807 16.5198 2.13046 15.8522C1.46285 15.1846 0.939646 14.4128 0.560858 13.5369C0.186805 12.6562 -0.000221878 11.714 -0.000221878 10.7102H2.11626C2.11626 11.4204 2.24883 12.088 2.51398 12.713C2.77913 13.338 3.14845 13.8873 3.62194 14.3608C4.10016 14.8295 4.6494 15.1988 5.26966 15.4687C5.89466 15.7339 6.56228 15.8664 7.27251 15.8664C7.98747 15.8664 8.65508 15.7339 9.27535 15.4687C9.90035 15.1988 10.4496 14.8295 10.9231 14.3608C11.3966 13.8873 11.7659 13.3404 12.031 12.7201C12.2962 12.0951 12.4288 11.4251 12.4288 10.7102C12.4288 9.99522 12.2938 9.32761 12.0239 8.70734C11.7588 8.08234 11.3895 7.53547 10.916 7.06672C10.4472 6.59323 9.90035 6.22391 9.27535 5.95876C8.65508 5.68888 7.98747 5.55393 7.27251 5.55393ZM7.63472 9.23291L2.96143 4.61643L7.63472 -4.48227e-05V9.23291Z" fill="currentColor"/></svg>{%- endcapture -%}
+      <span class="nr-chip nr-chip--icon notranslate">{%- if block.settings.chip_icon != blank -%}{{ block.settings.chip_icon }}{%- else -%}{{ nr_default_chip_icon }}{%- endif -%}</span>
+    {%- elsif block.settings.chip != blank -%}
+      <span class="nr-chip notranslate">{{ block.settings.chip }}</span>
+    {%- else -%}
+      <span class="nr-chip nr-chip--auto notranslate"></span>
+    {%- endif -%}
+    <div class="nr-col">
+      {%- if block.settings.heading != blank -%}
+        <p class="nr-heading">{{ block.settings.heading }}</p>
+      {%- endif -%}
+      {%- if block.settings.text != blank -%}
+        <p class="nr-text">{{ block.settings.text }}</p>
+      {%- endif -%}
+      {%- if block.settings.image != blank or block.settings.image_ratio != 'adapt' -%}
+        {%- liquid
+          assign nr_ar = ''
+          case block.settings.image_ratio
+            when 'square'
+              assign nr_ar = '1 / 1'
+            when 'portrait'
+              assign nr_ar = '3 / 4'
+            when 'landscape'
+              assign nr_ar = '3 / 2'
+            when 'wide'
+              assign nr_ar = '16 / 9'
+          endcase
+        -%}
+        {% style %}
+          .atlas-isolation-wrapper .nr-reason-{{ block.id }} .nr-media {
+            width: {{ block.settings.image_width | default: 100 }}%;
+            {%- if nr_ar != blank %}aspect-ratio: {{ nr_ar }};{% endif -%}
+          }
+          {%- if nr_ar == blank %}
+          .atlas-isolation-wrapper .nr-reason-{{ block.id }} .nr-media img {
+            height: auto;
+            object-fit: contain;
+          }
+          {%- endif %}
+        {% endstyle %}
+        <div class="nr-media">
+          {%- if block.settings.image != blank -%}
+            {{ block.settings.image | image_url: width: 1200, format: 'webp' | image_tag: loading: 'lazy', alt: block.settings.heading }}
+          {%- else -%}
+            {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+      {%- if block.settings.footnote != blank -%}
+        <p class="nr-footnote">{{ block.settings.footnote }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
+{% schema %}
+{
+  "name": "Numbered reason",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "chip",
+      "label": "Chip text",
+      "info": "Leave blank to auto-number this item."
+    },
+    {
+      "type": "checkbox",
+      "id": "chip_use_icon",
+      "label": "Use icon in chip",
+      "default": false,
+      "info": "Show an SVG icon instead of the number/text. Uses the SVG below, or a built-in default if that's left blank."
+    },
+    {
+      "type": "textarea",
+      "id": "chip_icon",
+      "label": "Chip icon (SVG)",
+      "info": "Optional. Paste SVG markup to override the built-in default icon. Use fill=\"currentColor\" so it follows the chip color.",
+      "visible_if": "{{ block.settings.chip_use_icon }}"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "text",
+      "label": "Subtext"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "footnote",
+      "label": "Footnote",
+      "info": "Optional caption line, e.g. a logo/award list."
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "Optional. Leave blank (with no aspect ratio) for a text-only item."
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "label": "Image width",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "adapt", "label": "Adapt to image" },
+        { "value": "square", "label": "Square (1:1)" },
+        { "value": "portrait", "label": "Portrait (3:4)" },
+        { "value": "landscape", "label": "Landscape (3:2)" },
+        { "value": "wide", "label": "Wide (16:9)" }
+      ],
+      "default": "adapt",
+      "info": "\"Adapt to image\" shows the image at its natural proportions. A fixed ratio crops to fit."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Numbered reason",
+      "settings": {
+        "heading": "Reason heading",
+        "text": "Supporting line."
+      }
+    }
+  ]
+}
+{% endschema %}

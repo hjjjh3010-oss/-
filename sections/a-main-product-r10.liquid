@@ -1,0 +1,409 @@
+{%- liquid
+  assign global_heading_size = settings.enable_global_heading_font_size
+  assign global_body_size = settings.enable_global_body_font_size
+  assign global_color = settings.enable_global_color
+-%}
+
+{%- comment -%} Atlas custom fonts — shared emit logic; see snippets/a-atlas-fonts.liquid. {%- endcomment -%}
+{% render 'a-atlas-fonts-r2', atlas_font: section.settings.atlas_font %}
+
+{%- style -%}
+  {%- if request.visual_preview_mode -%}
+    {% comment %} don't want fade-in animation in preview mode because it messes up preview {% endcomment %}
+    .animation_section,
+    .animation_section * {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+      will-change: auto !important;
+    }
+  {%- endif -%}
+
+  #shopify-section-{{ section.id }} .main-products {
+    padding: 5px 0;
+  }
+
+  @media screen and (max-width: 750px) {
+    #shopify-section-{{ section.id }} .main-products {
+      padding-top: 0;
+    }
+  }
+
+  .atlas-isolation-wrapper #MainProduct-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top_mobile }}px;
+    padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .atlas-isolation-wrapper #MainProduct-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top_desktop }}px;
+      padding-bottom: {{ section.settings.padding_bottom_desktop }}px;
+    }
+  }
+{%- endstyle -%}
+
+<script>
+  (function(){
+    if(sessionStorage.getItem('atlas_src_page'))return;
+    sessionStorage.setItem('atlas_src_page','1');
+    fetch('/cart.js').then(function(r){return r.json()}).then(function(cart){
+      var existing=cart.attributes&&cart.attributes.atlas_source||'';
+      var sources=existing?existing.split(',').map(function(s){return s.trim()}):[];
+      if(sources.indexOf('page')===-1){
+        sources.push('page');
+        fetch('/cart/update.js',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({attributes:{atlas_source:sources.join(',')}})});
+      }
+    }).catch(function(){});
+  })();
+</script>
+
+{%- comment -%}
+  Page-exact analytics (spec: docs/superpowers/specs/2026-09-05-page-exact-analytics-attribution-design.md).
+  The page's key lives in a per-publish snippet; a missing snippet (merchant-
+  duplicated template, legacy page) leaves atlas_page_key blank and the whole
+  block renders nothing. {% include %} is deliberate: render can't take a
+  dynamic name nor share scope. The capture swallows the missing-file error.
+  The order channel is JS-injected here (mirroring cart-drawer-mini-4.liquid) —
+  {% include %} is disabled inside snippets invoked via {% render %}, so
+  a-buy-buttons cannot carry the hidden inputs itself.
+{%- endcomment -%}
+{%- assign atlas_page_key = nil -%}
+{%- if template.suffix != blank -%}
+  {%- assign atlas_pk_snippet = 'a-atlas-pk-' | append: template.suffix -%}
+  {%- capture atlas_pk_discard -%}{% include atlas_pk_snippet %}{%- endcapture -%}
+{%- endif -%}
+{%- if atlas_page_key != blank and request.design_mode != true -%}
+<script>
+  (function () {
+    var PK = {{ atlas_page_key | json }};
+    if (!/^pk_[0-9a-f]{32}$/.test(PK)) return;
+    if (window.Shopify && Shopify.designMode) return;
+    if (/[?&]preview_theme_id=/.test(window.location.search)) return;
+    var SUFFIX = {{ template.suffix | json }};
+    var pageUrl = window.location.pathname + window.location.search;
+    var sessionId;
+    try {
+      // Same guard key as the legacy cart-upsells embed tracker: this inline
+      // script parses first, so exactly one tracker fires per URL per session.
+      if (!sessionStorage.getItem('atlas_pv_' + pageUrl)) {
+        sessionStorage.setItem('atlas_pv_' + pageUrl, '1');
+        sessionId = sessionStorage.getItem('atlas_session_id');
+        if (!sessionId) {
+          sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(7);
+          sessionStorage.setItem('atlas_session_id', sessionId);
+        }
+        // Form-encoded body (URLSearchParams sets application/x-www-form-urlencoded)
+        // keeps this a CORS-simple request, so no OPTIONS preflight fires — one
+        // request, not two, and nothing for a keyword filter to match on the path.
+        fetch('https://app.helloatlas.io/api/page_context', {
+          method: 'POST',
+          body: new URLSearchParams({
+            shop_url: {{ shop.permanent_domain | json }},
+            page_key: PK,
+            template_suffix: SUFFIX,
+            product_id: {{ product.id | json }},
+            theme_id: {{ theme.id | json }},
+            page_url: pageUrl,
+            session_id: sessionId,
+            referer: document.referrer
+          })
+        }).catch(function () {});
+      }
+    } catch (e) { /* sessionStorage unavailable */ }
+
+    function atlasStampForm(form) {
+      if (!form || form.querySelector('input[name="properties[_atlas_page_key]"]')) return;
+      var k = document.createElement('input');
+      k.type = 'hidden'; k.name = 'properties[_atlas_page_key]'; k.value = PK;
+      form.appendChild(k);
+      var s = document.createElement('input');
+      s.type = 'hidden'; s.name = 'properties[_atlas_template_suffix]'; s.value = SUFFIX;
+      form.appendChild(s);
+    }
+    function atlasInjectOrderInputs() {
+      var forms = document.querySelectorAll('form[action*="/cart/add"]');
+      for (var i = 0; i < forms.length; i++) atlasStampForm(forms[i]);
+    }
+    // Load-time pass covers forms present initially (the main buy box). The
+    // capture-phase submit listener is the catch-all for forms created AFTER load
+    // (quick-add modal, third-party apps): it runs before the product form's own
+    // submit handler reads FormData, so the hidden inputs make it into the
+    // cart/add payload. Bound once — a step5 library page renders both this
+    // carrier and cart-drawer-mini-4, and both resolve the same key/suffix.
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', atlasInjectOrderInputs);
+    } else {
+      atlasInjectOrderInputs();
+    }
+    if (!window.__atlasPkSubmitBound) {
+      window.__atlasPkSubmitBound = true;
+      document.addEventListener('submit', function (e) {
+        var f = e.target;
+        if (f && f.action && f.action.indexOf('/cart/add') !== -1) atlasStampForm(f);
+      }, true);
+    }
+  })();
+</script>
+{%- endif -%}
+
+<div
+  id="main-product-top"
+  class="main-products"
+  style="{% if section.settings.use_gradient_background %}background: {{ section.settings.section_background_gradient }};{% else %}background-color: {{ section.settings.section_background_color }};{% endif %}"
+>
+  <section
+    id="MainProduct-{{ section.id }}"
+    class="page-width "
+    data-section="{{ section.id }}"
+  >
+    {% render 'a-main-product-css-r3' %}
+
+    {% render 'a-accordion-css-r2' %}
+    <link
+      rel="stylesheet"
+      href="{{ 'a-component-sticky-atc-r2.css' | asset_url }}"
+      media="print"
+      onload="this.media='all'"
+      defer
+    >
+    <link
+      rel="stylesheet"
+      href="{{ 'a-component-rating-r2.css' | asset_url }}"
+      media="print"
+      onload="this.media='all'"
+      defer
+    >
+    {% render 'a-list-payment-styles-r2' %}
+
+    {%- if request.design_mode -%}
+      <script src="{{ 'a-theme-editor.js' | asset_url }}" defer="defer"></script>
+    {%- endif -%}
+
+    {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
+    {%- if first_3d_model -%}
+      {{ 'a-component-product-model-r2.css' | asset_url | stylesheet_tag }}
+      <link
+        id="ModelViewerStyle"
+        rel="stylesheet"
+        href="https://cdn.shopify.com/shopifycloud/model-viewer-ui/assets/v1.0/model-viewer-ui.css"
+        media="print"
+        onload="this.media='all'"
+      >
+      <link
+        id="ModelViewerOverride"
+        rel="stylesheet"
+        href="{{ 'a-component-model-viewer-ui-r2.css' | asset_url }}"
+        media="print"
+        onload="this.media='all'"
+      >
+    {%- endif -%}
+
+    <div class="product grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
+      {% content_for 'block', type: '_a-product-gallery-r3', id: 'product-gallery' %}
+      {% content_for 'block', type: '_a-product-information-r9', id: 'product-information' %}
+    </div>
+
+    {% render 'a-product-media-modal-r2', variant_images: variant_images %}
+
+    {%- if product.media.size > 0 -%}
+      <script src="{{ 'a-product-modal.js' | asset_url }}" defer="defer"></script>
+    {%- endif -%}
+
+    {%- if first_3d_model -%}
+      <script type="application/json" id="ProductJSON-{{ product.id }}">
+        {{ product.media | where: 'media_type', 'model' | json }}
+      </script>
+      <script src="{{ 'a-product-model.js' | asset_url }}" defer></script>
+    {%- endif -%}
+
+    <script defer>
+      document.addEventListener('DOMContentLoaded', function () {
+        function isIE() {
+          const ua = window.navigator.userAgent;
+          const msie = ua.indexOf('MSIE ');
+          const trident = ua.indexOf('Trident/');
+
+          return msie > 0 || trident > 0;
+        }
+
+        if (!isIE()) return;
+        const hiddenInput = document.querySelector('#{{ product_form_id }} input[name="id"]');
+        const noScriptInputWrapper = document.createElement('div');
+        const variantSwitcher =
+          document.querySelector('variant-radios[data-section="{{ section.id }}"]') ||
+          document.querySelector('variant-selects[data-section="{{ section.id }}"]');
+        noScriptInputWrapper.innerHTML = document.querySelector(
+          '.product-form__noscript-wrapper-{{ section.id }}'
+        ).textContent;
+        variantSwitcher.outerHTML = noScriptInputWrapper.outerHTML;
+
+        document.querySelector('#Variants-{{ section.id }}').addEventListener('change', function (event) {
+          hiddenInput.value = event.currentTarget.value;
+        });
+      });
+    </script>
+
+    {%- liquid
+      if product.selected_or_first_available_variant.featured_media
+        assign seo_media = product.selected_or_first_available_variant.featured_media
+      else
+        assign seo_media = product.featured_media
+      endif
+    -%}
+
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org/",
+        "@type": "Product",
+        "name": {{ product.title | json }},
+        "url": {{ request.origin | append: product.url | json }},
+        {% if seo_media -%}
+          "image": [
+            {{ seo_media | image_url: width: 1920 | prepend: "https:" | json }}
+          ],
+        {%- endif %}
+        "description": {{ product.description | strip_html | json }},
+        {% if product.selected_or_first_available_variant.sku != blank -%}
+          "sku": {{ product.selected_or_first_available_variant.sku | json }},
+        {%- endif %}
+        "brand": {
+          "@type": "Brand",
+          "name": {{ product.vendor | json }}
+        },
+        "offers": [
+          {%- for variant in product.variants -%}
+            {
+              "@type" : "Offer",
+              {%- if variant.sku != blank -%}
+                "sku": {{ variant.sku | json }},
+              {%- endif -%}
+              {%- if variant.barcode.size == 12 -%}
+                "gtin12": {{ variant.barcode }},
+              {%- endif -%}
+              {%- if variant.barcode.size == 13 -%}
+                "gtin13": {{ variant.barcode }},
+              {%- endif -%}
+              {%- if variant.barcode.size == 14 -%}
+                "gtin14": {{ variant.barcode }},
+              {%- endif -%}
+              "availability" : "http://schema.org/{% if variant.available %}InStock{% else %}OutOfStock{% endif %}",
+              "price" : {{ variant.price | divided_by: 100.00 | json }},
+              "priceCurrency" : {{ cart.currency.iso_code | json }},
+              "url" : {{ request.origin | append: variant.url | json }}
+            }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]
+      }
+    </script>
+  </section>
+</div>
+
+{% schema %}
+{
+  "name": "Product information",
+  "tag": "section",
+  "class": "atlas-isolation-wrapper atlas-gradient section main-product",
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "@theme"
+    }
+  ],
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_main_image_first",
+      "default": false,
+      "label": "Show main product image by default",
+      "info": "When enabled, the main product image will be displayed first instead of the variant image"
+    },
+    {
+      "type": "header",
+      "content": "Styling"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_gradient_background",
+      "label": "Use gradient background",
+      "default": false
+    },
+    {
+      "type": "color_background",
+      "id": "section_background_gradient",
+      "label": "Section background gradient",
+      "default": "linear-gradient(180deg, rgba(251, 51, 166, 1), rgba(127, 72, 176, 1) 50%, rgba(48, 145, 211, 1) 100%)",
+      "visible_if": "{{ section.settings.use_gradient_background }}"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section background color",
+      "default": "#ffffff",
+      "visible_if": "{{ section.settings.use_gradient_background == false }}"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Desktop top padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Desktop bottom padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Mobile top padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Mobile bottom padding",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Atlas fonts"
+    },
+    {
+      "type": "select",
+      "id": "atlas_font",
+      "label": "Font",
+      "info": "Applies a curated brand font to Atlas sections. Managed by Atlas.",
+      "options": [
+        { "value": "", "label": "Default (theme)" },
+        { "value": "work_sans", "label": "Work Sans" },
+        { "value": "inter", "label": "Inter" },
+        { "value": "archivo", "label": "Archivo" }
+      ],
+      "default": ""
+    }
+  ]
+}
+{% endschema %}

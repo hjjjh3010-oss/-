@@ -1,0 +1,299 @@
+{% comment %}
+  Renders product variant-picker
+
+  Accepts:
+  - product: {Object} product object.
+  - product_form_id: {String} Id of the product form to which the variant picker is associated.
+  - update_url: {Boolean} whether or not to update url when changing variants. If false, the url isn't updated. Default: true (optional).
+  Usage:
+  {% render 'a-card-product-variant-picker', product: product, product_form_id: product_form_id %}
+{% endcomment %}
+
+
+  {%- if has_custom_color -%}
+    <style>
+      .atlas-isolation-wrapper .swatch-color__label::before,
+      .atlas-isolation-wrapper .swatch-color__label {
+        background-color: var(--atlas-variants-custom-color) !important;
+      }
+      .atlas-isolation-wrapper variant-radios input:after {
+        background-color: var(--atlas-variants-custom-color) !important;
+      }
+      .atlas-isolation-wrapper .custom_variants_select_color {
+        select, select + svg {
+          color: var(--atlas-variants-custom-color) !important;
+        }
+        &:after {
+          box-shadow: 0 0 0 var(--atlas-inputs-border-width) var(--atlas-variants-custom-color) !important;
+        }
+        &:hover:after,
+        select:focus-visible,
+        select:focus {
+          box-shadow: 0 0 0 calc(1px + var(--atlas-inputs-border-width)) var(--atlas-variants-custom-color) !important;
+        }
+      }
+    </style>
+  {%- else -%}
+    <style>
+      #shopify-section-{{ section.id }} {
+        --atlas-variants-custom-color: #000;
+      }
+    </style>
+  {%- endif -%}
+
+  <style>
+    {%- comment -%} Scope swatch vars to THIS section — they were on :root and leaked across
+       sections, so a later featured-collection card clobbered the buy-box swatch size. {%- endcomment -%}
+    {%- comment -%} swatch_size stores rem values authored against this theme's 10px rem base;
+       on host themes (Horizon: 1rem = 16px) the raw value renders 1.6x too big. Emit px. {%- endcomment -%}
+    {%- assign card_swatch_size_px = swatch_size | default: '5rem' | remove: 'rem' | times: 10 | round -%}
+    #shopify-section-{{ section.id }} {
+      --atlas-custom-swatch-border-radius: {% if swatch_type == 'circle' %}50%{% else %}0{% endif %};
+      --atlas-custom-swtach-size: {{ card_swatch_size_px }}px;
+    }
+    .atlas-isolation-wrapper legend span {
+      font-weight: 400;
+      color: currentColor;
+    }
+    {%- comment -%} <variant-selects> is a custom element (defaults to display:inline), so it
+       shrink-wraps its grid instead of filling the card — unlike <variant-radios>, which the
+       base CSS forces to 100%. Make the card's picker block-level + full width so the dropdowns
+       span the card (matching the add-to-cart button). {%- endcomment -%}
+    #shopify-section-{{ section.id }} .card-variant-dropdowns__selects {
+      display: block;
+      width: 100%;
+    }
+    {%- comment -%} Base CSS caps .select at max-width:250px (250px), so the dropdowns stop ~23px
+       short of their grid cell and don't reach the add-to-cart button's width. Lift the cap for
+       the card dropdowns so they fill the cell (matching the CTA). {%- endcomment -%}
+    #shopify-section-{{ section.id }} .card-variant-dropdowns__grid .select {
+      max-width: none;
+    }
+    {%- comment -%} Outlined dropdown look: drop the gray variant-wrapper band (#fcfcfc) and give
+       each dropdown a black border. Dawn draws the select border via a transparent .select:after,
+       so nothing showed before — disable that pseudo and put the border on the select itself.
+       Dropdown-mode only, so the radio picker + other card modes are untouched. {%- endcomment -%}
+    {%- if use_dropdowns -%}
+    #shopify-section-{{ section.id }} .card-product-variant-selector {
+      background: transparent !important;
+    }
+    #shopify-section-{{ section.id }} .card-variant-dropdowns__grid .select:after {
+      display: none !important;
+    }
+    #shopify-section-{{ section.id }} .card-variant-dropdowns__grid .select__select {
+      border: 1px solid #000 !important;
+      background: #fff !important;
+      border-radius: 0 !important;
+    }
+    {%- endif -%}
+    {%- comment -%} The base .select__select metrics were rem-based when this pin was added;
+       base CSS now ships px directly (DEV-425), so these values simply match it. Kept so card
+       dropdowns stay pinned even if a host theme overrides .select__select. {%- endcomment -%}
+    #shopify-section-{{ section.id }} .card-variant-dropdowns__grid .select__select {
+      height: 45px;
+      font-size: 12px;
+      padding: 0 calc(var(--atlas-inputs-border-width) + 30px) 0 20px;
+    }
+    #shopify-section-{{ section.id }} .card-variant-dropdowns__grid .select .icon-caret {
+      height: 6px;
+      top: calc(50% - 2px);
+      right: calc(var(--atlas-inputs-border-width) + 15px);
+    }
+    {%- comment -%} Card variant dropdowns: 2 per row; a lone last dropdown spans the full width. {%- endcomment -%}
+    #shopify-section-{{ section.id }} .card-variant-dropdowns__grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    #shopify-section-{{ section.id }} .card-variant-dropdowns__grid > .product-form__input:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+    {%- comment -%} Narrow mobile cards can't fit 2 dropdowns side by side (their min-content
+       would push the card grid past the viewport) — stack them 1 per row on small screens. {%- endcomment -%}
+    @media (max-width: 768px) {
+      #shopify-section-{{ section.id }} .card-variant-dropdowns__grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  
+  
+  {%- unless product.has_only_default_variant -%}
+    {%- if use_dropdowns -%}
+      {%- comment -%} Dropdown variant picker — reuses the theme's <variant-selects> element + JS,
+         which wires the selected variant into the card form (see VariantSelects.updateVariantInput,
+         .card-product-variant-selector branch). No new JS. {%- endcomment -%}
+      <variant-selects
+        id="variant-selects-card-{{ product.id }}"
+        class="no-js-hidden card-variant-dropdowns__selects"
+        data-section="{{ section.id }}"
+        data-url="{{ product.url }}"
+        {% if update_url == false %}data-update-url="false"{% endif %}
+      >
+        <div class="card-variant-dropdowns__grid">
+        {%- for option in product.options_with_values -%}
+          <div class="product-form__input product-form__input--dropdown">
+            <label class="form__label" for="Option-card-{{ product.id }}-{{ forloop.index0 }}">{{ option.name }}</label>
+            <div class="select">
+              <select
+                id="Option-card-{{ product.id }}-{{ forloop.index0 }}"
+                class="select__select"
+                name="options[{{ option.name | escape }}]"
+                form="{{ product_form_id_custom }}"
+              >
+                {%- for value in option.values -%}
+                  <option value="{{ value | escape }}"{% if option.selected_value == value %} selected="selected"{% endif %}>{{ value }}</option>
+                {%- endfor -%}
+              </select>
+              {% render 'a-icon-caret' %}
+            </div>
+          </div>
+        {%- endfor -%}
+        </div>
+        <script type="application/json">
+          {{ product.variants | json }}
+        </script>
+      </variant-selects>
+    {%- else -%}
+    <variant-radios
+        id="variant-radios-{{ section.id }}"
+        class="no-js-hidden variant-radios-{{ product.id }}"
+        data-section="{{ section.id }}"
+        data-url="{{ product.url }}"
+        {% if update_url == false %}
+          data-update-url="false"
+        {% endif %}
+      >
+        {%- for option in product.options_with_values -%}
+          <fieldset class="js product-form__input" data-option-index="{{ forloop.index }}" style="min-width: 100%;">
+            <legend class="form__label">
+              {{ option.name }}: <span>{% unless section.settings.show_main_image_first %}{{ option.selected_value }}{% endunless %}</span>
+            </legend>
+            {%- liquid
+                assign variants_available_arr = product.variants | map: 'available'
+                assign variants_option1_arr = product.variants | map: 'option1'
+                assign variants_option2_arr = product.variants | map: 'option2'
+                assign variants_option3_arr = product.variants | map: 'option3'
+              -%}
+              <div class="card-product-variant-selector__inputs swiper">
+                <div class="swiper-wrapper">
+              {%- for value in option.values -%}
+                {%- liquid
+                  assign option_disabled = true
+              
+                  for option1_name in variants_option1_arr
+                    case option.position
+                      when 1
+                        if variants_option1_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                          assign option_disabled = false
+                        endif
+                      when 2
+                        if option1_name == product.selected_or_first_available_variant.option1 and variants_option2_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                          assign option_disabled = false
+                        endif
+                      when 3
+                        if option1_name == product.selected_or_first_available_variant.option1 and variants_option2_arr[forloop.index0] == product.selected_or_first_available_variant.option2 and variants_option3_arr[forloop.index0] == value and variants_available_arr[forloop.index0]
+                          assign option_disabled = false
+                        endif
+                    endcase
+                  endfor
+                -%}
+                <div class="swiper-slide" style="width: fit-content;">
+                <input
+                    style="display: none;"
+                    class="variant_radio_input"
+                    type="radio"
+                    id="product-{{ product.id }}-{{ option.position }}-{{ forloop.index0 }}"
+                    name="{{ option.name }}"
+                    value="{{ value | escape }}"
+                    form="{{ product_form_id_custom }}"
+                    {% unless section.settings.show_main_image_first %}
+                      {% if option.selected_value == value %}
+                        checked
+                      {% endif %}
+                    {% endunless %}
+                    {% if option_disabled %}
+                      class="disabled"
+                    {% endif %}
+                  >
+                  <div class="variant_radio_label_container">
+                    <label for="product-{{ product.id }}-{{ option.position }}-{{ forloop.index0 }}">
+                      {{ value -}}
+                      <span class="visually-hidden">Variant sold out or unavailable</span>
+                    </label>
+                  </div>
+                  </div>
+              {%- endfor -%}
+                </div>
+              </div>
+          </fieldset>
+        {%- endfor -%}
+        <script type="application/json">
+          {{ product.variants | json }}
+        </script>
+      </variant-radios>
+    {%- endif -%}
+  {%- endunless -%}
+  
+  <noscript class="product-form__noscript-wrapper-{{ section.id }}">
+    <div class="product-form__input{% if product.has_only_default_variant %} hidden{% endif %}">
+      <label class="form__label"  for="Variants-{{ section.id }}">
+        Product variants
+      </label>
+      <div class="select">
+        <select
+          name="id"
+          id="Variants-{{ section.id }}"
+          class="select__select custom_variants_select_color"
+          form="{{ product_form_id }}"
+        >
+          {%- for variant in product.variants -%}
+            <option
+              {% unless section.settings.show_main_image_first %}
+                {% if variant == product.selected_or_first_available_variant %}
+                  selected="selected"
+                {% endif %}
+              {% endunless %}
+              {% if variant.available == false %}
+                disabled
+              {% endif %}
+              value="{{ variant.id }}"
+            >
+              {%- liquid
+                echo variant.title
+                echo variant.price | money | strip_html | prepend: ' - '
+                if variant.available == false
+                  render 'a-t', key: 'products.product.sold_out', fallback: 'Sold out', prepend: ' - '
+                endif
+                if variant.quantity_rule.increment > 1
+                  render 'a-t', key: 'products.product.quantity.multiples_of', fallback: 'Increments of {{ quantity }}', quantity: variant.quantity_rule.increment, prepend: ' - '
+                endif
+                if variant.quantity_rule.min > 1
+                  render 'a-t', key: 'products.product.quantity.minimum_of', fallback: 'Minimum of {{ quantity }}', quantity: variant.quantity_rule.min, prepend: ' - '
+                endif
+                if variant.quantity_rule.max != null
+                  render 'a-t', key: 'products.product.quantity.maximum_of', fallback: 'Maximum of {{ quantity }}', quantity: variant.quantity_rule.max, prepend: ' - '
+                endif
+                assign cart_quantity = cart | item_count_for_variant: variant.id
+                if cart_quantity > 0
+                  render 'a-t', key: 'products.product.quantity.in_cart_html', fallback: '<span class="quantity-cart">{{ quantity }}</span> in cart', quantity: cart_quantity, prepend: ' - '
+                endif
+              -%}
+            </option>
+          {%- endfor -%}
+        </select>
+        {% render 'a-icon-caret' %}
+      </div>
+    </div>
+  </noscript>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      /* init swiper */
+      const variantRadiosSwipers = document.querySelectorAll('.variant-radios-{{ product.id }} .swiper');
+      variantRadiosSwipers.forEach(swiper => {
+        new Swiper(swiper, {
+          slidesPerView: "auto"
+        });
+      });
+    });
+  </script>

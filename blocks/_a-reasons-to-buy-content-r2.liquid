@@ -1,0 +1,439 @@
+<!-- start _reasons-to-buy-content.liquid -->
+<style>
+  {% if request.visual_preview_mode %}
+    {% assign section_id_selector = '#section' %}
+    {% assign section_id_variable = 'id' %}
+  {% else %}
+    {% assign section_id_selector = '#shopify-section-' | append: section.id %}
+    {% assign section_id_variable = section.id %}
+  {% endif %}
+  {%- comment -%}
+    Mobile typography must shrink at the same width the layout reflows. The default (vertical)
+    stats layout switches to two-up at 1200px (a-reasons.liquid:158); the horizontal layout
+    wraps two-up at 768px. Keying the mobile type breakpoint off section.settings.stats_layout
+    keeps desktop type out of the tablet grid — flipping these rules unconditionally to 768px
+    cramped every vertical-layout sibling between 769-1200px.
+  {%- endcomment -%}
+  {%- if section.settings.stats_layout == 'horizontal' -%}
+    {%- assign reasons_mobile_bp = '768px' -%}
+  {%- else -%}
+    {%- assign reasons_mobile_bp = '1200px' -%}
+  {%- endif -%}
+  {{ section_id_selector }} {
+      --atlas-subheading-size: {{ block.settings.subheading_size }}px;
+      --atlas-subheading-color: {{ block.settings.subheading_color }};
+      --atlas-subheading-bold-color: {{ block.settings.bolded_subheading_color }};
+    }
+    {{ section_id_selector }} .reasons-to-buy__text-content {
+      display: flex;
+      flex-direction: column;
+      gap: {{ block.settings.content_gap }}px;
+       text-align: {{ block.settings.content_alignment }};
+     }
+     @media screen and (max-width: {{ reasons_mobile_bp }}) {
+      {{ section_id_selector }} .reasons-to-buy__text-content {
+        gap: {{ block.settings.content_gap_mobile }}px;
+      }
+     }
+
+    {{ section_id_selector }} .reasons-to-buy__subheading,
+    {{ section_id_selector }} .reasons-to-buy__subheading p {
+      font-size: var(--atlas-subheading-size) !important;
+      color: var(--atlas-subheading-color) !important;
+      --atlas-color-highlighted-color: var(--atlas-subheading-bold-color);
+      margin: 0;
+      line-height: 100%;
+    }
+    {{ section_id_selector }} {
+      --atlas-heading-size: {{ block.settings.heading_size }}px;
+      --atlas-heading-mob-size: {{ block.settings.reasons_mob_heading_size }}px;
+      --atlas-heading-color: {{ block.settings.heading_color }};
+    }
+    {%- comment -%}
+      Heading typography, opt-in. The block's heading renders as an h3 whose weight and
+      tracking come from the theme's global heading vars — 400 and a +0.6px body tracking —
+      so a design whose section headings are bold and tightly tracked cannot say so here,
+      while every h2 section heading on the same page picks up 700 from `.title`. Both
+      default to "" (inherit), so the ~14 sibling templates are unchanged. Tracking is
+      offered in em so it scales with whatever heading size the block is set to.
+    {%- endcomment -%}
+    {{ section_id_selector }} .heading_block-{{block.id }} {
+      font-size: var(--atlas-heading-size) !important;
+      {%- if block.settings.heading_weight != blank %}
+        font-weight: {{ block.settings.heading_weight }};
+      {%- endif %}
+      {%- if block.settings.heading_letter_spacing != blank %}
+        letter-spacing: {{ block.settings.heading_letter_spacing }};
+      {%- endif %}
+      line-height: 100%;
+      color: var(--atlas-heading-color) !important;
+      margin: 0;
+      padding-top: {{ block.settings.headig_padding_top }}px;
+      padding-bottom: {{ block.settings.headig_padding_bottom }}px;
+    }
+    @media screen and (max-width: {{ reasons_mobile_bp }}) {
+      {{ section_id_selector }} .heading_block-{{block.id }} {
+          font-size: var(--atlas-heading-mob-size) !important;
+        }
+      }
+      {%- if block.settings.heading_use_gradient -%}
+        {{ section_id_selector }} .heading_block-{{block.id }} strong {
+          background: {% if block.settings.heading_gradient_color != blank %}{{ block.settings.heading_gradient_color }}{% else %}var(--atlas-color-highlighted-color){% endif %};
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+        }
+      {% else %}
+        {{ section_id_selector }} .heading_block-{{block.id }} strong {
+          color: {{ block.settings.bolded_heading_color }};
+        }
+      {%- endif -%}
+      {{ section_id_selector }} {
+        --atlas-text-size: {{ block.settings.text_size }}px;
+        --atlas-text-color: {{ block.settings.text_color }};
+      }
+  {{ section_id_selector }} .text_block-{{block.id }} {
+    font-size: var(--atlas-text-size) !important;
+    {%- comment -%} Relative unit so one value covers both breakpoints (the font size swaps at
+      the layout's mobile breakpoint). Unset falls back to 100%, which is what this rule hardcoded
+      before the setting existed — so a template that doesn't set it renders byte-identically. {%- endcomment -%}
+    line-height: {{ block.settings.text_line_height | default: 100 }}%;
+    color: var(--atlas-text-color) !important;
+    --atlas-color-highlighted-color:  {{ block.settings.bolded_text_color }};
+    margin: 0;
+    padding-top: {{ block.settings.text_padding_top }}px;
+    padding-bottom: {{ block.settings.text_padding_bottom }}px;
+  }
+  @media screen and (max-width: {{ reasons_mobile_bp }}) {
+      {{ section_id_selector }} {
+        --atlas-text-size: {{ block.settings.text_mob_size }}px;
+      }
+    }
+    {%- if block.settings.text_use_gradient -%}
+      {{ section_id_selector }} .text_block-{{block.id }} strong {
+        background: {{ block.settings.text_gradient_color }};
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+    {% else %}
+      {{ section_id_selector }} .text_block-{{block.id }} strong {
+        color: {{ block.settings.bolded_text_color }};
+      }
+    {%- endif -%}
+</style>
+<div class="reasons-to-buy__text-content" {{ block.shopify_attributes }}>
+  {%- if block.settings.heading != blank -%}
+    <{{ block.settings.heading_tag }}
+      class="heading_block-{{block.id }} {{ class_list }}"
+      {{ block.shopify_attributes }}
+    >
+      {{- block.settings.heading -}}
+    </{{ block.settings.heading_tag }}>
+  {%- endif -%}
+  {%- if block.settings.text != blank -%}
+    <{{ block.settings.text_tag }} class="text_block-{{block.id }} {{ class_list }}" {{ block.shopify_attributes }}>
+      {{- block.settings.text -}}
+    </{{ block.settings.text_tag }}>
+  {%- endif -%}
+</div>
+<!-- end _reasons-to-buy-content.liquid -->
+{% schema %}
+{
+  "name": "Text content",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h5", "label": "H5" },
+        { "value": "h6", "label": "H6" }
+      ],
+      "default": "h3"
+    },
+    {
+      "type": "select",
+      "id": "heading_weight",
+      "label": "Heading weight",
+      "options": [
+        { "value": "", "label": "Default" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": ""
+    },
+    {
+      "type": "select",
+      "id": "heading_letter_spacing",
+      "label": "Heading letter spacing",
+      "options": [
+        { "value": "", "label": "Default" },
+        { "value": "normal", "label": "Normal" },
+        { "value": "-0.02em", "label": "Tight" },
+        { "value": "-0.05em", "label": "Tighter" }
+      ],
+      "default": ""
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 20,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop heading size",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "reasons_mob_heading_size",
+      "min": 10,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile heading size",
+      "default": 28
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "bolded_heading_color",
+      "label": "Heading bolded color",
+      "default": "#000000"
+    },
+    {
+      "type": "checkbox",
+      "id": "heading_use_gradient",
+      "label": "Use gradient for heading",
+      "info": "Any text formatted as bold within the heading will be converted to a gradient.",
+      "default": false
+    },
+    {
+      "type": "color_background",
+      "id": "heading_gradient_color",
+      "label": "Heading gradient color",
+      "visible_if": "{{ block.settings.heading_use_gradient }}",
+      "default": "linear-gradient(180deg, rgba(234, 56, 133, 1), rgba(95, 77, 188, 1) 100%)"
+    },
+    {
+      "type": "range",
+      "id": "headig_padding_top",
+      "label": "Heading top padding",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "headig_padding_bottom",
+      "label": "Heading bottom padding",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Subheading"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_tag",
+      "label": "Text tag",
+      "options": [
+        { "value": "p", "label": "P" },
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h5", "label": "H5" },
+        { "value": "h6", "label": "H6" }
+      ],
+      "default": "p"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop text size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "text_mob_size",
+      "min": 10,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile text size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "text_line_height",
+      "min": 100,
+      "max": 200,
+      "step": 1,
+      "unit": "%",
+      "label": "Text line height",
+      "info": "Relative to the text size, so it applies on both desktop and mobile. 100% is the tightest.",
+      "default": 100
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "bolded_text_color",
+      "label": "Text bolded color",
+      "default": "#000000"
+    },
+    {
+      "type": "checkbox",
+      "id": "text_use_gradient",
+      "label": "Use gradient for text",
+      "info": "Any text formatted as bold within the text will be converted to a gradient.",
+      "default": false
+    },
+    {
+      "type": "color_background",
+      "id": "text_gradient_color",
+      "label": "Text gradient color",
+      "default": "linear-gradient(180deg, rgba(234, 56, 133, 1), rgba(95, 77, 188, 1) 100%)",
+      "visible_if": "{{ block.settings.text_use_gradient }}"
+    },
+    {
+      "type": "range",
+      "id": "text_padding_top",
+      "label": "Text top padding",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "text_padding_bottom",
+      "label": "Text bottom padding",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "Text content alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "label": "Desktop content gap",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 21
+    },
+    {
+      "type": "range",
+      "id": "content_gap_mobile",
+      "label": "Mobile content gap",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    }
+  ],
+  "presets": [
+    {
+      "name": "Text content",
+      "settings": {
+        "heading": "The Reason Customers Choose Us <em><strong>Again and Again</strong></em>",
+        "heading_tag": "h3",
+        "heading_size": 40,
+        "reasons_mob_heading_size": 28,
+        "heading_color": "#000000",
+        "bolded_heading_color": "#000000",
+        "heading_use_gradient": true,
+        "heading_gradient_color": "linear-gradient(180deg, rgba(234, 56, 133, 1), rgba(95, 77, 188, 1) 100%)",
+        "headig_padding_top": 0,
+        "headig_padding_bottom": 0,
+        "text": "Delivering quality and consistency that customers rely on.",
+        "text_tag": "p",
+        "text_size": 16,
+        "text_mob_size": 14,
+        "text_color": "#666666",
+        "bolded_text_color": "#000000",
+        "text_use_gradient": false,
+        "text_gradient_color": "",
+        "text_padding_top": 0,
+        "text_padding_bottom": 0,
+        "content_alignment": "left",
+        "content_gap": 21,
+        "content_gap_mobile": 14
+      }
+    }
+  ]
+}
+{% endschema %}

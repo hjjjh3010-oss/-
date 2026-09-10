@@ -1,0 +1,51 @@
+<!-- start_image_card --><li class="image-card" {{ block.shopify_attributes }}>
+  <div class="image-card__media">
+    {%- if block.settings.image != blank -%}
+      {{
+        block.settings.image
+        | image_url: width: 600
+        | image_tag: loading: 'lazy', widths: '188, 376, 600', sizes: '(min-width: 990px) 200px, 45vw'
+      }}
+    {%- else -%}
+      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+    {%- endif -%}
+  </div>
+  {%- if block.settings.title != blank or block.settings.subtitle != blank -%}
+    <div class="image-card__meta">
+      {%- if block.settings.title != blank -%}
+        <p class="image-card__title">{{ block.settings.title }}</p>
+      {%- endif -%}
+      {%- if block.settings.subtitle != blank -%}
+        <p class="image-card__subtitle">{{ block.settings.subtitle }}</p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</li><!-- end_image_card -->
+{% schema %}
+{
+  "name": "Image card",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Title"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "subtitle",
+      "label": "Subtitle"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image card"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,192 @@
+{%- comment -%}
+  Progress card — urgency card with a label, a static progress bar and a note
+  (e.g. "SELLING OUT FAST / 85% claimed"). Renders only where instantiated.
+{%- endcomment -%}
+{% assign product = closest.product %}
+<div class="progress-card product-block-{{ block.id }}" {{ block.shopify_attributes }}>
+  {% style %}
+    .atlas-isolation-wrapper .product-block-{{ block.id }} {
+      padding-top: {{ block.settings.padding_top }}px;
+      padding-bottom: {{ block.settings.padding_bottom }}px;
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .progress-card__inner {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: {{ block.settings.card_bg }};
+      border-radius: {{ block.settings.card_border_radius }}px;
+      padding: 16px;
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .progress-card__label {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 1.2px;
+      line-height: normal;
+      color: {{ block.settings.label_color }};
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .progress-card__track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: {{ block.settings.track_color }};
+      overflow: hidden;
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .progress-card__fill {
+      display: block;
+      height: 100%;
+      width: {{ block.settings.progress_percent }}%;
+      border-radius: 999px;
+      background: {{ block.settings.bar_color }};
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .progress-card__note {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.4;
+      color: {{ block.settings.note_color }};
+    }
+    @media screen and (max-width: 768px) {
+      .atlas-isolation-wrapper .product-block-{{ block.id }} {
+        padding-top: {{ block.settings.padding_top_mobile }}px;
+        padding-bottom: {{ block.settings.padding_bottom_mobile }}px;
+      }
+    }
+  {% endstyle %}
+  <div class="progress-card__inner">
+    {%- if block.settings.label_text != blank -%}
+      <p class="progress-card__label">{{ block.settings.label_text }}</p>
+    {%- endif -%}
+    <div class="progress-card__track" role="presentation">
+      <span class="progress-card__fill"></span>
+    </div>
+    {%- if block.settings.note_text != blank -%}
+      <p class="progress-card__note">{{ block.settings.note_text }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Progress card",
+  "tag": null,
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "label_text",
+      "label": "Label",
+      "default": "SELLING OUT FAST"
+    },
+    {
+      "type": "range",
+      "id": "progress_percent",
+      "label": "Progress",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 85
+    },
+    {
+      "type": "inline_richtext",
+      "id": "note_text",
+      "label": "Note",
+      "default": "85% claimed — limited stock at this price."
+    },
+    {
+      "type": "header",
+      "content": "Styling"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label color",
+      "default": "#7c1c2f"
+    },
+    {
+      "type": "color",
+      "id": "bar_color",
+      "label": "Bar color",
+      "default": "#7c1c2f"
+    },
+    {
+      "type": "color",
+      "id": "track_color",
+      "label": "Track color",
+      "default": "#d5d5d5"
+    },
+    {
+      "type": "color",
+      "id": "note_color",
+      "label": "Note color",
+      "default": "#676986"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card background",
+      "default": "#fdf5f1"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop top padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop bottom padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile top padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile bottom padding",
+      "default": 8
+    }
+  ],
+  "presets": [
+    {
+      "name": "Progress card",
+      "category": "Product Information"
+    }
+  ]
+}
+{% endschema %}

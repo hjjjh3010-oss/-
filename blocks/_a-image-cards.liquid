@@ -1,0 +1,332 @@
+{%- comment -%}
+  Image cards — a responsive grid of image + title + subtitle cards.
+
+  Added for the IM8 buy-box "what every order includes" card, where the design is a
+  3-up grid of portrait cards inside a bordered panel. Nothing in the existing block
+  library renders that: _a-reviews is a star-rated review SLIDER, _a-key-feature-item
+  exposes its image only as a data-attribute for a JS preview panel, and
+  _a-icon-with-text caps its image at icon size (32px).
+
+  New file, so no existing template references it and none can be affected.
+{%- endcomment -%}
+{%- liquid
+  assign cols = block.settings.columns_desktop
+  assign gap = block.settings.gap
+-%}
+{% style %}
+  .block-{{ block.id }} {
+    display: grid;
+    grid-template-columns: repeat({{ cols }}, minmax(0, 1fr));
+    gap: {{ gap }}px;
+    width: 100%;
+    margin: 0;
+    padding: {{ block.settings.padding_top }}px 0 {{ block.settings.padding_bottom }}px;
+    list-style: none;
+  }
+
+  {%- comment -%}
+    Three steps, not two. This block often sits in a product buy box, so its
+    container is roughly half the viewport: at a 1024px viewport the column is only
+    ~441px, and desktop's 4 columns left ~100px per card, which overflowed the
+    titles. The tablet step keeps cards readable in that middle range.
+  {%- endcomment -%}
+  @media screen and (min-width: 750px) and (max-width: 1099px) {
+    .block-{{ block.id }} {
+      grid-template-columns: repeat({{ block.settings.columns_tablet }}, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .block-{{ block.id }} {
+      grid-template-columns: repeat({{ block.settings.columns_mobile }}, minmax(0, 1fr));
+      gap: {{ block.settings.gap_mobile }}px;
+    }
+  }
+
+  .block-{{ block.id }} .image-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: {{ block.settings.card_background }};
+    border: 1px solid {{ block.settings.card_border_color }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+  }
+
+  .block-{{ block.id }} .image-card__media {
+    width: 100%;
+    height: {{ block.settings.image_height }}px;
+    overflow: hidden;
+  }
+
+  /* The theme placeholder is a square viewBox, so in a short slot it letterboxes and
+     reads as a floating icon. Tint the slot so an empty card looks deliberate — same
+     treatment a-reasons gives its blank image. A real image covers this entirely. */
+  .block-{{ block.id }} .image-card__media:has(> svg) {
+    background: rgba(45, 42, 38, 0.04);
+  }
+
+  @media screen and (max-width: 749px) {
+    .block-{{ block.id }} .image-card__media {
+      height: {{ block.settings.image_height_mobile }}px;
+    }
+  }
+
+  /* Both a real image and the theme placeholder SVG fill the media box the same way. */
+  .block-{{ block.id }} .image-card__media img,
+  .block-{{ block.id }} .image-card__media svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .block-{{ block.id }} .image-card__meta {
+    display: flex;
+    flex-direction: column;
+    gap: {{ block.settings.meta_gap }}px;
+    padding: {{ block.settings.meta_padding }}px;
+  }
+
+  .block-{{ block.id }} .image-card__title,
+  .block-{{ block.id }} .image-card__subtitle {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .block-{{ block.id }} .image-card__title {
+    margin: 0;
+    font-size: {{ block.settings.title_font_size }}px;
+    line-height: {{ block.settings.title_font_size | plus: 4 }}px;
+    font-weight: 700;
+    color: {{ block.settings.title_color }};
+  }
+
+  .block-{{ block.id }} .image-card__subtitle {
+    margin: 0;
+    font-size: {{ block.settings.subtitle_font_size }}px;
+    line-height: {{ block.settings.subtitle_font_size | plus: 4 }}px;
+    font-weight: 400;
+    color: {{ block.settings.subtitle_color }};
+  }
+{% endstyle %}
+<ul class="image-cards block-{{ block.id }}" {{ block.shopify_attributes }}>
+  {% content_for 'blocks' %}
+</ul>
+{% schema %}
+{
+  "name": "Image cards",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "_a-image-card"
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "columns_tablet",
+      "label": "Columns on tablet",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2,
+      "info": "Used between 750px and 1099px, where a buy-box column is too narrow for the desktop count."
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "1"
+        },
+        {
+          "value": "2",
+          "label": "2"
+        }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "gap_mobile",
+      "label": "Gap on mobile",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "range",
+      "id": "image_height",
+      "label": "Image height",
+      "min": 80,
+      "max": 320,
+      "step": 4,
+      "unit": "px",
+      "default": 168
+    },
+    {
+      "type": "range",
+      "id": "image_height_mobile",
+      "label": "Image height on mobile",
+      "min": 60,
+      "max": 260,
+      "step": 4,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "header",
+      "content": "Card"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Card border",
+      "default": "#e8c8c8"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "meta_padding",
+      "label": "Text padding",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "meta_gap",
+      "label": "Gap between title and subtitle",
+      "min": 0,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Title size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#1a0508"
+    },
+    {
+      "type": "range",
+      "id": "subtitle_font_size",
+      "label": "Subtitle size",
+      "min": 8,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Subtitle color",
+      "default": "#6b4a4f"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image cards",
+      "blocks": [
+        {
+          "type": "_a-image-card"
+        },
+        {
+          "type": "_a-image-card"
+        },
+        {
+          "type": "_a-image-card"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,280 @@
+{%- comment -%}
+  Numbered reasons — chip-anchored argument rows inside the product info column.
+  Container only: shared look (chip, typography, gaps, padding) + auto-numbering
+  counter live here; each row is a repeatable `_a-numbered-reason` child rendered
+  via `content_for 'blocks'`. Renders only where instantiated.
+{%- endcomment -%}
+<div class="numbered-reasons product-block-{{ block.id }}" {{ block.shopify_attributes }}>
+  {% style %}
+    .atlas-isolation-wrapper .product-block-{{ block.id }} {
+      counter-reset: nr-counter;
+      display: flex;
+      flex-direction: column;
+      gap: {{ block.settings.item_gap }}px;
+      padding-top: {{ block.settings.padding_top }}px;
+      padding-bottom: {{ block.settings.padding_bottom }}px;
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-item {
+      counter-increment: nr-counter;
+      display: flex;
+      align-items: flex-start;
+      gap: {{ block.settings.chip_gap }}px;
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-chip {
+      flex: 0 0 {{ block.settings.chip_size }}px;
+      width: {{ block.settings.chip_size }}px;
+      height: {{ block.settings.chip_size }}px;
+      border-radius: 999px;
+      background: {{ block.settings.chip_bg }};
+      color: {{ block.settings.chip_text_color }};
+      font-size: {{ block.settings.chip_font_size }}px;
+      font-weight: 700;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-chip--auto::before {
+      content: counter(nr-counter);
+    }
+    {%- if block.settings.hide_chip -%}
+      {%- comment -%}
+        Gated (default off). Rows here always reserve chip_size + chip_gap even when
+        the chip is styled invisible, which pushes the row's content off-centre. This
+        removes it from layout so the block can carry image-only rows honestly.
+      {%- endcomment -%}
+      .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-chip {
+        display: none;
+      }
+      .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-item {
+        gap: 0;
+      }
+    {%- endif -%}
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-chip--icon svg {
+      display: block;
+      width: auto;
+      height: 22px;
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-col {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-heading {
+      margin: 0;
+      font-size: {{ block.settings.heading_font_size }}px;
+      font-weight: 600;
+      line-height: 1.4;
+      color: {{ block.settings.heading_color }};
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-text {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.4;
+      color: {{ block.settings.body_color }};
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-media {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-media img,
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-media svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .atlas-isolation-wrapper .product-block-{{ block.id }} .nr-footnote {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 1.2px;
+      line-height: 1.4;
+      color: {{ block.settings.body_color }};
+      opacity: 0.7;
+    }
+    @media screen and (max-width: 768px) {
+      .atlas-isolation-wrapper .product-block-{{ block.id }} {
+        gap: {{ block.settings.item_gap_mobile }}px;
+        padding-top: {{ block.settings.padding_top_mobile }}px;
+        padding-bottom: {{ block.settings.padding_bottom_mobile }}px;
+      }
+    }
+  {% endstyle %}
+  {% content_for 'blocks' %}
+</div>
+
+{% schema %}
+{
+  "name": "Numbered reasons",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "_a-numbered-reason"
+    }
+  ],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Chip"
+    },
+    {
+      "type": "range",
+      "id": "chip_size",
+      "label": "Chip size",
+      "min": 24,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "chip_font_size",
+      "label": "Chip font size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "chip_bg",
+      "label": "Chip background",
+      "default": "#7c1c2f"
+    },
+    {
+      "type": "color",
+      "id": "chip_text_color",
+      "label": "Chip text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "chip_gap",
+      "label": "Space after chip",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#231f20"
+    },
+    {
+      "type": "color",
+      "id": "body_color",
+      "label": "Body text color",
+      "default": "#676986"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "item_gap",
+      "label": "Desktop space between items",
+      "min": 8,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "item_gap_mobile",
+      "label": "Mobile space between items",
+      "min": 8,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop top padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Desktop bottom padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile top padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "unit": "px",
+      "label": "Mobile bottom padding",
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_chip",
+      "label": "Hide the number chip",
+      "default": false,
+      "info": "Removes the chip from the layout so rows can be image- or text-only."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Numbered reasons",
+      "category": "Product Information",
+      "blocks": [
+        {
+          "type": "_a-numbered-reason"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

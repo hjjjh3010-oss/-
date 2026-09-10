@@ -1,0 +1,101 @@
+{%- comment -%}
+  The border settings are additive and default to 0 width, so a group that does not
+  set them emits exactly the same style attribute as before. Border is built
+  independently of has_background so it can outline a transparent group too.
+{%- endcomment -%}
+{%- capture group_style -%}
+  {%- if block.settings.has_background -%}
+    background-color: {{ block.settings.bg_color }}; padding: {{ block.settings.group_padding }}px; border-radius: {{ block.settings.group_border_radius }}px;
+  {%- endif -%}
+  {%- if block.settings.border_width > 0 -%}
+    border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+    {%- unless block.settings.has_background -%}
+      border-radius: {{ block.settings.group_border_radius }}px; padding: {{ block.settings.group_padding }}px;
+    {%- endunless -%}
+  {%- endif -%}
+{%- endcapture -%}
+<div
+  {% if group_style != blank %}style="{{ group_style | strip }}"{% endif %}
+  {{ block.shopify_attributes }}
+>
+{% content_for 'blocks' %}
+</div>
+{% schema %}
+{
+  "name": "Group",
+  "tag": null,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "has_background",
+      "label": "Show background",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#f7f7f8",
+      "visible_if": "{{ block.settings.has_background }}"
+    },
+    {
+      "type": "range",
+      "id": "group_padding",
+      "label": "Padding",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16,
+      "visible_if": "{{ block.settings.has_background }}"
+    },
+    {
+      "type": "range",
+      "id": "group_border_radius",
+      "label": "Corner radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "visible_if": "{{ block.settings.has_background }}"
+    },
+    {
+      "type": "header",
+      "content": "Border"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 0,
+      "info": "0 leaves the group without a border, as before."
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#e5e5e5",
+      "visible_if": "{{ block.settings.border_width > 0 }}"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@theme"
+    },
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Group",
+      "category": "Product Information"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,570 @@
+{% render 'a-atlas-fonts-r2', atlas_font: section.settings.atlas_font %}
+{%- comment -%}
+  Before/after results with concern filters + progressive reveal. Generic and isolated:
+  - `filter` blocks build a chip bar (a blank category = "show all" / "See all").
+  - `result` blocks carry a category, before/after images, a label and supporting copy.
+  - Client-side filtering + "load more" reveal (self-contained custom element; follows the
+    same hidden-toggle convention as assets/a-show-more.js, which is a plain toggle and does
+    not handle a filtered, count-limited reveal).
+  All content is author-defined; no hard-coded brand strings. Default-safe on its own template.
+{%- endcomment -%}
+
+{%- liquid
+  assign global_heading_size = settings.enable_global_heading_font_size
+  assign global_color = settings.enable_global_color
+  assign heading_align = section.settings.heading_alignment | default: 'left'
+-%}
+
+{% style %}
+  .atlas-isolation-wrapper #section-{{ section.id }} {
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    background: {{ section.settings.section_background_color }};
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-header {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: {{ heading_align }};
+    {% if heading_align == 'center' %}align-items: center;{% elsif heading_align == 'right' %}align-items: flex-end;{% else %}align-items: flex-start;{% endif %}
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-eyebrow {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: {{ section.settings.eyebrow_letter_spacing }}px;
+    color: {{ section.settings.eyebrow_color }};
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-heading {
+    margin: 0;
+    font-size: {% if global_heading_size %}var(--atlas-font-heading-size){% else %}{{ section.settings.heading_size }}px{% endif %};
+    line-height: 1.2;
+    font-weight: 600;
+    color: {% if global_color %}rgb(var(--atlas-color-base-heading)){% else %}{{ section.settings.heading_color }}{% endif %};
+  }
+  @media (max-width: 768px) {
+    .atlas-isolation-wrapper #section-{{ section.id }} .ba-heading {
+      font-size: {% if global_heading_size %}var(--atlas-font-heading-mob-size){% else %}{{ section.settings.heading_mobile_size }}px{% endif %};
+    }
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-filter {
+    border: 1px solid {{ section.settings.filter_border_color }};
+    background: transparent;
+    color: {{ section.settings.filter_text_color }};
+    border-radius: 9999px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-filter:focus-visible {
+    outline: 2px solid {{ section.settings.filter_active_bg }};
+    outline-offset: 2px;
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-filter.is-active {
+    background: {{ section.settings.filter_active_bg }};
+    color: {{ section.settings.filter_active_text }};
+    border-color: {{ section.settings.filter_active_bg }};
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-result {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 0 1 calc((100% - 80px) / 3);
+    min-width: 0;
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-result.is-hidden,
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-load-more.is-hidden {
+    display: none;
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-pair {
+    display: flex;
+    gap: 8px;
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-img {
+    flex: 1 1 0;
+    min-width: 0;
+    aspect-ratio: 200 / 260;
+    border-radius: 12px;
+    overflow: hidden;
+    background: {{ section.settings.image_placeholder_bg }};
+    position: relative;
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-img img,
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-img svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-img .ba-img-tag {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: {{ section.settings.support_text_color }};
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: 4px;
+    padding: 2px 6px;
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-label {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: {% if global_color %}rgb(var(--atlas-color-base-heading)){% else %}{{ section.settings.label_color }}{% endif %};
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-support {
+    margin: 0;
+    font-size: 12px;
+    color: {{ section.settings.support_text_color }};
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-load-more-wrap {
+    display: flex;
+    {% if heading_align == 'center' %}justify-content: center;{% elsif heading_align == 'right' %}justify-content: flex-end;{% else %}justify-content: flex-start;{% endif %}
+  }
+  .atlas-isolation-wrapper #section-{{ section.id }} .ba-load-more {
+    border: 1px solid {{ section.settings.filter_active_bg }};
+    background: transparent;
+    color: {{ section.settings.filter_active_bg }};
+    border-radius: 8px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  @media (max-width: 1024px) {
+    .atlas-isolation-wrapper #section-{{ section.id }} .ba-result {
+      flex: 0 1 calc((100% - 40px) / 2);
+    }
+  }
+  @media (max-width: 749px) {
+    .atlas-isolation-wrapper #section-{{ section.id }} .ba-results {
+      gap: 32px;
+    }
+    .atlas-isolation-wrapper #section-{{ section.id }} .ba-result {
+      flex: 0 1 100%;
+    }
+  }
+{% endstyle %}
+
+<div id="section-{{ section.id }}">
+  <before-after-results class="page-width ba-wrap" data-visible="{{ section.settings.initial_visible_count }}">
+    {%- if section.settings.eyebrow != blank or section.settings.heading != blank -%}
+      <div class="ba-header">
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="ba-eyebrow">{{ section.settings.eyebrow }}</p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="ba-heading">{{ section.settings.heading }}</h2>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- assign filter_blocks = section.blocks | where: 'type', 'filter' -%}
+    {%- if filter_blocks.size > 0 -%}
+      <div class="ba-filters" role="tablist" aria-label="{{ section.settings.heading | default: 'Result filters' | escape }}">
+        {%- for block in filter_blocks -%}
+          <button
+            type="button"
+            class="ba-filter{% if forloop.first %} is-active{% endif %}"
+            role="tab"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            data-category="{{ block.settings.category | strip | downcase }}"
+            {{ block.shopify_attributes }}
+          >{{ block.settings.label }}</button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- assign result_blocks = section.blocks | where: 'type', 'result' -%}
+    <div class="ba-results">
+      {%- for block in result_blocks -%}
+        <div class="ba-result" data-category="{{ block.settings.category | strip | downcase }}" {{ block.shopify_attributes }}>
+          <div class="ba-pair">
+            <div class="ba-img">
+              {%- if block.settings.before_image != blank -%}
+                {{ block.settings.before_image | image_url: width: 400 | image_tag: loading: 'lazy', alt: block.settings.before_image.alt | default: block.settings.label }}
+              {%- else -%}
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+              {%- if section.settings.show_ba_tags -%}<span class="ba-img-tag">{{ section.settings.before_label }}</span>{%- endif -%}
+            </div>
+            <div class="ba-img">
+              {%- if block.settings.after_image != blank -%}
+                {{ block.settings.after_image | image_url: width: 400 | image_tag: loading: 'lazy', alt: block.settings.after_image.alt | default: block.settings.label }}
+              {%- else -%}
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+              {%- endif -%}
+              {%- if section.settings.show_ba_tags -%}<span class="ba-img-tag">{{ section.settings.after_label }}</span>{%- endif -%}
+            </div>
+          </div>
+          {%- if block.settings.label != blank -%}<p class="ba-label">{{ block.settings.label }}</p>{%- endif -%}
+          {%- if block.settings.supporting_text != blank -%}<p class="ba-support">{{ block.settings.supporting_text }}</p>{%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.load_more_label != blank and result_blocks.size > section.settings.initial_visible_count -%}
+      <div class="ba-load-more-wrap">
+        <button type="button" class="ba-load-more">{{ section.settings.load_more_label }}</button>
+      </div>
+    {%- endif -%}
+  </before-after-results>
+</div>
+
+<script>
+  (function () {
+    if (customElements.get('before-after-results')) return;
+    class BeforeAfterResults extends HTMLElement {
+      connectedCallback() {
+        if (this._init) return;
+        this._init = true;
+        this.limit = parseInt(this.dataset.visible || '3', 10);
+        this.filters = Array.from(this.querySelectorAll('.ba-filter'));
+        this.results = Array.from(this.querySelectorAll('.ba-result'));
+        this.loadMore = this.querySelector('.ba-load-more');
+        this.activeCategory = this.filters.length ? (this.filters[0].dataset.category || '') : '';
+        this.expanded = false;
+        this.filters.forEach((f) => f.addEventListener('click', () => this.selectFilter(f)));
+        if (this.loadMore) {
+          this.loadMore.addEventListener('click', () => {
+            this.expanded = true;
+            this.render();
+          });
+        }
+        this.render();
+      }
+      selectFilter(target) {
+        this.filters.forEach((f) => {
+          var active = f === target;
+          f.classList.toggle('is-active', active);
+          f.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        this.activeCategory = target.dataset.category || '';
+        this.expanded = false;
+        this.render();
+      }
+      matches(result) {
+        return !this.activeCategory || result.dataset.category === this.activeCategory;
+      }
+      render() {
+        var shown = 0;
+        var matchingCount = 0;
+        this.results.forEach((result) => {
+          if (!this.matches(result)) {
+            result.classList.add('is-hidden');
+            return;
+          }
+          matchingCount++;
+          if (this.expanded || shown < this.limit) {
+            result.classList.remove('is-hidden');
+            shown++;
+          } else {
+            result.classList.add('is-hidden');
+          }
+        });
+        if (this.loadMore) {
+          var hasMore = matchingCount > this.limit && !this.expanded;
+          this.loadMore.classList.toggle('is-hidden', !hasMore);
+        }
+      }
+    }
+    customElements.define('before-after-results', BeforeAfterResults);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Before & after results",
+  "tag": "section",
+  "class": "atlas-isolation-wrapper atlas-gradient section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "info": "Optional small line above the heading. Leave blank to hide."
+    },
+    {
+      "type": "color",
+      "id": "eyebrow_color",
+      "label": "Eyebrow color",
+      "default": "#7c1c2f"
+    },
+    {
+      "type": "range",
+      "id": "eyebrow_letter_spacing",
+      "label": "Eyebrow letter spacing",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Pick a concern to see real results"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Desktop heading size",
+      "min": 20,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "heading_mobile_size",
+      "label": "Mobile heading size",
+      "min": 16,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1f0212"
+    },
+    {
+      "type": "header",
+      "content": "Filters & reveal"
+    },
+    {
+      "type": "range",
+      "id": "initial_visible_count",
+      "label": "Results shown before \"load more\"",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "text",
+      "id": "load_more_label",
+      "label": "Load more button label",
+      "info": "Leave blank to hide the load-more control.",
+      "default": "Load more results"
+    },
+    {
+      "type": "color",
+      "id": "filter_border_color",
+      "label": "Filter border color",
+      "default": "#ddbfc2"
+    },
+    {
+      "type": "color",
+      "id": "filter_text_color",
+      "label": "Filter text color",
+      "default": "#231f20"
+    },
+    {
+      "type": "color",
+      "id": "filter_active_bg",
+      "label": "Active filter background",
+      "default": "#7c1c2f"
+    },
+    {
+      "type": "color",
+      "id": "filter_active_text",
+      "label": "Active filter text",
+      "default": "#fefbf9"
+    },
+    {
+      "type": "header",
+      "content": "Result images"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_ba_tags",
+      "label": "Show before/after labels on images",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "before_label",
+      "label": "Before label",
+      "default": "BEFORE"
+    },
+    {
+      "type": "text",
+      "id": "after_label",
+      "label": "After label",
+      "default": "AFTER"
+    },
+    {
+      "type": "color",
+      "id": "image_placeholder_bg",
+      "label": "Image placeholder background",
+      "default": "#fdf5f1"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Result label color",
+      "default": "#1f0212"
+    },
+    {
+      "type": "color",
+      "id": "support_text_color",
+      "label": "Supporting text color",
+      "default": "#676986"
+    },
+    {
+      "type": "header",
+      "content": "Section styling"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section background color",
+      "default": "#fefbf9"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Atlas fonts"
+    },
+    {
+      "type": "select",
+      "id": "atlas_font",
+      "label": "Font",
+      "info": "Applies a curated brand font to Atlas sections. Managed by Atlas.",
+      "options": [
+        { "value": "", "label": "Default (theme)" },
+        { "value": "work_sans", "label": "Work Sans" },
+        { "value": "inter", "label": "Inter" },
+        { "value": "archivo", "label": "Archivo" }
+      ],
+      "default": ""
+    }
+  ],
+  "blocks": [
+    {
+      "type": "filter",
+      "name": "Filter chip",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Chip label",
+          "default": "Concern"
+        },
+        {
+          "type": "text",
+          "id": "category",
+          "label": "Category key",
+          "info": "Matches result blocks with the same key. Leave blank for a \"show all\" chip."
+        }
+      ]
+    },
+    {
+      "type": "result",
+      "name": "Result pair",
+      "settings": [
+        {
+          "type": "text",
+          "id": "category",
+          "label": "Category key",
+          "info": "Which filter chip this result belongs to (match a chip's category key)."
+        },
+        {
+          "type": "image_picker",
+          "id": "before_image",
+          "label": "Before image"
+        },
+        {
+          "type": "image_picker",
+          "id": "after_image",
+          "label": "After image"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Result label",
+          "default": "Concern · 8 weeks"
+        },
+        {
+          "type": "text",
+          "id": "supporting_text",
+          "label": "Supporting text"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Before & after results",
+      "blocks": [
+        { "type": "filter" },
+        { "type": "result" },
+        { "type": "result" },
+        { "type": "result" }
+      ]
+    }
+  ]
+}
+{% endschema %}
