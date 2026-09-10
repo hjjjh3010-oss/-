@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "accessibility": {
     "skip_to_content": "Skip to main content",
@@ -18,89 +27,6 @@
     "free_shipping": "Free shipping on orders over $50",
     "limited_time": "Limited time offer",
     "ends_in": "Ends in"
-  },
-  "header": {
-    "shop": "Shop",
-    "contact": "Contact",
-    "about": "About",
-    "search": "Search",
-    "account": "Account",
-    "cart": "Cart",
-    "cart_count": "Cart ({count})",
-    "menu": "Menu",
-    "navigation": "Navigation"
-  },
-  "home_page": {
-    "hero": {
-      "title": "Transform Bath Time into Bonding Time",
-      "subtitle": "The premium pet bathing solution that makes grooming effortless and enjoyable for both you and your furry friend.",
-      "cta_primary": "Shop Now",
-      "cta_secondary": "Learn More"
-    },
-    "featured_products": {
-      "title": "Best Sellers",
-      "view_all": "View All Products"
-    },
-    "benefits": {
-      "title": "Why Choose Us",
-      "free_shipping": "Free Shipping",
-      "free_shipping_desc": "On orders over $50",
-      "easy_returns": "60-Day Returns",
-      "easy_returns_desc": "Hassle-free returns",
-      "secure_payment": "Secure Payment",
-      "secure_payment_desc": "100% secure checkout",
-      "support": "24/7 Support",
-      "support_desc": "Dedicated customer care"
-    },
-    "newsletter": {
-      "title": "Join the Pack",
-      "description": "Get exclusive offers, pet care tips, and new product alerts.",
-      "placeholder": "Enter your email",
-      "submit": "Subscribe",
-      "success": "Thanks for subscribing!",
-      "error": "Please enter a valid email"
-    }
-  },
-  "product": {
-    "add_to_cart": "Add to Cart",
-    "buy_now": "Buy Now",
-    "sold_out": "Sold Out",
-    "unavailable": "Unavailable",
-    "quantity": "Quantity",
-    "decrease_quantity": "Decrease quantity",
-    "increase_quantity": "Increase quantity",
-    "description": "Description",
-    "specifications": "Specifications",
-    "shipping_returns": "Shipping & Returns",
-    "reviews": "Reviews",
-    "write_review": "Write a Review",
-    "no_reviews": "No reviews yet. Be the first to write one!",
-    "rating": "Rating",
-    "out_of_5": "out of 5 stars",
-    "based_on": "Based on {count} review{count_plural}",
-    "share": "Share",
-    "share_copy": "Copy Link",
-    "share_copied": "Copied!",
-    "sku": "SKU",
-    "vendor": "Brand",
-    "availability": "Availability",
-    "in_stock": "In Stock",
-    "low_stock": "Only {count} left in stock",
-    "pre_order": "Pre-Order",
-    "coming_soon": "Coming Soon",
-    "notify_me": "Notify Me When Available",
-    "product_gallery": "Product Gallery",
-    "select_variant": "Select a variant",
-    "variant_select": "Select {option}",
-    "payment_options": "Payment Options",
-    "guarantee": "60-Day Money-Back Guarantee",
-    "guarantee_desc": "If you're not completely satisfied, return within 60 days for a full refund.",
-    "shipping_time": "Shipping Time",
-    "shipping_time_desc": "Orders ship within 1-2 business days. Delivery takes 3-7 business days.",
-    "pet_compatibility": "Pet Compatibility",
-    "pet_compatibility_desc": "Suitable for dogs and cats of all sizes. Weight capacity up to 50 lbs.",
-    "related_products": "You May Also Like",
-    "recently_viewed": "Recently Viewed"
   },
   "cart": {
     "title": "Shopping Cart",
@@ -151,16 +77,6 @@
     "load_more": "Load More",
     "view_all": "View All {count} Products"
   },
-  "search": {
-    "title": "Search Results",
-    "placeholder": "Search products...",
-    "no_results": "No results found for \"{query}\"",
-    "no_results_suggestion": "Try different keywords or check spelling.",
-    "results_count": "{count} result{count_plural} found",
-    "popular_searches": "Popular Searches",
-    "recent_searches": "Recent Searches",
-    "clear_recent": "Clear"
-  },
   "footer": {
     "quick_links": "Quick Links",
     "privacy_policy": "Privacy Policy",
@@ -180,45 +96,6 @@
     "follow_us": "Follow Us",
     "copyright": "© {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.",
     "payment_methods": "Payment Methods"
-  },
-  "pages": {
-    "about": {
-      "title": "About Us",
-      "our_story": "Our Story",
-      "mission": "Our Mission",
-      "values": "Our Values",
-      "team": "Meet the Team"
-    },
-    "contact": {
-      "title": "Contact Us",
-      "heading": "Get in Touch",
-      "description": "Have a question? We'd love to hear from you.",
-      "form_name": "Name",
-      "form_email": "Email",
-      "form_phone": "Phone (optional)",
-      "form_subject": "Subject",
-      "form_message": "Message",
-      "form_submit": "Send Message",
-      "form_success": "Thanks for reaching out! We'll get back to you within 24 hours.",
-      "form_error": "Please fill in all required fields.",
-      "contact_info": "Contact Information",
-      "email": "Email",
-      "phone": "Phone",
-      "address": "Address",
-      "hours": "Business Hours",
-      "hours_value": "Mon-Fri: 9am-6pm EST"
-    },
-    "faq": {
-      "title": "Frequently Asked Questions",
-      "question": "Question",
-      "answer": "Answer"
-    },
-    "404": {
-      "title": "Page Not Found",
-      "description": "Sorry, we couldn't find the page you're looking for.",
-      "button": "Return Home",
-      "search_prompt": "Or try searching for what you need:"
-    }
   },
   "forms": {
     "required": "Required",
@@ -271,5 +148,183 @@
     "success": "Success",
     "warning": "Warning",
     "info": "Information"
+  },
+  "header": {
+    "shop": "Shop",
+    "contact": "Contact",
+    "about": "About",
+    "search": "Search",
+    "account": "Account",
+    "cart": "Cart",
+    "cart_count": "Cart ({count})",
+    "menu": "Menu",
+    "navigation": "Navigation"
+  },
+  "home_page": {
+    "hero": {
+      "title": "Transform Bath Time into Bonding Time",
+      "subtitle": "The premium pet bathing solution that makes grooming effortless and enjoyable for both you and your furry friend.",
+      "cta_primary": "Shop Now",
+      "cta_secondary": "Learn More"
+    },
+    "featured_products": {
+      "title": "Best Sellers",
+      "view_all": "View All Products"
+    },
+    "benefits": {
+      "title": "Why Choose Us",
+      "free_shipping": "Free Shipping",
+      "free_shipping_desc": "On orders over $50",
+      "easy_returns": "60-Day Returns",
+      "easy_returns_desc": "Hassle-free returns",
+      "secure_payment": "Secure Payment",
+      "secure_payment_desc": "100% secure checkout",
+      "support": "24/7 Support",
+      "support_desc": "Dedicated customer care"
+    },
+    "newsletter": {
+      "title": "Join the Pack",
+      "description": "Get exclusive offers, pet care tips, and new product alerts.",
+      "placeholder": "Enter your email",
+      "submit": "Subscribe",
+      "success": "Thanks for subscribing!",
+      "error": "Please enter a valid email"
+    }
+  },
+  "pages": {
+    "404": {
+      "title": "Page Not Found",
+      "description": "Sorry, we couldn't find the page you're looking for.",
+      "button": "Return Home",
+      "search_prompt": "Or try searching for what you need:"
+    },
+    "about": {
+      "title": "About Us",
+      "our_story": "Our Story",
+      "mission": "Our Mission",
+      "values": "Our Values",
+      "team": "Meet the Team"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "heading": "Get in Touch",
+      "description": "Have a question? We'd love to hear from you.",
+      "form_name": "Name",
+      "form_email": "Email",
+      "form_phone": "Phone (optional)",
+      "form_subject": "Subject",
+      "form_message": "Message",
+      "form_submit": "Send Message",
+      "form_success": "Thanks for reaching out! We'll get back to you within 24 hours.",
+      "form_error": "Please fill in all required fields.",
+      "contact_info": "Contact Information",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "hours": "Business Hours",
+      "hours_value": "Mon-Fri: 9am-6pm EST"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "question": "Question",
+      "answer": "Answer"
+    }
+  },
+  "product": {
+    "add_to_cart": "Add to Cart",
+    "buy_now": "Buy Now",
+    "sold_out": "Sold Out",
+    "unavailable": "Unavailable",
+    "quantity": "Quantity",
+    "decrease_quantity": "Decrease quantity",
+    "increase_quantity": "Increase quantity",
+    "description": "Description",
+    "specifications": "Specifications",
+    "shipping_returns": "Shipping & Returns",
+    "reviews": "Reviews",
+    "write_review": "Write a Review",
+    "no_reviews": "No reviews yet. Be the first to write one!",
+    "rating": "Rating",
+    "out_of_5": "out of 5 stars",
+    "based_on": "Based on {count} review{count_plural}",
+    "share": "Share",
+    "share_copy": "Copy Link",
+    "share_copied": "Copied!",
+    "sku": "SKU",
+    "vendor": "Brand",
+    "availability": "Availability",
+    "in_stock": "In Stock",
+    "low_stock": "Only {count} left in stock",
+    "pre_order": "Pre-Order",
+    "coming_soon": "Coming Soon",
+    "notify_me": "Notify Me When Available",
+    "product_gallery": "Product Gallery",
+    "select_variant": "Select a variant",
+    "variant_select": "Select {option}",
+    "payment_options": "Payment Options",
+    "guarantee": "60-Day Money-Back Guarantee",
+    "guarantee_desc": "If you're not completely satisfied, return within 60 days for a full refund.",
+    "shipping_time": "Shipping Time",
+    "shipping_time_desc": "Orders ship within 1-2 business days. Delivery takes 3-7 business days.",
+    "pet_compatibility": "Pet Compatibility",
+    "pet_compatibility_desc": "Suitable for dogs and cats of all sizes. Weight capacity up to 50 lbs.",
+    "related_products": "You May Also Like",
+    "recently_viewed": "Recently Viewed"
+  },
+  "search": {
+    "title": "Search Results",
+    "placeholder": "Search products...",
+    "no_results": "No results found for \"{query}\"",
+    "no_results_suggestion": "Try different keywords or check spelling.",
+    "results_count": "{count} result{count_plural} found",
+    "popular_searches": "Popular Searches",
+    "recent_searches": "Recent Searches",
+    "clear_recent": "Clear"
+  },
+  "gempages": {
+    "Carousel": {
+      "no_slider": "No Slider"
+    },
+    "CarouselV3": {
+      "no_slider": "No Slider"
+    },
+    "Newsletter": {
+      "err_msg_default": "Can’t send email. Please try again later.",
+      "success_msg_default": "Thanks for subscribing"
+    },
+    "IconListV2": {
+      "icons_not_found": "Icons not found"
+    },
+    "IconList": {
+      "icons_not_found": "Icons not found"
+    },
+    "IconListHoz": {
+      "icons_not_found": "Icons not found"
+    },
+    "Product": {
+      "product_not_found": "Product not found"
+    },
+    "ProductList": {
+      "product_not_found": "Product Not Found!",
+      "no_products_found": "No products found!",
+      "no_related_products": "No related products!"
+    },
+    "ProductListV3": {
+      "product_not_found": "Product Not Found!",
+      "no_products_found": "No products found!",
+      "no_related_products": "No related products!"
+    },
+    "ProductTitle": {
+      "product_not_found": "Product Not Found"
+    },
+    "ProductVariants": {
+      "please_select": "Please select an option"
+    },
+    "StockCounter": {
+      "let_buy_now": "<mark>HURRY!</mark> LET BUY NOW"
+    },
+    "Breadcrumb": {
+      "home": "Home"
+    }
   }
 }
