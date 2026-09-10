@@ -8,7 +8,7 @@
 
   <span class="rating__stars">
     {% for i in (1..5) %}
-      {% if i <= rating_value | floor %}
+      {% if i <= rating_value %}
         {% render 'icon-star' %}
       {% else %}
         {% render 'icon-star--empty' %}
@@ -17,4 +17,13 @@
   </span>
   <span class="rating__value">{{ rating_value }}</span>
   <span class="rating__count">({{ rating_count }})</span>
-</div>
+</div>{%- comment -%}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: "{% if i <= rating_value | floor %}"
+  to: "{% if i <= rating_value %}"
+  position: 351..377
+{%- endcomment -%}
