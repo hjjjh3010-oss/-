@@ -108,69 +108,6 @@
         "atlas_font": ""
       }
     },
-    "scrolling_images_aajYaC": {
-      "type": "a-scrolling-images-r4",
-      "blocks": {
-        "slide_daDrML": {
-          "type": "slide",
-          "settings": {
-            "link": ""
-          }
-        },
-        "slide_MD6URA": {
-          "type": "slide",
-          "settings": {
-            "link": ""
-          }
-        },
-        "slide_H7aXCW": {
-          "type": "slide",
-          "settings": {
-            "link": ""
-          }
-        },
-        "slide_cVqRDk": {
-          "type": "slide",
-          "settings": {
-            "link": ""
-          }
-        }
-      },
-      "block_order": [
-        "slide_daDrML",
-        "slide_MD6URA",
-        "slide_H7aXCW",
-        "slide_cVqRDk"
-      ],
-      "settings": {
-        "section_heading": "As seen on",
-        "section_eyebrow": "",
-        "heading_alignment": "center",
-        "font_size": 20,
-        "mobile_font_size": 16,
-        "header_color": "#343a0f",
-        "header_highlighted_color": "#343a0f",
-        "heading_use_gradient": false,
-        "heading_gradient_color": "",
-        "layout_mode": "scroll",
-        "pause_hover": true,
-        "slider_direction": "right",
-        "scrolling_velocity": 2,
-        "slider_gap": 52,
-        "slider_gap_mobile": 15,
-        "icon_width": 120,
-        "icon_width_mobile": 250,
-        "show_bottom_divider": false,
-        "divider_color": "#e5e5e5",
-        "image_border_radius": 8,
-        "use_gradient_background": false,
-        "section_background_gradient": "linear-gradient(180deg, rgba(251, 51, 166, 1), rgba(127, 72, 176, 1) 50%, rgba(48, 145, 211, 1) 100%)",
-        "section_background_color": "#ffffff",
-        "padding_top": 12,
-        "padding_bottom": 12,
-        "atlas_font": ""
-      }
-    },
     "image_with_text_NrYFbe": {
       "type": "a-image-with-text-r5",
       "settings": {
@@ -1311,7 +1248,6 @@
   },
   "order": [
     "image_banner_TVECWz",
-    "scrolling_images_aajYaC",
     "image_with_text_NrYFbe",
     "benefits_cards_AHFLcL",
     "rich_text_P9Xf6T",
