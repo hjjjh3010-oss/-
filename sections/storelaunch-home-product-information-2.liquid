@@ -1,0 +1,2951 @@
+{%- liquid
+  assign s = section.settings
+  assign sl_skip_install_mask = false
+  if request.design_mode
+    assign sl_skip_install_mask = true
+  endif
+  if theme.role == 'development'
+    assign sl_skip_install_mask = true
+  endif
+  assign selected_product = product
+  if s.product_handle != blank and all_products[s.product_handle] != blank
+    assign selected_product = all_products[s.product_handle]
+  endif
+  if selected_product == blank and collections.all != blank and collections.all.products_count > 0
+    assign selected_product = collections.all.products.first
+  endif
+  assign product = selected_product
+  assign selected_variant = nil
+  assign image_media = blank
+  if product
+    assign selected_variant = product.selected_or_first_available_variant
+    assign image_media = product.media | where: 'media_type', 'image'
+  endif
+  assign has_variant_picker = false
+  for block in section.blocks
+    if block.type == 'variant_picker'
+      assign has_variant_picker = true
+      break
+    endif
+  endfor
+-%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }}.sl-product-info-2-root {
+    --slh-pi2-bg: {{ s.section_bg }};
+    --slh-pi2-text: {{ s.text_color }};
+    --slh-pi2-muted: {{ s.muted_text_color }};
+    --slh-pi2-border: {{ s.border_color }};
+    --sl-heading: {{ s.heading_fs | default: 30 }}px;
+    --sl-lh-heading: 1.15;
+    --sl-body: {{ s.body_fs | default: 16 }}px;
+    padding-top: {{ s.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ s.padding_bottom | times: 0.75 | round: 0 }}px;
+    background: var(--slh-pi2-bg);
+    color: var(--slh-pi2-text);
+  }
+
+  @media screen and (min-width: 750px) {
+    #shopify-section-{{ section.id }}.sl-product-info-2-root {
+      padding-top: {{ s.padding_top }}px;
+      padding-bottom: {{ s.padding_bottom }}px;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__wrap {
+    max-width: {{ s.max_width }}px;
+    margin: 0 auto;
+    padding: 0 clamp(16px, 4vw, 40px);
+    font-size: {{ s.wrap_fs | default: 16 }}px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__layout {
+    display: grid;
+    gap: clamp(20px, 3.5vw, 34px);
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 989px) {
+    #shopify-section-{{ section.id }} .slh-pi2__layout {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      align-items: start;
+      gap: 22px;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__wrap {
+      padding: 0 clamp(20px, 3.2vw, 30px);
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__media-grid {
+      grid-template-columns: 1fr;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__thumbs {
+      grid-auto-columns: calc((100% - (5 * 8px)) / 6);
+      scroll-snap-type: x mandatory;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__thumb {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      scroll-snap-align: start;
+    }
+  }
+
+  @media screen and (min-width: 990px) {
+    #shopify-section-{{ section.id }} .slh-pi2__layout {
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr);
+      align-items: start;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__media-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  @media screen and (min-width: 990px) {
+    #shopify-section-{{ section.id }} .slh-pi2__media-grid {
+      grid-template-columns: 60px minmax(0, 1fr) 116px;
+      align-items: stretch;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__thumbs {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 54px;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__main {
+    order: 1;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__thumbs {
+    order: 3;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__thumbs::-webkit-scrollbar {
+    display: none;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__thumb {
+    width: 54px;
+    height: 54px;
+    border: 1px solid var(--slh-pi2-border);
+    border-radius: {{ s.thumbnail_radius | default: 10 }}px;
+    overflow: hidden;
+    background: #fff;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__thumb.is-active {
+    border-color: #000000;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media screen and (max-width: 749px) {
+    #shopify-section-{{ section.id }} .slh-pi2__thumbs {
+      grid-auto-columns: calc((100% - ({{ s.mobile_thumbnail_columns | default: 5 | minus: 1 }} * 8px)) / {{ s.mobile_thumbnail_columns | default: 5 }});
+      scroll-snap-type: x mandatory;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__thumb {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      scroll-snap-align: start;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__main {
+    border-radius: {{ s.media_radius }}px;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__review {
+    margin-top: 12px;
+    border: 1px solid var(--slh-pi2-border);
+    border-radius: 12px;
+    padding: 12px;
+    background: #fdfefc;
+    display: none;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__faq-under-image {
+    display: none;
+    margin-top: 0;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__faq-main-col {
+    margin-top: 16px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__review-title {
+    margin: 0 0 4px;
+    font-size: {{ s.review_title_fs | default: 18 }}px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__review-text {
+    margin: 0;
+    color: var(--slh-pi2-muted);
+    font-size: {{ s.review_text_fs | default: 14 }}px;
+    line-height: 1.4;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__review-name {
+    margin: 8px 0 0;
+    font-size: {{ s.review_name_fs | default: 14 }}px;
+    font-weight: 500;
+  }
+
+  @media screen and (min-width: 990px) {
+    #shopify-section-{{ section.id }} .slh-pi2__media-grid {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: stretch;
+      column-gap: 12px;
+      row-gap: 12px;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__main {
+      grid-column: 1;
+      grid-row: 1;
+      width: 100%;
+      min-width: 0;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__thumbs {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      order: initial;
+      grid-auto-flow: column;
+      grid-auto-columns: calc((100% - ({{ s.mobile_thumbnail_columns | default: 6 | minus: 1 }} * 8px)) / {{ s.mobile_thumbnail_columns | default: 6 }});
+      grid-auto-rows: unset;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__thumb {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      scroll-snap-align: start;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__review {
+      display: none;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__faq-under-image {
+      display: none;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__faq-main-col {
+      display: block;
+      margin-top: 16px;
+    }
+  }
+
+  @media screen and (max-width: 989px) {
+    #shopify-section-{{ section.id }} .slh-pi2__media-grid {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: stretch;
+      column-gap: 12px;
+      row-gap: 12px;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__main {
+      grid-column: 1;
+      grid-row: 1;
+      width: 100%;
+      min-width: 0;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__thumbs {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__title {
+    margin: 0 0 8px;
+    font-size: var(--sl-heading);
+    font-weight: 600;
+    line-height: var(--sl-lh-heading);
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__price {
+    margin: 0 0 12px;
+    font-size: {{ s.price_fs | default: 18 }}px;
+    font-weight: 600;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__price-compare {
+    color: var(--slh-pi2-muted);
+    text-decoration: line-through;
+    font-size: 0.9em;
+    font-weight: 400;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__summary {
+    margin: 25px 0 16px;
+    font-size: {{ s.summary_fs | default: 14 }}px;
+    line-height: 1.35;
+    color: var(--slh-pi2-text);
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__summary-highlight {
+    background: var(--slh-pi2-summary-hl-bg, {{ s.summary_highlight_bg | default: '#e9e9e9' }});
+    color: var(--slh-pi2-summary-hl-color, {{ s.summary_highlight_color | default: '#000000' }});
+    padding: 0.08em 0.26em;
+    border-radius: 3px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__tpbar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: clamp(8px, 1.7vw, 14px);
+    width: 100%;
+    margin-bottom: 10px;
+    color: #0a0a0a;
+    white-space: nowrap;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__tp-label {
+    font-size: {{ s.tp_label_fs | default: 14 }}px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__tp-stars {
+    display: flex;
+    align-items: center;
+    line-height: 0;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__tp-badge {
+    width: min(100px, 100%);
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__tp-count {
+    margin: 0;
+    font-size: {{ s.tp_count_fs | default: 14 }}px;
+    line-height: 1.2;
+    color: #0a0a0a;
+    white-space: nowrap;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__tp-count strong {
+    font-weight: 600;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__tp-count span {
+    font-weight: 400;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__desc,
+  #shopify-section-{{ section.id }} .slh-pi2__desc p,
+  #shopify-section-{{ section.id }} .slh-pi2__accordion-content,
+  #shopify-section-{{ section.id }} .slh-pi2__accordion-content p {
+    margin: 0;
+    font-size: var(--sl-body);
+    color: var(--slh-pi2-muted);
+    line-height: 1.5;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__field {
+    margin-bottom: 14px;
+    display: grid;
+    gap: 8px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__label {
+    font-size: {{ s.label_fs | default: 14 }}px;
+    font-weight: 500;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__select,
+  #shopify-section-{{ section.id }} .slh-pi2__qty {
+    width: 100%;
+    min-height: 50px;
+    border: 1px solid var(--slh-pi2-border);
+    border-radius: 12px;
+    background: #fff;
+    padding: 0 14px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker.slh-pi2__field {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-options {
+    display: grid;
+    gap: 10px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__option-group {
+    display: grid;
+    gap: 8px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__option-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker {
+    --sl-vp-btn-radius: 20px;
+    --sl-vp-dropdown-radius: 12px;
+    --sl-vp-control-size: 15px;
+    --sl-vp-control-weight: 500;
+    --sl-vp-control-line-height: 1.3;
+    --sl-vp-label-gap: 8px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__label {
+    margin: 0;
+    padding: 0;
+    font-size: var(--sl-vp-control-size);
+    font-weight: var(--sl-vp-control-weight);
+    line-height: var(--sl-vp-control-line-height);
+    color: var(--sl-vp-label-color, var(--slh-pi2-text));
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__option-group {
+    gap: var(--sl-vp-label-gap);
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__select-wrap {
+    position: relative;
+    display: block;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 100%;
+    min-height: 48px;
+    padding: 0 44px 0 16px;
+    border: 1px solid var(--sl-vp-border, var(--slh-pi2-border));
+    border-radius: var(--sl-vp-dropdown-radius);
+    background-color: var(--sl-vp-dropdown-bg, #fff);
+    color: var(--sl-vp-dropdown-text, var(--slh-pi2-text));
+    font-size: var(--sl-vp-control-size);
+    font-weight: var(--sl-vp-control-weight);
+    line-height: var(--sl-vp-control-line-height);
+    cursor: pointer;
+    box-shadow: none;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__select:hover,
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__select:focus,
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__select:focus-visible,
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__select:active {
+    outline: none;
+    box-shadow: none;
+    border-color: var(--sl-vp-border, var(--slh-pi2-border));
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__select-wrap::after {
+    content: '';
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--sl-vp-label-color, var(--slh-pi2-muted));
+    border-bottom: 2px solid var(--sl-vp-label-color, var(--slh-pi2-muted));
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__option-btn {
+    min-height: 0;
+    padding: 5px 12px;
+    border: 1px solid var(--sl-vp-border, var(--slh-pi2-border));
+    border-radius: var(--sl-vp-btn-radius);
+    background: var(--sl-vp-btn-bg, #fff);
+    color: var(--sl-vp-btn-text, var(--slh-pi2-text));
+    font-size: var(--sl-vp-control-size);
+    font-weight: var(--sl-vp-control-weight);
+    line-height: var(--sl-vp-control-line-height);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__option-btn:hover:not(:disabled):not(.is-selected) {
+    border-color: color-mix(in srgb, var(--sl-vp-border, var(--slh-pi2-border)) 50%, var(--sl-vp-btn-text, var(--slh-pi2-text)));
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__option-btn.is-selected {
+    border-color: var(--sl-vp-btn-selected-bg, var(--slh-pi2-text));
+    background: var(--sl-vp-btn-selected-bg, var(--slh-pi2-text));
+    color: var(--sl-vp-btn-selected-text, #fff);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--sl-vp-btn-selected-bg, var(--slh-pi2-text)) 22%, transparent);
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__variant-picker .slh-pi2__option-btn.is-unavailable {
+    opacity: 0.45;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__qty-wrap {
+    display: grid;
+    grid-template-columns: 42px 1fr 42px;
+    min-height: 50px;
+    border: 1px solid var(--slh-pi2-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__qty-btn {
+    border: 0;
+    background: #f5f5f5;
+    cursor: pointer;
+    font-size: {{ s.qty_btn_fs | default: 19 }}px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__qty {
+    border: 0;
+    text-align: center;
+    border-radius: 0;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__add-row {
+    display: grid;
+    margin-top: 20px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__cta {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 55px;
+    border: 0;
+    border-radius: var(--slh-pi2-cta-radius, 15px);
+    background: var(--slh-pi2-cta-bg, #000000);
+    color: var(--slh-pi2-cta-text, #ffffff);
+    font-size: {{ s.cta_fs | default: 18 }}px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__cta-price {
+    font-size: 0.95em;
+    font-weight: 500;
+    opacity: 0.95;
+    white-space: nowrap;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust-block {
+    width: 100%;
+    margin-top: 0;
+    margin-bottom: 0;
+    --trust-bg: #ffffff;
+    --trust-border: #e8e8ec;
+    --trust-text: #0a0a0a;
+    --trust-rating: #0a0a0a;
+    --trust-divider: #e8e8ec;
+    --trust-star: #000000;
+    --trust-star-size: 16px;
+    --trust-star-gap: 8px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__ship {
+    margin-top: 14px;
+    --ship-muted: #525252;
+    --ship-fg: #171717;
+    font-size: {{ s.ship_fs | default: 14 }}px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__ship-text {
+    margin: 0;
+    line-height: 1.5;
+    color: var(--ship-muted);
+    text-align: center;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__ship-lead,
+  #shopify-section-{{ section.id }} .slh-pi2__ship-date {
+    color: var(--ship-fg);
+    font-weight: 400;
+  }
+
+  #shopify-section-{{ section.id }} .sl-track {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 12px;
+  }
+
+  #shopify-section-{{ section.id }} .sl-track__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  #shopify-section-{{ section.id }} .sl-track__item {
+    flex: 1 1 0;
+    position: relative;
+    text-align: center;
+    min-width: 0;
+    padding: 0;
+  }
+
+  #shopify-section-{{ section.id }} .sl-track__item:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: calc(var(--track-icon-size) / 2);
+    left: calc(50% + var(--track-icon-size) / 2);
+    width: calc(100% - var(--track-icon-size));
+    height: 2px;
+    background: var(--track-line);
+    z-index: 0;
+    transform: translateY(-50%);
+  }
+
+  #shopify-section-{{ section.id }} .sl-track__icon-ring {
+    position: relative;
+    z-index: 1;
+    width: var(--track-icon-size);
+    height: var(--track-icon-size);
+    margin: 0 auto 0.65em;
+    border-radius: 50%;
+    background: var(--track-icon-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--track-accent);
+  }
+
+  #shopify-section-{{ section.id }} .sl-track__icon-ring svg {
+    width: 55%;
+    height: 55%;
+    display: block;
+  }
+
+  #shopify-section-{{ section.id }} .sl-track__icon-ring .ph-duotone {
+    font-size: {{ s.track_icon_fs | default: 22 }}px;
+    line-height: 1;
+    color: var(--track-accent);
+  }
+
+  #shopify-section-{{ section.id }} .sl-track__date {
+    margin: 0;
+    font-size: 0.92em;
+    font-weight: 500;
+    color: var(--track-text, #171717);
+    line-height: 1.25;
+  }
+
+  #shopify-section-{{ section.id }} .sl-track__status {
+    margin: 0.15em 0 0;
+    font-size: 1.05em;
+    font-weight: 600;
+    color: var(--track-text, #171717);
+    line-height: 1.2;
+  }
+
+  #shopify-section-{{ section.id }} .sl-stock-urgency {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #shopify-section-{{ section.id }} .sl-stock-urgency__description {
+    margin: 0;
+    line-height: 1.45;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  #shopify-section-{{ section.id }} .sl-stock-urgency__meta-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  #shopify-section-{{ section.id }} .sl-stock-urgency__meta-row--status-only {
+    justify-content: flex-end;
+  }
+
+  #shopify-section-{{ section.id }} .sl-stock-urgency__bar {
+    width: 100%;
+    overflow: hidden;
+    display: block;
+  }
+
+  #shopify-section-{{ section.id }} .sl-stock-urgency__bar-fill {
+    display: block;
+    height: 100%;
+    width: var(--su-fill, 93%);
+    transition: width 0.35s ease;
+  }
+
+  #shopify-section-{{ section.id }} .sl-stock-urgency__status {
+    margin: 0;
+    line-height: 1.3;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__announce-banner {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__announce-banner__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--ab-gap, 12px);
+    background: var(--ab-bg, #f1e9fd);
+    border-radius: var(--ab-radius, 8px);
+    padding: var(--ab-pad-y, 14px) var(--ab-pad-x, 16px);
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__announce-banner__icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ab-icon, #111111);
+    line-height: 1;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__announce-banner__icon .ph-duotone {
+    font-size: var(--ab-icon-size, 32px);
+    line-height: 1;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__announce-banner__text {
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--ab-text, #111111);
+    font-size: var(--ab-text-size, 14px);
+    font-weight: var(--ab-text-weight, 400);
+    line-height: 1.35;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 18px;
+    background: var(--trust-bg);
+    border: 1px solid var(--trust-border);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(10, 10, 10, 0.06);
+    font-size: {{ s.trust_fs | default: 14 }}px;
+    line-height: 1.5;
+    color: var(--trust-text);
+    box-sizing: border-box;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust-score {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--trust-star-gap);
+    margin: 0;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust-stars {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 2px;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust-stars img {
+    height: var(--trust-star-size);
+    width: auto;
+    display: block;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust-star-svg {
+    width: var(--trust-star-size);
+    height: var(--trust-star-size);
+    flex-shrink: 0;
+    display: block;
+    fill: var(--trust-star);
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust-meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    color: var(--trust-rating);
+    line-height: 1.35;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust-meta strong {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust-sep {
+    opacity: 0.45;
+    font-weight: 300;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust hr {
+    height: 1px;
+    border: 0;
+    background: var(--trust-divider);
+    margin: 20px 0;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust p {
+    margin: 0;
+    color: var(--trust-text);
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__trust p strong {
+    font-weight: 500;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__payment-icons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__payment-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__payment-icon img {
+    width: 32px;
+    height: 20px;
+    max-width: 32px;
+    max-height: 20px;
+    object-fit: contain;
+    display: block;
+  }
+
+  @media screen and (max-width: 768px) {
+    #shopify-section-{{ section.id }} .slh-pi2__trust {
+      max-width: 100%;
+      padding: 15px;
+      font-size: 12.6px;
+    }
+
+    #shopify-section-{{ section.id }} .slh-pi2__trust hr {
+      margin: 16px 0;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__accordion details {
+    border-bottom: 1px solid var(--slh-pi2-border);
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__accordion summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 14px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__accordion summary::-webkit-details-marker {
+    display: none;
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__accordion-icon::before {
+    content: "+";
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__accordion details[open] .slh-pi2__accordion-icon::before {
+    content: "-";
+  }
+
+  #shopify-section-{{ section.id }} .slh-pi2__accordion-content {
+    padding: 0 0 14px;
+  }
+
+  @media screen and (max-width: 749px) {
+    #shopify-section-{{ section.id }} .slh-pi2__accordion summary,
+    #shopify-section-{{ section.id }} .slh-pi2__accordion-content,
+    #shopify-section-{{ section.id }} .slh-pi2__accordion-content p {
+      font-size: 13px;
+    }
+
+    #shopify-section-{{ section.id }}.sl-product-info-2-root {
+      --sl-heading: {{ s.heading_fs_m | default: 22 }}px;
+      --sl-body: {{ s.body_fs_m | default: 14 }}px;
+    }
+    #shopify-section-{{ section.id }} .slh-pi2__price { font-size: {{ s.price_fs_m | default: 15 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__summary { font-size: {{ s.summary_fs_m | default: 14 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__tp-label { font-size: {{ s.tp_label_fs_m | default: 14 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__tp-count { font-size: {{ s.tp_count_fs_m | default: 14 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__label { font-size: {{ s.label_fs_m | default: 14 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__review-title { font-size: {{ s.review_title_fs_m | default: 17 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__review-text { font-size: {{ s.review_text_fs_m | default: 14 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__review-name { font-size: {{ s.review_name_fs_m | default: 14 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__cta { font-size: {{ s.cta_fs_m | default: 16 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__trust { font-size: {{ s.trust_fs_m | default: 13 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__wrap { font-size: {{ s.wrap_fs_m | default: 14 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__qty-btn { font-size: {{ s.qty_btn_fs_m | default: 17 }}px; }
+    #shopify-section-{{ section.id }} .slh-pi2__ship { font-size: {{ s.ship_fs_m | default: 13 }}px; }
+    #shopify-section-{{ section.id }} .sl-track__icon-ring .ph-duotone { font-size: {{ s.track_icon_fs_m | default: 20 }}px; }
+  }
+{%- endstyle -%}
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/duotone/style.css">
+
+<div class="slh-pi2__wrap">
+  <div class="slh-pi2__layout">
+    <div>
+      <div class="slh-pi2__media-grid">
+        {% if image_media.size > 0 %}
+          <div class="slh-pi2__thumbs">
+            {% for media in image_media %}
+              <button
+                type="button"
+                class="slh-pi2__thumb{% if forloop.first %} is-active{% endif %}"
+                data-slh-pi2-thumb
+                data-media-id="{{ media.id }}"
+                data-full-src="{{ media | image_url: width: 1600 }}"
+                data-alt="{{ media.alt | default: product.title | escape }}"
+              >
+                {{ media | image_url: width: 180 | image_tag: loading: 'lazy', alt: '' }}
+              </button>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <div class="slh-pi2__main">
+          {% if product.featured_media %}
+            <img
+              class="slh-pi2__main-img"
+              src="{{ product.featured_media | image_url: width: 1600 }}"
+              alt="{{ product.featured_media.alt | default: product.title | escape }}"
+              loading="eager"
+            >
+          {% endif %}
+        </div>
+
+        <div class="slh-pi2__faq-under-image"></div>
+      </div>
+
+      {% if s.review_title != blank or s.review_text != blank %}
+        <div class="slh-pi2__review">
+          {% if s.review_title != blank %}<p class="slh-pi2__review-title">{{ s.review_title }}</p>{% endif %}
+          {% if s.review_text != blank %}<p class="slh-pi2__review-text">{{ s.review_text }}</p>{% endif %}
+          {% if s.review_name != blank %}<p class="slh-pi2__review-name">— {{ s.review_name }}</p>{% endif %}
+        </div>
+      {% endif %}
+
+    </div>
+
+    <div>
+      {% if product %}
+      {% form 'product', product %}
+        {% if has_variant_picker == false %}
+          <input type="hidden" name="id" value="{{ selected_variant.id }}">
+        {% endif %}
+
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'trustpilot_row' %}
+              <div class="slh-pi2__tpbar" {{ block.shopify_attributes }}>
+                <span class="slh-pi2__tp-label" style="font-size: {{ block.settings.label_size | default: 14 }}px; font-weight: {{ block.settings.label_weight | default: '600' }};">{{ block.settings.label | default: 'Excellent' }}</span>
+                <div class="slh-pi2__tp-stars" role="img" aria-label="{{ block.settings.rating | default: '4.8' }} out of 5 stars">
+                  <img
+                    class="slh-pi2__tp-badge"
+                    src="{{ block.settings.badge_image | default: 'https://i.imgur.com/EHjNmTM.png' }}"
+                    width="100"
+                    height="20"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  >
+                </div>
+                <p class="slh-pi2__tp-count">
+                  <strong>{{ block.settings.review_count | default: '20,921' }}</strong>
+                  <span> {{ block.settings.reviews_label | default: 'reviews' }}</span>
+                </p>
+              </div>
+            {% when 'title' %}
+              <h1
+                class="slh-pi2__title"
+                style="font-size: {{ block.settings.font_size | default: 28 }}px; color: {{ block.settings.text_color | default: s.text_color }};"
+                {{ block.shopify_attributes }}
+              >{{ product.title | escape }}</h1>
+            {% when 'price' %}
+              <p
+                class="slh-pi2__price"
+                style="font-size: {{ block.settings.font_size | default: 17 }}px; color: {{ block.settings.text_color | default: s.text_color }};"
+                {{ block.shopify_attributes }}
+              >
+                <span>{{ selected_variant.price | money }}</span>
+                {% if selected_variant.compare_at_price > selected_variant.price %}
+                  <span
+                    class="slh-pi2__price-compare"
+                    style="color: {{ block.settings.compare_color | default: s.muted_text_color }};"
+                  >{{ selected_variant.compare_at_price | money }}</span>
+                {% endif %}
+              </p>
+            {% when 'summary_line' %}
+              {% assign summary_sentence = block.settings.summary_text | default: block.settings.suffix %}
+              {% if summary_sentence == blank and block.settings.prefix != blank %}
+                {% assign summary_sentence = block.settings.prefix %}
+              {% endif %}
+              {% if summary_sentence != blank %}
+                {% assign summary_markup = summary_sentence %}
+                {% if block.settings.highlight != blank %}
+                  {% assign highlight_markup = '<span class="slh-pi2__summary-highlight">' | append: block.settings.highlight | append: '</span>' %}
+                  {% if summary_markup contains block.settings.highlight %}
+                    {% assign summary_markup = summary_markup | replace_first: block.settings.highlight, highlight_markup %}
+                  {% endif %}
+                {% endif %}
+                <p
+                  class="slh-pi2__summary"
+                  style="
+                    margin-top: {{ block.settings.margin_top | default: 16 }}px;
+                    margin-bottom: {{ block.settings.margin_bottom | default: 16 }}px;
+                  "
+                >
+                  <span
+                    style="
+                      --slh-pi2-summary-hl-bg: {{ block.settings.highlight_bg | default: s.summary_highlight_bg | default: '#e9e9e9' }};
+                      --slh-pi2-summary-hl-color: {{ block.settings.highlight_text_color | default: s.summary_highlight_color | default: '#000000' }};
+                    "
+                  >{{ summary_markup }}</span>
+                </p>
+              {% endif %}
+            {% when 'low_stock' %}
+              {% if block.settings.show %}
+                {%- liquid
+                  assign day_seed = 'now' | date: '%j' | plus: 0
+                  assign stk_min = block.settings.stock_min | default: 4
+                  assign stk_max = block.settings.stock_max | default: 22
+                  assign stock_left = day_seed | modulo: 11 | plus: 5
+                  if stock_left < stk_min
+                    assign stock_left = stk_min
+                  endif
+                  if stock_left > stk_max
+                    assign stock_left = stk_max
+                  endif
+                  assign stk_uid = block.id | handleize | default: 'stk'
+                  assign stk_lead = block.settings.lead | default: 'Low stock, only '
+                  assign stk_tail = block.settings.tail | default: ' left'
+                -%}
+                <div
+                  class="sl-stk sl-stk--{{ stk_uid }}"
+                  data-min="{{ stk_min }}"
+                  data-max="{{ stk_max }}"
+                  data-tick-min-ms="{{ block.settings.tick_min_sec | default: 15 | times: 1000 }}"
+                  data-tick-max-ms="{{ block.settings.tick_max_sec | default: 30 | times: 1000 }}"
+                  data-pause-min-ms="{{ block.settings.pause_min_sec | default: 45 | times: 1000 }}"
+                  data-pause-extra-ms="{{ block.settings.pause_extra_sec | default: 60 | times: 1000 }}"
+                  style="
+                    --stk-accent: {{ block.settings.accent_color | default: '#dc2626' }};
+                    --stk-text: {{ block.settings.text_color | default: '#171717' }};
+                    font-size: {{ block.settings.font_size | default: 14 }}px;
+                    margin-top: {{ block.settings.margin_top | default: 6 }}px;
+                    margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;
+                  "
+                  {{ block.shopify_attributes }}
+                >
+                  <style>
+                    @keyframes sl-stk-pulse--{{ stk_uid }} {
+                      0% {
+                        box-shadow:
+                          0 0 0 0 color-mix(in srgb, var(--stk-accent) 36%, transparent),
+                          0 0 1px 1px rgba(0, 0, 0, 0.1);
+                      }
+                      100% {
+                        box-shadow:
+                          0 0 0 0.42em color-mix(in srgb, var(--stk-accent) 0%, transparent),
+                          0 0 1px 1px rgba(0, 0, 0, 0.1);
+                      }
+                    }
+                    .sl-stk--{{ stk_uid }} .sl-stk__inner {
+                      display: flex;
+                      align-items: center;
+                      gap: 0.72em;
+                      flex-wrap: wrap;
+                    }
+                    .sl-stk--{{ stk_uid }} .sl-stk__dot {
+                      flex-shrink: 0;
+                      width: 0.74em;
+                      height: 0.74em;
+                      border-radius: 50%;
+                      background: var(--stk-accent);
+                      margin-inline-end: 0.06em;
+                      will-change: box-shadow;
+                      animation: sl-stk-pulse--{{ stk_uid }} 2s infinite;
+                    }
+                    @media (prefers-reduced-motion: reduce) {
+                      .sl-stk--{{ stk_uid }} .sl-stk__dot {
+                        animation: none;
+                        opacity: 1;
+                        box-shadow: none;
+                      }
+                    }
+                    .sl-stk--{{ stk_uid }} .sl-stk__line {
+                      margin: 0;
+                      color: var(--stk-text);
+                      line-height: 1.45;
+                    }
+                    .sl-stk--{{ stk_uid }} .sl-stk__num {
+                      font-weight: 600;
+                      color: var(--stk-accent);
+                      font-variant-numeric: tabular-nums;
+                      margin-inline: 0.18em;
+                    }
+                  </style>
+                  <div class="sl-stk__inner">
+                    <span class="sl-stk__dot" aria-hidden="true"></span>
+                    <p class="sl-stk__line">
+                      <span class="sl-stk__lead">{{ stk_lead | escape }}</span>{% if block.settings.show_number %}<span class="sl-stk__num" data-slh-stk>{{ stock_left }}</span><span class="sl-stk__tail">{{ stk_tail | escape }}</span>{% endif %}
+                    </p>
+                  </div>
+                  <script>
+                    (function () {
+                      var root = document.currentScript && document.currentScript.closest('.sl-stk--{{ stk_uid }}');
+                      if (!root) return;
+                      var el = root.querySelector('[data-slh-stk]');
+                      if (!el) return;
+                      var min = parseInt(root.getAttribute('data-min'), 10) || 4;
+                      var max = parseInt(root.getAttribute('data-max'), 10) || 22;
+                      if (max < min) max = min;
+                      var tickMin = parseInt(root.getAttribute('data-tick-min-ms'), 10) || 15000;
+                      var tickMax = parseInt(root.getAttribute('data-tick-max-ms'), 10) || 30000;
+                      if (tickMax < tickMin) tickMax = tickMin;
+                      var pauseMin = parseInt(root.getAttribute('data-pause-min-ms'), 10) || 45000;
+                      var pauseExtra = parseInt(root.getAttribute('data-pause-extra-ms'), 10) || 60000;
+                      var current = parseInt(String(el.textContent).replace(/\D/g, ''), 10);
+                      if (isNaN(current)) current = Math.round((min + max) / 2);
+                      current = Math.min(max, Math.max(min, current));
+                      el.textContent = String(current);
+                      var target = current;
+                      var idleUntil = 0;
+                      var resting = true;
+                      function pickTarget() {
+                        if (current <= min) {
+                          target = current;
+                          return;
+                        }
+                        var hi = current - 1;
+                        if (hi < min) {
+                          target = current;
+                          return;
+                        }
+                        target = min + Math.floor(Math.random() * (hi - min + 1));
+                      }
+                      function nextTickDelay() {
+                        return tickMin + Math.random() * (tickMax - tickMin);
+                      }
+                      function schedule(ms) {
+                        setTimeout(tick, Math.max(0, Math.round(ms)));
+                      }
+                      function tick() {
+                        var now = Date.now();
+                        if (current === target) {
+                          if (resting && now >= idleUntil) {
+                            pickTarget();
+                            if (current === target) {
+                              idleUntil = now + 2000;
+                              schedule(Math.max(250, idleUntil - now));
+                            } else {
+                              resting = false;
+                              schedule(nextTickDelay());
+                            }
+                          } else if (resting) {
+                            schedule(Math.max(250, idleUntil - now));
+                          } else {
+                            schedule(250);
+                          }
+                          return;
+                        }
+                        if (current > target) {
+                          current--;
+                          el.textContent = String(current);
+                        }
+                        if (current === target) {
+                          idleUntil = now + pauseMin + Math.random() * pauseExtra;
+                          resting = true;
+                          schedule(Math.max(250, idleUntil - now));
+                        } else {
+                          schedule(nextTickDelay());
+                        }
+                      }
+                      tick();
+                    })();
+                  </script>
+                </div>
+              {% endif %}
+            {% when 'variant_picker' %}
+              {% if product.has_only_default_variant == false %}
+                {% assign vp_style = block.settings.picker_style | default: 'buttons' %}
+                {% assign vp_show_price = block.settings.show_variant_price %}
+                {% assign vp_show_labels = true %}
+                {% if block.settings.show_option_labels == false %}
+                  {% assign vp_show_labels = false %}
+                {% endif %}
+                {% assign vp_btn_radius = block.settings.button_border_radius | default: 20 %}
+                {% assign vp_dropdown_radius = block.settings.dropdown_border_radius | default: 12 %}
+                <div
+                  class="slh-pi2__field slh-pi2__variant-picker"
+                  data-slh-variant-picker
+                  data-picker-style="{{ vp_style }}"
+                  style="
+                    --sl-vp-btn-radius: {{ vp_btn_radius }}px;
+                    --sl-vp-dropdown-radius: {{ vp_dropdown_radius }}px;
+                    --sl-vp-label-color: {{ block.settings.label_color }};
+                    --sl-vp-border: {{ block.settings.control_border_color }};
+                    --sl-vp-dropdown-bg: {{ block.settings.dropdown_background }};
+                    --sl-vp-dropdown-text: {{ block.settings.dropdown_text_color }};
+                    --sl-vp-btn-bg: {{ block.settings.button_background }};
+                    --sl-vp-btn-text: {{ block.settings.button_text_color }};
+                    --sl-vp-btn-selected-bg: {{ block.settings.button_selected_background }};
+                    --sl-vp-btn-selected-text: {{ block.settings.button_selected_text_color }};
+                  "
+                  {{ block.shopify_attributes }}
+                >
+                  {% if vp_style == 'dropdown' and product.options.size == 1 %}
+                    {% if vp_show_labels %}
+                      <label class="slh-pi2__label" for="variant2-{{ section.id }}">{{ product.options.first | escape }}</label>
+                    {% endif %}
+                    <div class="slh-pi2__select-wrap">
+                      <select id="variant2-{{ section.id }}" class="slh-pi2__select" name="id" data-slh-variant-select{% unless vp_show_labels %} aria-label="{{ product.options.first | escape }}"{% endunless %}>
+                      {% for variant in product.variants %}
+                        <option
+                          value="{{ variant.id }}"
+                          {% if variant == selected_variant %}selected{% endif %}
+                          {% unless variant.available %}disabled{% endunless %}
+                        >
+                          {{ variant.title }}{% if vp_show_price %} - {{ variant.price | money }}{% endif %}
+                        </option>
+                      {% endfor %}
+                    </select>
+                    </div>
+                  {% elsif vp_style == 'dropdown' %}
+                    <input type="hidden" name="id" value="{{ selected_variant.id }}" data-slh-variant-id>
+                    <div class="slh-pi2__variant-options">
+                      {% for option in product.options_with_values %}
+                        <div class="slh-pi2__option-group">
+                          {% if vp_show_labels %}
+                            <label class="slh-pi2__label" for="option2-{{ section.id }}-{{ forloop.index0 }}">{{ option.name | escape }}</label>
+                          {% endif %}
+                          <div class="slh-pi2__select-wrap">
+                            <select
+                              id="option2-{{ section.id }}-{{ forloop.index0 }}"
+                              class="slh-pi2__select"
+                              data-slh-option-select
+                              data-option-index="{{ forloop.index0 }}"
+                              {% unless vp_show_labels %}aria-label="{{ option.name | escape }}"{% endunless %}
+                            >
+                              {% for value in option.values %}
+                                <option value="{{ value | escape }}" {% if option.selected_value == value %}selected{% endif %}>{{ value }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    <input type="hidden" name="id" value="{{ selected_variant.id }}" data-slh-variant-id>
+                    <div class="slh-pi2__variant-options">
+                      {% for option in product.options_with_values %}
+                        <div class="slh-pi2__option-group">
+                          {% if vp_show_labels %}
+                            <span class="slh-pi2__label">{{ option.name | escape }}</span>
+                          {% endif %}
+                          <div class="slh-pi2__option-values" role="group" aria-label="{{ option.name | escape }}">
+                            {% for value in option.values %}
+                              <button
+                                type="button"
+                                class="slh-pi2__option-btn{% if option.selected_value == value %} is-selected{% endif %}"
+                                data-slh-option-btn
+                                data-option-index="{{ forloop.parentloop.index0 }}"
+                                data-option-value="{{ value | escape }}"
+                              >
+                                {{ value }}
+                              </button>
+                            {% endfor %}
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                  <script type="application/json" data-slh-variants-data>
+                    [
+                    {% for variant in product.variants %}
+                      {
+                        "id": {{ variant.id }},
+                        "available": {{ variant.available | json }},
+                        "options": {{ variant.options | json }},
+                        "price": {{ variant.price }},
+                        "price_formatted": {{ variant.price | money | json }},
+                        "compare_at_price": {{ variant.compare_at_price | default: 0 }},
+                        "compare_at_price_formatted": {{ variant.compare_at_price | money | json }},
+                        "featured_media_id": {% if variant.featured_media %}{{ variant.featured_media.id }}{% elsif variant.featured_image %}{{ variant.featured_image.id }}{% else %}null{% endif %},
+                        "featured_image_src": {% if variant.featured_image %}{{ variant.featured_image | image_url: width: 1600 | json }}{% else %}null{% endif %},
+                        "featured_image_alt": {% if variant.featured_image %}{{ variant.featured_image.alt | default: product.title | json }}{% else %}{{ product.title | json }}{% endif %}
+                      }{% unless forloop.last %},{% endunless %}
+                    {% endfor %}
+                    ]
+                  </script>
+                </div>
+              {% endif %}
+            {% when 'quantity_selector' %}
+              <div class="slh-pi2__qty-wrap" {{ block.shopify_attributes }}>
+                <button class="slh-pi2__qty-btn" type="button" data-slh-pi2-qty-minus>-</button>
+                <input class="slh-pi2__qty" type="number" name="quantity" min="1" value="1">
+                <button class="slh-pi2__qty-btn" type="button" data-slh-pi2-qty-plus>+</button>
+              </div>
+            {% when 'buy_buttons' %}
+              <div class="slh-pi2__add-row" {{ block.shopify_attributes }}>
+                <button type="submit" name="add" class="slh-pi__cta slh-pi2__cta" style="--slh-pi2-cta-radius: {{ block.settings.button_radius | default: 15 }}px; --slh-pi2-cta-bg: {{ block.settings.button_bg | default: '#000000' }}; --slh-pi2-cta-text: {{ block.settings.button_text_color | default: '#ffffff' }};">
+                  <span class="slh-pi2__cta-label">{{ block.settings.button_text | default: s.add_to_cart_label | default: 'Add to cart' | escape }}</span>
+                  {% if block.settings.show_price_in_button %}
+                    <span class="slh-pi2__cta-divider" aria-hidden="true"> - </span>
+                    <span class="slh-pi2__cta-price" data-slh-atc-price></span>
+                  {% endif %}
+                </button>
+              </div>
+            {% when 'shipping_eta' %}
+              {% if block.settings.show %}
+                {% assign ship_date_locale = block.settings.date_locale | strip %}
+                {% if ship_date_locale == blank %}
+                  {% assign ship_date_locale = request.locale.iso_code | default: 'en' %}
+                {% endif %}
+                <div
+                  class="slh-pi2__ship"
+                  data-slh-ship-root
+                  data-locale="{{ ship_date_locale | escape }}"
+                  data-transit-min="{{ block.settings.transit_min | default: 3 }}"
+                  data-transit-max="{{ block.settings.transit_max | default: 6 }}"
+                  style="
+                    --ship-muted: {{ block.settings.muted_color | default: '#525252' }};
+                    --ship-fg: {{ block.settings.text_color | default: '#171717' }};
+                    font-size: {{ block.settings.font_size | default: 14 }}px;
+                    margin-top: {{ block.settings.margin_top | default: 14 }}px;
+                  "
+                  {{ block.shopify_attributes }}
+                >
+                  <p class="slh-pi2__ship-text">
+                    <span class="slh-pi2__ship-lead">{{ block.settings.line_lead | default: 'Get your order on' }}</span>
+                    <span class="slh-pi2__ship-date" data-slh-ship-date></span>
+                  </p>
+                </div>
+              {% endif %}
+            {% when 'trust_container' %}
+              {% comment %} Trust container hidden by request {% endcomment %}
+              {% if false %}
+                <div class="slh-pi2__trust-block">
+                  <div
+                    class="slh-pi2__trust"
+                    style="
+                      --trust-bg: {{ block.settings.bg_color | default: '#FFFFFF' }};
+                      --trust-border: {{ block.settings.border_color | default: '#e8e8ec' }};
+                      --trust-text: {{ block.settings.text_color | default: '#0a0a0a' }};
+                      --trust-rating: {{ block.settings.rating_color | default: '#0a0a0a' }};
+                      --trust-divider: {{ block.settings.divider_color | default: '#e8e8ec' }};
+                      --trust-star: {{ block.settings.star_color | default: '#000000' }};
+                      --trust-star-size: {{ block.settings.star_size | default: 16 }}px;
+                      --trust-star-gap: {{ block.settings.star_gap | default: 8 }}px;
+                      margin-top: {{ block.settings.margin_top | default: 12 }}px;
+                      margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;
+                      padding: {{ block.settings.padding | default: 18 }}px;
+                      border-radius: {{ block.settings.border_radius | default: 12 }}px;
+                      font-size: {{ block.settings.font_size | default: 14 }}px;
+                    "
+                    {{ block.shopify_attributes }}
+                  >
+                    <div class="slh-pi2__trust-score">
+                      <div class="slh-pi2__trust-stars" aria-hidden="true">
+                        {% assign trust_icon_style = block.settings.rating_icon_style | default: 'stars' %}
+                        {% if trust_icon_style == 'trustpilot' %}
+                          <img
+                            src="{% if block.settings.badge_image != blank %}{{ block.settings.badge_image }}{% else %}https://i.imgur.com/EHjNmTM.png{% endif %}"
+                            alt=""
+                            loading="lazy"
+                            width="100"
+                            height="20"
+                          >
+                        {% else %}
+                          {% for i in (1..5) %}
+                            <svg class="slh-pi2__trust-star-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z"/></svg>
+                          {% endfor %}
+                        {% endif %}
+                      </div>
+                      <div class="slh-pi2__trust-meta">
+                        <strong>{{ block.settings.rating | default: '4.8' }}</strong>
+                        <span class="slh-pi2__trust-sep">|</span>
+                        <span>
+                          {% if block.settings.review_count != blank %}
+                            <strong>{{ block.settings.review_count }}</strong> {{ block.settings.reviews_label | default: 'reviews' }}
+                          {% else %}
+                            {{ block.settings.reviews_label | default: '1,322 verified reviews' }}
+                          {% endif %}
+                        </span>
+                      </div>
+                    </div>
+                    <hr>
+                    <p><strong>{{ block.settings.delivery_title | default: 'Free delivery' }}</strong> {{ block.settings.delivery_body | default: 'on orders over $50' }}</p>
+                    <hr>
+                    <p><strong>{{ block.settings.guarantee_title | default: '30-day guarantee' }}</strong> {{ block.settings.guarantee_body | default: '— full refund, no hassle' }}</p>
+                    <hr>
+                    <div class="slh-pi2__payment-icons">
+                      <span class="slh-pi2__payment-icon"><img src="https://raw.githubusercontent.com/activemerchant/payment_icons/master/app/assets/images/payment_icons/visa.svg" alt="" width="32" height="20" loading="lazy"></span>
+                      <span class="slh-pi2__payment-icon"><img src="https://raw.githubusercontent.com/activemerchant/payment_icons/master/app/assets/images/payment_icons/master.svg" alt="" width="32" height="20" loading="lazy"></span>
+                      <span class="slh-pi2__payment-icon"><img src="https://raw.githubusercontent.com/activemerchant/payment_icons/master/app/assets/images/payment_icons/american_express.svg" alt="" width="32" height="20" loading="lazy"></span>
+                      <span class="slh-pi2__payment-icon"><img src="https://raw.githubusercontent.com/activemerchant/payment_icons/master/app/assets/images/payment_icons/paypal.svg" alt="" width="32" height="20" loading="lazy"></span>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            {% when 'announcement_banner' %}
+              {% if block.settings.message != blank %}
+                <div
+                  class="slh-pi2__announce-banner slh-pi2__announce-banner--{{ block.id | handleize }}"
+                  style="
+                    --ab-bg: {{ block.settings.bg_color | default: '#f1e9fd' }};
+                    --ab-icon: {{ block.settings.icon_color | default: '#111111' }};
+                    --ab-text: {{ block.settings.text_color | default: '#111111' }};
+                    --ab-icon-size: {{ block.settings.icon_size | default: 32 }}px;
+                    --ab-text-size: {{ block.settings.text_size | default: 14 }}px;
+                    --ab-text-weight: {{ block.settings.text_weight | default: 400 }};
+                    --ab-gap: {{ block.settings.content_gap | default: 12 }}px;
+                    --ab-radius: {{ block.settings.border_radius | default: 8 }}px;
+                    --ab-pad-y: {{ block.settings.padding_y | default: 14 }}px;
+                    --ab-pad-x: {{ block.settings.padding_x | default: 16 }}px;
+                    margin-top: {{ block.settings.margin_top | default: 12 }}px;
+                    margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;
+                  "
+                  {{ block.shopify_attributes }}
+                >
+                  <div class="slh-pi2__announce-banner__inner">
+                    {% if block.settings.show_icon %}
+                      <span class="slh-pi2__announce-banner__icon" aria-hidden="true">
+                        <i class="ph-duotone ph-seal-check"></i>
+                      </span>
+                    {% endif %}
+                    <p class="slh-pi2__announce-banner__text">{{ block.settings.message | escape }}</p>
+                  </div>
+                </div>
+              {% endif %}
+            {% when 'benefits' %}
+              {% assign ben_id = block.id | handleize | default: section.id %}
+              <div class="sl-ben sl-ben--{{ ben_id }}" style="
+                --ben-gap: {{ block.settings.row_gap | default: '10' }}px;
+                --ben-icon: {{ block.settings.icon_color | default: '#16a34a' }};
+                --ben-text: {{ block.settings.text_color | default: '#171717' }};
+                font-size: {{ block.settings.font_size | default: '14' }}px;
+                margin-top: {{ block.settings.wrapper_margin_top | default: 8 }}px;
+                margin-bottom: {{ block.settings.wrapper_margin_bottom | default: 8 }}px;
+              " {{ block.shopify_attributes }}>
+                <style>
+                  .sl-ben--{{ ben_id }} .sl-ben__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ben-gap); width: fit-content; max-width: 100%; margin-inline: 0; }
+                  .sl-ben--{{ ben_id }} .sl-ben__row { display: grid; grid-template-columns: 1.15em minmax(0, 1fr); column-gap: 0.55em; align-items: start; }
+                  .sl-ben--{{ ben_id }} .sl-ben__check { width: 1.15em; height: 1.15em; color: var(--ben-icon); margin-top: 0.14em; justify-self: start; }
+                  .sl-ben--{{ ben_id }} .sl-ben__text { color: var(--ben-text); line-height: 1.45; margin: 0; }
+                </style>
+                <ul class="sl-ben__list" role="list">
+                  <li class="sl-ben__row">
+                    <svg class="sl-ben__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+                    <p class="sl-ben__text">{{ block.settings.benefit_1 | default: 'Free shipping on orders over $50' }}</p>
+                  </li>
+                  <li class="sl-ben__row">
+                    <svg class="sl-ben__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+                    <p class="sl-ben__text">{{ block.settings.benefit_2 | default: '30-day hassle-free returns' }}</p>
+                  </li>
+                  <li class="sl-ben__row">
+                    <svg class="sl-ben__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+                    <p class="sl-ben__text">{{ block.settings.benefit_3 | default: 'Secure checkout & buyer protection' }}</p>
+                  </li>
+                </ul>
+              </div>
+            {% when 'benefits_with_icons' %}
+              {% assign bwi_id = block.id | handleize | default: section.id %}
+              <div
+                class="sl-bwi sl-bwi--{{ bwi_id }}"
+                style="
+                  --bwi-gap: {{ block.settings.row_gap | default: 10 }}px;
+                  --bwi-icon: {{ block.settings.icon_color | default: '#16a34a' }};
+                  --bwi-text: {{ block.settings.text_color | default: '#171717' }};
+                  font-size: {{ block.settings.font_size | default: 14 }}px;
+                  margin-top: {{ block.settings.wrapper_margin_top | default: 8 }}px;
+                  margin-bottom: {{ block.settings.wrapper_margin_bottom | default: 8 }}px;
+                "
+                {{ block.shopify_attributes }}
+              >
+                <style>
+                  .sl-bwi--{{ bwi_id }} .sl-bwi__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--bwi-gap); width: fit-content; max-width: 100%; margin-inline: 0; }
+                  .sl-bwi--{{ bwi_id }} .sl-bwi__row { display: grid; grid-template-columns: 1.2em minmax(0, 1fr); column-gap: 0.55em; align-items: start; }
+                  .sl-bwi--{{ bwi_id }} .sl-bwi__icon { width: 1.2em; height: 1.2em; color: var(--bwi-icon); margin-top: 0.12em; justify-self: start; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+                  .sl-bwi--{{ bwi_id }} .sl-bwi__icon i { font-size: 1em; line-height: 1; }
+                  .sl-bwi--{{ bwi_id }} .sl-bwi__text { color: var(--bwi-text); line-height: 1.45; margin: 0; }
+                </style>
+                <ul class="sl-bwi__list" role="list">
+                  {% if block.settings.benefit_1 != blank %}
+                    <li class="sl-bwi__row">
+                      <span class="sl-bwi__icon" aria-hidden="true"><i class="ph ph-{{ block.settings.icon_1 | default: 'heart' }}"></i></span>
+                      <p class="sl-bwi__text">{{ block.settings.benefit_1 }}</p>
+                    </li>
+                  {% endif %}
+                  {% if block.settings.benefit_2 != blank %}
+                    <li class="sl-bwi__row">
+                      <span class="sl-bwi__icon" aria-hidden="true"><i class="ph ph-{{ block.settings.icon_2 | default: 'shield-check' }}"></i></span>
+                      <p class="sl-bwi__text">{{ block.settings.benefit_2 }}</p>
+                    </li>
+                  {% endif %}
+                  {% if block.settings.benefit_3 != blank %}
+                    <li class="sl-bwi__row">
+                      <span class="sl-bwi__icon" aria-hidden="true"><i class="ph ph-{{ block.settings.icon_3 | default: 'rocket-launch' }}"></i></span>
+                      <p class="sl-bwi__text">{{ block.settings.benefit_3 }}</p>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+            {% when 'benefits_grid' %}
+              {% assign benefits2_id = block.id | handleize | default: section.id %}
+              <div
+                class="benefits-2-root benefits-2-root--{{ benefits2_id }}"
+                data-block-type="benefits-2"
+                style="
+                  --benefits-2-font-size-desktop: {{ block.settings.font_size_desktop | default: 12 }}px;
+                  --benefits-2-font-size-mobile: {{ block.settings.font_size_mobile | default: 12 }}px;
+                  --benefits-2-text-color: {{ block.settings.text_color | default: '#000000' }};
+                  --benefits-2-checkmark-bg-color: {{ block.settings.checkmark_bg_color | default: '#000000' }};
+                  --benefits-2-checkmark-color: {{ block.settings.checkmark_color | default: '#FFFFFF' }};
+                  --benefits-2-border-color: {{ block.settings.border_color | default: '#000000' }};
+                  --benefits-2-border-style: {{ block.settings.border_style | default: 'dashed' }};
+                  --benefits-2-border-width: {{ block.settings.border_width | default: 1 }}px;
+                  --benefits-2-border-radius: {{ block.settings.border_radius | default: 20 }}px;
+                  --benefits-2-gap: {{ block.settings.gap | default: 10 }}px;
+                  --benefits-2-margin-top: {{ block.settings.margin_top | default: 0 }}px;
+                  --benefits-2-margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;
+                "
+                {{ block.shopify_attributes }}
+              >
+                <style>
+                  .benefits-2-root--{{ benefits2_id }} .benefits-2-container {
+                    width: 100%;
+                    margin-top: var(--benefits-2-margin-top);
+                    margin-bottom: var(--benefits-2-margin-bottom);
+                  }
+                  .benefits-2-root--{{ benefits2_id }} .benefits-2-grid {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: var(--benefits-2-gap);
+                    width: 100%;
+                    justify-content: start;
+                    align-items: start;
+                  }
+                  .benefits-2-root--{{ benefits2_id }} .benefit-2-item {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: flex-start;
+                    text-align: left;
+                    padding: 8px;
+                    border: var(--benefits-2-border-width) var(--benefits-2-border-style) var(--benefits-2-border-color);
+                    border-radius: var(--benefits-2-border-radius);
+                    background: transparent;
+                    gap: 8px;
+                    width: fit-content;
+                    max-width: 100%;
+                    min-width: 0;
+                    box-sizing: border-box;
+                  }
+                  .benefits-2-root--{{ benefits2_id }} .benefit-2-icon {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background-color: var(--benefits-2-checkmark-bg-color);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                  }
+                  .benefits-2-root--{{ benefits2_id }} .benefit-2-icon .checkmark-svg {
+                    width: 12px;
+                    height: 12px;
+                    color: var(--benefits-2-checkmark-color);
+                    fill: var(--benefits-2-checkmark-color);
+                  }
+                  .benefits-2-root--{{ benefits2_id }} .benefit-2-text {
+                    font-size: var(--benefits-2-font-size-desktop);
+                    color: var(--benefits-2-text-color);
+                    line-height: 1.4;
+                    font-weight: 400;
+                    margin: 0;
+                    white-space: normal;
+                    overflow-wrap: break-word;
+                    word-break: normal;
+                    hyphens: auto;
+                  }
+                  @media screen and (max-width: 768px) {
+                    .benefits-2-root--{{ benefits2_id }} .benefits-2-grid {
+                      justify-content: start;
+                    }
+                    .benefits-2-root--{{ benefits2_id }} .benefit-2-item {
+                      width: fit-content;
+                      max-width: 100%;
+                    }
+                    .benefits-2-root--{{ benefits2_id }} .benefit-2-icon {
+                      width: 18px;
+                      height: 18px;
+                    }
+                    .benefits-2-root--{{ benefits2_id }} .benefit-2-icon .checkmark-svg {
+                      width: 10px;
+                      height: 10px;
+                    }
+                    .benefits-2-root--{{ benefits2_id }} .benefit-2-text {
+                      font-size: var(--benefits-2-font-size-mobile);
+                      white-space: normal;
+                      overflow-wrap: break-word;
+                      word-break: normal;
+                      hyphens: auto;
+                    }
+                  }
+                </style>
+                <div class="benefits-2-container">
+                  <div class="benefits-2-grid" role="list">
+                    <div class="benefit-2-item" role="listitem">
+                      <div class="benefit-2-icon" aria-hidden="true">
+                        <svg class="checkmark-svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                      </div>
+                      <p class="benefit-2-text">{{ block.settings.benefit_1 | default: 'Free Shipping' }}</p>
+                    </div>
+                    <div class="benefit-2-item" role="listitem">
+                      <div class="benefit-2-icon" aria-hidden="true">
+                        <svg class="checkmark-svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                      </div>
+                      <p class="benefit-2-text">{{ block.settings.benefit_2 | default: '30 Days Guarantee' }}</p>
+                    </div>
+                    <div class="benefit-2-item" role="listitem">
+                      <div class="benefit-2-icon" aria-hidden="true">
+                        <svg class="checkmark-svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                      </div>
+                      <p class="benefit-2-text">{{ block.settings.benefit_3 | default: 'Secure checkout' }}</p>
+                    </div>
+                    <div class="benefit-2-item" role="listitem">
+                      <div class="benefit-2-icon" aria-hidden="true">
+                        <svg class="checkmark-svg" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                      </div>
+                      <p class="benefit-2-text">{{ block.settings.benefit_4 | default: 'Buyer protection' }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% when 'star_rating' %}
+              {% assign ssline_id = block.id | handleize | default: section.id %}
+              <div
+                class="sl-ssline sl-ssline--{{ ssline_id }}"
+                style="
+                  margin-top: {{ block.settings.margin_top | default: '8' }}px;
+                  margin-bottom: {{ block.settings.margin_bottom | default: '8' }}px;
+                  width: 100%;
+                  display: flex;
+                  justify-content: {{ block.settings.alignment | default: 'center' }};
+                "
+                {{ block.shopify_attributes }}
+              >
+                <style>
+                  .sl-ssline--{{ ssline_id }} .sl-ssline__row {
+                    width: auto;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    gap: {{ block.settings.layout_gap | default: '8' }}px;
+                    flex-wrap: wrap;
+                  }
+                  .sl-ssline--{{ ssline_id }} .sl-ssline__stars {
+                    display: flex;
+                    align-items: center;
+                    gap: 2px;
+                    flex-shrink: 0;
+                  }
+                  .sl-ssline--{{ ssline_id }} .sl-ssline__star-svg {
+                    width: {{ block.settings.star_size | default: '20' }}px;
+                    height: {{ block.settings.star_size | default: '20' }}px;
+                    flex-shrink: 0;
+                    display: block;
+                    fill: {{ block.settings.star_color | default: '#f59e0b' }};
+                  }
+                  .sl-ssline--{{ ssline_id }} .sl-ssline__label {
+                    margin: 0;
+                    font-size: {{ block.settings.text_size | default: '15' }}px;
+                    font-weight: {{ block.settings.font_weight | default: '400' }};
+                    color: {{ block.settings.text_color | default: '#0a0a0a' }};
+                    line-height: 1.35;
+                    text-align: left;
+                  }
+                </style>
+                <div class="sl-ssline__row">
+                  <div class="sl-ssline__stars" aria-hidden="true">
+                    <svg class="sl-ssline__star-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z"/></svg>
+                    <svg class="sl-ssline__star-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z"/></svg>
+                    <svg class="sl-ssline__star-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z"/></svg>
+                    <svg class="sl-ssline__star-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z"/></svg>
+                    <svg class="sl-ssline__star-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z"/></svg>
+                  </div>
+                  <p class="sl-ssline__label">{{ block.settings.label_text | default: '+1 Million Happy Customers' }}</p>
+                </div>
+              </div>
+            {% when 'payment_badge' %}
+              {% assign pay_id = block.id | handleize | default: section.id %}
+              <style>
+                .payment-methods-container-{{ pay_id }} {
+                  display: flex;
+                  align-items: center;
+                  justify-content: {{ block.settings.alignment | default: 'center' }};
+                  flex-wrap: wrap;
+                  width: 100%;
+                  gap: {{ block.settings.gap | default: '8' }}px;
+                  padding: {{ block.settings.padding | default: '12' }}px;
+                  background: {{ block.settings.bg_color | default: 'transparent' }};
+                  border-radius: {{ block.settings.border_radius | default: '8' }}px;
+                  margin-top: {{ block.settings.margin_top | default: '4' }}px;
+                  margin-bottom: {{ block.settings.margin_bottom | default: '4' }}px;
+                  line-height: 0;
+                }
+                .payment-methods-container-{{ pay_id }} .payment-icon {
+                  height: {{ block.settings.icon_height | default: '28' }}px;
+                  width: auto;
+                  filter: {{ block.settings.icon_style | default: 'none' }};
+                  transition: transform 0.2s ease;
+                }
+                .payment-methods-container-{{ pay_id }} .payment-icon:hover {
+                  transform: translateY(-2px);
+                }
+                .payment-methods-container-{{ pay_id }} .visa { display: {{ block.settings.show_visa | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .mastercard { display: {{ block.settings.show_mastercard | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .amex { display: {{ block.settings.show_amex | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .discover { display: {{ block.settings.show_discover | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .paypal { display: {{ block.settings.show_paypal | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .stripe { display: {{ block.settings.show_stripe | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .apple_pay { display: {{ block.settings.show_apple_pay | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .google_pay { display: {{ block.settings.show_google_pay | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .ideal { display: {{ block.settings.show_ideal | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .klarna { display: {{ block.settings.show_klarna | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .afterpay { display: {{ block.settings.show_afterpay | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .shop_pay { display: {{ block.settings.show_shop_pay | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .venmo { display: {{ block.settings.show_venmo | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .diners_club { display: {{ block.settings.show_diners | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .jcb { display: {{ block.settings.show_jcb | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .unionpay { display: {{ block.settings.show_unionpay | default: 'block' }}; }
+                .payment-methods-container-{{ pay_id }} .alipay { display: {{ block.settings.show_alipay | default: 'block' }}; }
+                @media (max-width: 768px) {
+                  .payment-methods-container-{{ pay_id }} .payment-icon {
+                    height: {{ block.settings.icon_height_mobile | default: '20' }}px !important;
+                  }
+                  .payment-methods-container-{{ pay_id }} {
+                    gap: {{ block.settings.gap_mobile | default: '6' }}px !important;
+                    padding: {{ block.settings.padding_mobile | default: '8' }}px !important;
+                  }
+                }
+              </style>
+              <div class="payment-methods-container-{{ pay_id }}" {{ block.shopify_attributes }}>
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/visa.svg" alt="Visa" class="payment-icon visa">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/master.svg" alt="Mastercard" class="payment-icon mastercard">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/american_express.svg" alt="American Express" class="payment-icon amex">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/discover.svg" alt="Discover" class="payment-icon discover">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/paypal.svg" alt="PayPal" class="payment-icon paypal">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/stripe.svg" alt="Stripe" class="payment-icon stripe">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/apple_pay.svg" alt="Apple Pay" class="payment-icon apple_pay">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/google_pay.svg" alt="Google Pay" class="payment-icon google_pay">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/ideal.svg" alt="iDEAL" class="payment-icon ideal">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/klarna.svg" alt="Klarna" class="payment-icon klarna">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/afterpay.svg" alt="Afterpay" class="payment-icon afterpay">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/shopify_pay.svg" alt="Shop Pay" class="payment-icon shop_pay">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/venmo.svg" alt="Venmo" class="payment-icon venmo">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/diners_club.svg" alt="Diners Club" class="payment-icon diners_club">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/jcb.svg" alt="JCB" class="payment-icon jcb">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/unionpay.svg" alt="UnionPay" class="payment-icon unionpay">
+                <img src="https://raw.githubusercontent.com/activemerchant/payment_icons/refs/heads/master/app/assets/images/payment_icons/alipay.svg" alt="Alipay" class="payment-icon alipay">
+              </div>
+            {% when 'description' %}
+              <div
+                class="slh-pi2__desc rte"
+                style="
+                  margin-top: {{ block.settings.margin_top | default: 0 }}px;
+                  margin-bottom: {{ block.settings.margin_bottom | default: 0 }}px;
+                "
+                {{ block.shopify_attributes }}
+              >
+                {{ product.description }}
+              </div>
+            {% when 'stock_urgency' %}
+              {% if block.settings.su_show != false %}
+                {%- liquid
+                  assign su_uid = block.id | handleize | default: 'su'
+                  assign sold_pct = block.settings.su_sold_percent | default: block.settings.sold_percent | default: 93
+                  if sold_pct < 1
+                    assign sold_pct = 1
+                  endif
+                  if sold_pct > 100
+                    assign sold_pct = 100
+                  endif
+                  assign su_status_raw = block.settings.su_status_text | default: block.settings.status_text | strip
+                  if su_status_raw != blank
+                    assign status_line = su_status_raw | replace: '{percent}', sold_pct
+                  else
+                    assign status_line = ''
+                  endif
+                  assign su_bar_radius = block.settings.su_bar_radius | default: block.settings.bar_radius | default: 50
+                  if su_bar_radius >= 50
+                    assign su_bar_radius_css = '9999px'
+                  else
+                    assign su_bar_radius_css = su_bar_radius | append: 'px'
+                  endif
+                  assign su_description = block.settings.su_description | default: block.settings.description
+                  assign su_aria_label = status_line
+                  if su_aria_label == blank
+                    assign su_aria_label = su_description
+                  endif
+                  if su_aria_label == blank
+                    assign su_aria_label = 'Stock availability'
+                  endif
+                -%}
+                <div
+                  class="sl-stock-urgency sl-stock-urgency--{{ su_uid }}"
+                  style="
+                    --su-fill: {{ sold_pct }}%;
+                    --su-bar-fill: {{ block.settings.su_bar_fill_color | default: block.settings.bar_fill_color | default: '#9f4a54' }};
+                    --su-bar-track: {{ block.settings.su_bar_track_color | default: block.settings.bar_track_color | default: '#e5e5e5' }};
+                    --su-desc: {{ block.settings.su_description_color | default: block.settings.description_color | default: '#111111' }};
+                    --su-status: {{ block.settings.su_status_color | default: block.settings.status_color | default: '#111111' }};
+                    margin-top: {{ block.settings.su_margin_top | default: block.settings.margin_top | default: 20 }}px;
+                    margin-bottom: {{ block.settings.su_margin_bottom | default: block.settings.margin_bottom | default: 12 }}px;
+                  "
+                  {{ block.shopify_attributes }}
+                >
+                  {% assign su_has_desc = false %}
+                  {% if su_description != blank %}
+                    {% assign su_has_desc = true %}
+                  {% endif %}
+                  {% assign su_has_status = false %}
+                  {% if status_line != blank %}
+                    {% assign su_has_status = true %}
+                  {% endif %}
+                  {% if su_has_desc or su_has_status %}
+                    <div
+                      class="sl-stock-urgency__meta-row{% unless su_has_desc %} sl-stock-urgency__meta-row--status-only{% endunless %}"
+                      style="margin-bottom: {{ block.settings.su_bar_margin_top | default: block.settings.bar_margin_top | default: 10 }}px;"
+                    >
+                      {% if su_has_desc %}
+                        <p
+                          class="sl-stock-urgency__description"
+                          style="
+                            color: var(--su-desc);
+                            font-size: {{ block.settings.su_description_size | default: block.settings.description_size | default: 14 }}px;
+                            font-weight: {{ block.settings.su_description_weight | default: block.settings.description_weight | default: 400 }};
+                          "
+                        >
+                          {{ su_description | escape }}
+                        </p>
+                      {% endif %}
+                      {% if su_has_status %}
+                        <p
+                          class="sl-stock-urgency__status"
+                          style="
+                            color: var(--su-status);
+                            font-size: {{ block.settings.su_status_size | default: block.settings.status_size | default: 14 }}px;
+                            font-weight: {{ block.settings.su_status_weight | default: block.settings.status_weight | default: 700 }};
+                          "
+                        >
+                          {{ status_line | escape }}
+                        </p>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                  <div
+                    class="sl-stock-urgency__bar"
+                    role="progressbar"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="{{ sold_pct }}"
+                    aria-label="{{ su_aria_label | escape }}"
+                    style="
+                      height: {{ block.settings.su_bar_height | default: block.settings.bar_height | default: 8 }}px;
+                      border-radius: {{ su_bar_radius_css }};
+                      background: var(--su-bar-track);
+                      margin-bottom: {{ block.settings.su_bar_margin_bottom | default: block.settings.bar_margin_bottom | default: 0 }}px;
+                    "
+                  >
+                    <span
+                      class="sl-stock-urgency__bar-fill"
+                      style="
+                        background: var(--su-bar-fill);
+                        border-radius: {{ su_bar_radius_css }};
+                      "
+                    ></span>
+                  </div>
+                </div>
+              {% endif %}
+            {% when 'star_badge' %}
+              {% assign rating_value = block.settings.rating_value | default: 4.7 | plus: 0 %}
+              {% assign rating_width = rating_value | times: 20 %}
+              <div
+                class="kodu-star-badge-wrapper"
+                style="margin-top: {{ block.settings.wrapper_margin_top }}px; margin-bottom: {{ block.settings.wrapper_margin_bottom }}px;"
+                {{ block.shopify_attributes }}
+              >
+                <div
+                  class="kodu-star-badge-row"
+                  style="display:flex; align-items:center; flex-wrap:wrap; justify-content: {{ block.settings.align_web }}; gap: {{ block.settings.gap }}px;"
+                >
+                  <div class="kodu-star-badge-stars" style="position:relative; display:inline-flex;">
+                    <div class="kodu-star-badge-empty" style="display:flex; gap:2px;">
+                      {% for i in (1..5) %}
+                        <svg class="kodu-star-svg" style="width: {{ block.settings.star_size }}px; height: {{ block.settings.star_size }}px; fill: {{ block.settings.empty_star_color }};" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6L22 9.2l-5 4.9 1.2 7L12 17.8 5.8 21l1.2-7-5-4.9 7.1-0.6z"/></svg>
+                      {% endfor %}
+                    </div>
+                    <div class="kodu-star-badge-full" style="position:absolute; top:0; left:0; overflow:hidden; height:100%; width: {{ rating_width }}%; display:flex; gap:2px;">
+                      {% for i in (1..5) %}
+                        <svg class="kodu-star-svg" style="width: {{ block.settings.star_size }}px; height: {{ block.settings.star_size }}px; fill: {{ block.settings.star_color }};" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.6L22 9.2l-5 4.9 1.2 7L12 17.8 5.8 21l1.2-7-5-4.9 7.1-0.6z"/></svg>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div class="kodu-star-badge-text" style="font-size: {{ block.settings.text_size }}px; color: {{ block.settings.text_color }};">
+                    <strong>{{ block.settings.rating_label }} {{ block.settings.rating_value }}</strong>
+                    <span style="color: {{ block.settings.count_color }}; margin-left: 2px;">({{ block.settings.reviews_count }})</span>
+                  </div>
+                  {% if block.settings.show_badge %}
+                    <div style="background: {{ block.settings.badge_bg }}; color: {{ block.settings.badge_text_color }}; padding: 2px 6px; border-radius: {{ block.settings.badge_radius }}px; font-size: {{ block.settings.badge_size }}px;">
+                      {{ block.settings.badge_text }}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            {% when 'benefits_list' %}
+              <div
+                class="sl-ben sl-ben--{{ block.id | handleize }}"
+                style="
+                  --ben-gap: {{ block.settings.row_gap }}px;
+                  --ben-icon: {{ block.settings.icon_color }};
+                  --ben-text: {{ block.settings.text_color }};
+                  font-size: {{ block.settings.font_size }}px;
+                  margin-top: {{ block.settings.wrapper_margin_top }}px;
+                  margin-bottom: {{ block.settings.wrapper_margin_bottom }}px;
+                "
+                {{ block.shopify_attributes }}
+              >
+                <ul class="sl-ben__list" role="list" style="list-style:none; margin:0; padding:0; display:grid; gap:var(--ben-gap); width:fit-content; max-width:100%; margin-inline:0;">
+                  {% if block.settings.benefit_1 != blank %}
+                    <li class="sl-ben__row" style="display:grid; grid-template-columns:1.15em minmax(0, 1fr); column-gap:0.55em; align-items:start;">
+                      <svg class="sl-ben__check" viewBox="0 0 24 24" fill="none" stroke="var(--ben-icon)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em; height:1.15em; margin-top:0.14em;"><path d="M20 6L9 17l-5-5"/></svg>
+                      <p class="sl-ben__text" style="color:var(--ben-text); line-height:1.45; margin:0;">{{ block.settings.benefit_1 }}</p>
+                    </li>
+                  {% endif %}
+                  {% if block.settings.benefit_2 != blank %}
+                    <li class="sl-ben__row" style="display:grid; grid-template-columns:1.15em minmax(0, 1fr); column-gap:0.55em; align-items:start;">
+                      <svg class="sl-ben__check" viewBox="0 0 24 24" fill="none" stroke="var(--ben-icon)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em; height:1.15em; margin-top:0.14em;"><path d="M20 6L9 17l-5-5"/></svg>
+                      <p class="sl-ben__text" style="color:var(--ben-text); line-height:1.45; margin:0;">{{ block.settings.benefit_2 }}</p>
+                    </li>
+                  {% endif %}
+                  {% if block.settings.benefit_3 != blank %}
+                    <li class="sl-ben__row" style="display:grid; grid-template-columns:1.15em minmax(0, 1fr); column-gap:0.55em; align-items:start;">
+                      <svg class="sl-ben__check" viewBox="0 0 24 24" fill="none" stroke="var(--ben-icon)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1.15em; height:1.15em; margin-top:0.14em;"><path d="M20 6L9 17l-5-5"/></svg>
+                      <p class="sl-ben__text" style="color:var(--ben-text); line-height:1.45; margin:0;">{{ block.settings.benefit_3 }}</p>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+            {% when 'shipping_timeline' %}
+              {% assign timeline_date_locale = block.settings.date_locale | strip %}
+              {% if timeline_date_locale == blank %}
+                {% assign timeline_date_locale = request.locale.iso_code | default: 'en' %}
+              {% endif %}
+              <div
+                class="sl-track"
+                data-slh-track-root
+                data-locale="{{ timeline_date_locale | escape }}"
+                data-format="{{ block.settings.date_format | default: 'month_long_day' }}"
+                data-step1-offset="{{ block.settings.step1_offset | default: 0 }}"
+                data-step2-offset="{{ block.settings.step2_offset | default: 1 }}"
+                data-step3-offset="{{ block.settings.step3_offset | default: 3 }}"
+                data-dynamic-dates="{% if block.settings.use_dynamic_dates %}true{% else %}false{% endif %}"
+                style="
+                  --track-accent: {{ block.settings.accent_color }};
+                  --track-icon-bg: {{ block.settings.icon_bg_color }};
+                  --track-line: {{ block.settings.line_color }};
+                  --track-text: {{ block.settings.text_color | default: '#171717' }};
+                  --track-icon-size: {{ block.settings.icon_size }}px;
+                  font-size: {{ block.settings.font_size }}px;
+                "
+                {{ block.shopify_attributes }}
+              >
+                <ol class="sl-track__list" role="list">
+                  <li class="sl-track__item">
+                    <div class="sl-track__icon-ring" aria-hidden="true"><i class="ph-duotone ph-calendar-check"></i></div>
+                    <p class="sl-track__date" data-slh-track-date data-offset="{{ block.settings.step1_offset | default: 0 }}">{{ block.settings.step1_date }}</p>
+                    <p class="sl-track__status">{{ block.settings.step1_label }}</p>
+                  </li>
+                  <li class="sl-track__item">
+                    <div class="sl-track__icon-ring" aria-hidden="true"><i class="ph-duotone ph-package"></i></div>
+                    <p class="sl-track__date" data-slh-track-date data-offset="{{ block.settings.step2_offset | default: 1 }}">{{ block.settings.step2_date }}</p>
+                    <p class="sl-track__status">{{ block.settings.step2_label }}</p>
+                  </li>
+                  <li class="sl-track__item">
+                    <div class="sl-track__icon-ring" aria-hidden="true"><i class="ph-duotone ph-truck"></i></div>
+                    <p class="sl-track__date" data-slh-track-date data-offset="{{ block.settings.step3_offset | default: 3 }}">{{ block.settings.step3_date }}</p>
+                    <p class="sl-track__status">{{ block.settings.step3_label }}</p>
+                  </li>
+                </ol>
+                <script>
+                  (function () {
+                    var root = document.currentScript && document.currentScript.closest('[data-slh-track-root]');
+                    if (!root) return;
+                    if (root.getAttribute('data-dynamic-dates') !== 'true') return;
+                    var locale = root.getAttribute('data-locale') || 'en';
+                    var format = root.getAttribute('data-format') || 'month_long_day';
+                    var optionMap = {
+                      month_long_day: { month: 'long', day: 'numeric' },
+                      month_short_day: { month: 'short', day: 'numeric' }
+                    };
+                    var dateOptions = optionMap[format] || optionMap.month_long_day;
+                    var today = new Date();
+                    var current = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                    root.querySelectorAll('[data-slh-track-date]').forEach(function(node, idx) {
+                      var fallbackOffset = parseInt(root.getAttribute('data-step' + (idx + 1) + '-offset'), 10);
+                      var offset = parseInt(node.getAttribute('data-offset'), 10);
+                      if (!Number.isFinite(offset)) offset = Number.isFinite(fallbackOffset) ? fallbackOffset : idx;
+                      var eta = new Date(current.getFullYear(), current.getMonth(), current.getDate() + offset);
+                      try {
+                        node.textContent = new Intl.DateTimeFormat(locale, dateOptions).format(eta);
+                      } catch (e) {
+                        node.textContent = eta.toLocaleDateString(undefined, dateOptions);
+                      }
+                    });
+                  })();
+                </script>
+              </div>
+            {% when 'collapsible_row' %}
+              {% if block.settings.title != blank %}
+                <div class="slh-pi2__accordion slh-pi2__faq-main-col" {{ block.shopify_attributes }}>
+                  <details>
+                    <summary><span>{{ block.settings.title | escape }}</span><span class="slh-pi2__accordion-icon"></span></summary>
+                    <div class="slh-pi2__accordion-content rte">{{ block.settings.content }}</div>
+                  </details>
+                </div>
+              {% endif %}
+            {% when '@app' %}
+              <div {{ block.shopify_attributes }}>{% render block %}</div>
+            {% when 'custom_liquid' %}
+              <div {{ block.shopify_attributes }}>
+                {{ block.settings.custom_liquid }}
+              </div>
+          {% endcase %}
+        {% endfor %}
+      {% endform %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var root = document.getElementById('shopify-section-{{ section.id }}');
+    if (!root) return;
+
+    var variantPicker = root.querySelector('[data-slh-variant-picker]');
+    if (variantPicker) {
+      var variantsDataEl = variantPicker.querySelector('[data-slh-variants-data]');
+      var variants = [];
+      try {
+        variants = JSON.parse(variantsDataEl && variantsDataEl.textContent || '[]');
+      } catch (err) {
+        variants = [];
+      }
+
+      var mainImg = root.querySelector('.slh-pi2__main-img');
+      var thumbs = root.querySelectorAll('[data-slh-pi2-thumb]');
+      var priceEl = root.querySelector('.slh-pi2__price > span:first-child');
+      var compareEl = root.querySelector('.slh-pi2__price-compare');
+      var idInput = variantPicker.querySelector('[name="id"]');
+      var combinedSelect = variantPicker.querySelector('[data-slh-variant-select]');
+      var optionSelects = variantPicker.querySelectorAll('[data-slh-option-select]');
+      var optionBtns = variantPicker.querySelectorAll('[data-slh-option-btn]');
+      function getSelectedOptions() {
+        if (combinedSelect) return null;
+        var count = optionSelects.length || (optionBtns.length ? Math.max.apply(null, Array.prototype.map.call(optionBtns, function(btn) {
+          return parseInt(btn.getAttribute('data-option-index'), 10) + 1;
+        })) : 0);
+        var options = new Array(count);
+        optionSelects.forEach(function(sel) {
+          var idx = parseInt(sel.getAttribute('data-option-index'), 10);
+          options[idx] = sel.value;
+        });
+        optionBtns.forEach(function(btn) {
+          if (!btn.classList.contains('is-selected')) return;
+          var idx = parseInt(btn.getAttribute('data-option-index'), 10);
+          options[idx] = btn.getAttribute('data-option-value');
+        });
+        return options;
+      }
+
+      function findVariant() {
+        if (combinedSelect) {
+          var id = parseInt(combinedSelect.value, 10);
+          return variants.find(function(v) { return v.id === id; }) || null;
+        }
+        var options = getSelectedOptions();
+        if (!options || !options.length) return null;
+        return variants.find(function(v) {
+          if (!v.options || v.options.length < options.length) return false;
+          for (var i = 0; i < options.length; i++) {
+            if (v.options[i] !== options[i]) return false;
+          }
+          return true;
+        }) || null;
+      }
+
+      function setMainImage(variant) {
+        if (!mainImg || !variant || !variant.featured_image_src) return;
+        mainImg.src = variant.featured_image_src;
+        mainImg.alt = variant.featured_image_alt || mainImg.alt || '';
+        if (thumbs.length) {
+          thumbs.forEach(function(thumb) {
+            var mediaId = thumb.getAttribute('data-media-id');
+            var isMatch = mediaId && variant.featured_media_id && String(mediaId) === String(variant.featured_media_id);
+            thumb.classList.toggle('is-active', isMatch);
+          });
+        }
+      }
+
+      function updateAvailability() {
+        if (combinedSelect || !variants.length) return;
+        var selected = getSelectedOptions();
+        if (!selected) return;
+        optionBtns.forEach(function(btn) {
+          var idx = parseInt(btn.getAttribute('data-option-index'), 10);
+          var value = btn.getAttribute('data-option-value');
+          var testOptions = selected.slice();
+          testOptions[idx] = value;
+          var match = variants.find(function(v) {
+            if (!v.options) return false;
+            for (var i = 0; i < testOptions.length; i++) {
+              if (v.options[i] !== testOptions[i]) return false;
+            }
+            return true;
+          });
+          btn.classList.toggle('is-unavailable', !match || !match.available);
+          btn.disabled = !match || !match.available;
+        });
+      }
+
+      function applyVariant(variant) {
+        if (!variant) return;
+        if (idInput) idInput.value = variant.id;
+        if (combinedSelect) combinedSelect.value = String(variant.id);
+        if (priceEl) priceEl.textContent = variant.price_formatted || priceEl.textContent;
+        if (compareEl) {
+          if (variant.compare_at_price && variant.price && variant.compare_at_price > variant.price) {
+            compareEl.textContent = variant.compare_at_price_formatted;
+            compareEl.style.display = '';
+          } else {
+            compareEl.style.display = 'none';
+          }
+        }
+        setMainImage(variant);
+        updateAvailability();
+      }
+
+      function onVariantChange() {
+        var variant = findVariant();
+        if (variant) applyVariant(variant);
+      }
+
+      if (combinedSelect) {
+        combinedSelect.addEventListener('change', onVariantChange);
+      }
+      optionSelects.forEach(function(sel) {
+        sel.addEventListener('change', onVariantChange);
+      });
+      optionBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          if (btn.disabled) return;
+          var idx = btn.getAttribute('data-option-index');
+          variantPicker.querySelectorAll('[data-slh-option-btn][data-option-index="' + idx + '"]').forEach(function(other) {
+            other.classList.remove('is-selected');
+          });
+          btn.classList.add('is-selected');
+          onVariantChange();
+        });
+      });
+
+      updateAvailability();
+    }
+
+    var mainImg = root.querySelector('.slh-pi2__main-img');
+    var thumbs = root.querySelectorAll('[data-slh-pi2-thumb]');
+    if (mainImg && thumbs.length) {
+      thumbs.forEach(function(thumb) {
+        thumb.addEventListener('click', function() {
+          var url = thumb.getAttribute('data-full-src');
+          var alt = thumb.getAttribute('data-alt') || '';
+          if (!url) return;
+          mainImg.src = url;
+          mainImg.alt = alt;
+          thumbs.forEach(function(t) { t.classList.remove('is-active'); });
+          thumb.classList.add('is-active');
+        });
+      });
+    }
+
+    var qtyInput = root.querySelector('.slh-pi2__qty');
+    var minus = root.querySelector('[data-slh-pi2-qty-minus]');
+    var plus = root.querySelector('[data-slh-pi2-qty-plus]');
+    if (qtyInput && minus && plus) {
+      minus.addEventListener('click', function() {
+        qtyInput.value = Math.max(1, (parseInt(qtyInput.value || '1', 10) || 1) - 1);
+      });
+      plus.addEventListener('click', function() {
+        qtyInput.value = (parseInt(qtyInput.value || '1', 10) || 1) + 1;
+      });
+    }
+
+    var atcPriceTargets = root.querySelectorAll('[data-slh-atc-price]');
+    if (atcPriceTargets.length) {
+      var priceTextNode = root.querySelector('.slh-pi2__price > span:first-child');
+      var syncAtcPrice = function() {
+        if (!priceTextNode) return;
+        var text = (priceTextNode.textContent || '').trim();
+        if (!text) return;
+        atcPriceTargets.forEach(function(node) {
+          node.textContent = text;
+        });
+      };
+      syncAtcPrice();
+      if (priceTextNode && window.MutationObserver) {
+        var obs = new MutationObserver(syncAtcPrice);
+        obs.observe(priceTextNode, { characterData: true, childList: true, subtree: true });
+      }
+    }
+
+    var shipRoots = root.querySelectorAll('[data-slh-ship-root]');
+    shipRoots.forEach(function(shipRoot) {
+      var out = shipRoot.querySelector('[data-slh-ship-date]');
+      if (!out) return;
+      var minD = parseInt(shipRoot.getAttribute('data-transit-min'), 10) || 3;
+      var maxD = parseInt(shipRoot.getAttribute('data-transit-max'), 10) || 6;
+      if (maxD < minD) maxD = minD;
+      var today = new Date();
+      today.setHours(0, 0, 0, 0);
+      var seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+      var span = minD + (seed % ((maxD - minD + 1) || 1));
+      var d = new Date(today);
+      var added = 0;
+      while (added < span) {
+        d.setDate(d.getDate() + 1);
+        var wd = d.getDay();
+        if (wd !== 0 && wd !== 6) added++;
+      }
+      var locale = shipRoot.getAttribute('data-locale') || 'en';
+      var opts = { weekday: 'long', month: 'long', day: 'numeric' };
+      try {
+        out.textContent = ' ' + d.toLocaleDateString(locale, opts);
+      } catch (e) {
+        out.textContent = ' ' + d.toDateString();
+      }
+    });
+  })();
+</script>
+
+
+
+{% schema %}
+{
+  "name": "Product information 2",
+  "tag": "section",
+  "class": "sl-product-info-2-root",
+  "settings": [
+    { "type": "checkbox", "id": "sl_fade_up", "label": "Entrance animation", "default": false },
+    { "type": "range", "id": "max_width", "min": 1000, "max": 1600, "step": 20, "unit": "px", "label": "Max width", "default": 1200 },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Padding top", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "label": "Padding bottom", "default": 24 },
+    { "type": "range", "id": "media_radius", "min": 0, "max": 28, "step": 2, "unit": "px", "label": "Media radius", "default": 14 },
+    { "type": "range", "id": "thumbnail_radius", "min": 0, "max": 28, "step": 2, "unit": "px", "label": "Thumbnail radius", "default": 10 },
+    { "type": "range", "id": "mobile_thumbnail_columns", "min": 3, "max": 6, "step": 1, "label": "Thumbnails per row (mobile + desktop slider)", "default": 6 },
+    { "type": "color", "id": "section_bg", "label": "Background", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#000000" },
+    { "type": "color", "id": "muted_text_color", "label": "Secondary text", "default": "#444444" },
+    { "type": "color", "id": "border_color", "label": "Border color", "default": "#dcdcdc" },
+    {
+      "type": "text",
+      "id": "product_handle",
+      "label": "Product handle (for non-product templates)",
+      "default": "sample-product"
+    },
+    { "type": "header", "content": "Font Sizes" },
+    { "type": "range", "id": "wrap_fs", "min": 8, "max": 32, "step": 1, "unit": "px", "label": "Base text size (desktop)", "default": 16 },
+    { "type": "range", "id": "wrap_fs_m", "min": 8, "max": 28, "step": 1, "unit": "px", "label": "Base text size (mobile)", "default": 14 },
+    { "type": "range", "id": "heading_fs", "min": 16, "max": 60, "step": 1, "unit": "px", "label": "Heading size (desktop)", "default": 30 },
+    { "type": "range", "id": "heading_fs_m", "min": 14, "max": 48, "step": 1, "unit": "px", "label": "Heading size (mobile)", "default": 22 },
+    { "type": "range", "id": "body_fs", "min": 8, "max": 30, "step": 1, "unit": "px", "label": "Body text size (desktop)", "default": 16 },
+    { "type": "range", "id": "body_fs_m", "min": 8, "max": 26, "step": 1, "unit": "px", "label": "Body text size (mobile)", "default": 14 },
+    { "type": "range", "id": "price_fs", "min": 12, "max": 44, "step": 1, "unit": "px", "label": "Price size (desktop)", "default": 18 },
+    { "type": "range", "id": "price_fs_m", "min": 12, "max": 40, "step": 1, "unit": "px", "label": "Price size (mobile)", "default": 15 },
+    { "type": "range", "id": "summary_fs", "min": 8, "max": 28, "step": 1, "unit": "px", "label": "Summary text size (desktop)", "default": 14 },
+    { "type": "range", "id": "summary_fs_m", "min": 8, "max": 26, "step": 1, "unit": "px", "label": "Summary text size (mobile)", "default": 14 },
+    { "type": "range", "id": "tp_label_fs", "min": 8, "max": 28, "step": 1, "unit": "px", "label": "Trustpilot label size (desktop)", "default": 14 },
+    { "type": "range", "id": "tp_label_fs_m", "min": 8, "max": 26, "step": 1, "unit": "px", "label": "Trustpilot label size (mobile)", "default": 14 },
+    { "type": "range", "id": "tp_count_fs", "min": 8, "max": 28, "step": 1, "unit": "px", "label": "Trustpilot count size (desktop)", "default": 14 },
+    { "type": "range", "id": "tp_count_fs_m", "min": 8, "max": 26, "step": 1, "unit": "px", "label": "Trustpilot count size (mobile)", "default": 14 },
+    { "type": "range", "id": "label_fs", "min": 8, "max": 28, "step": 1, "unit": "px", "label": "Field label size (desktop)", "default": 14 },
+    { "type": "range", "id": "label_fs_m", "min": 8, "max": 26, "step": 1, "unit": "px", "label": "Field label size (mobile)", "default": 14 },
+    { "type": "range", "id": "cta_fs", "min": 9, "max": 40, "step": 1, "unit": "px", "label": "Add to cart button size (desktop)", "default": 18 },
+    { "type": "range", "id": "cta_fs_m", "min": 9, "max": 36, "step": 1, "unit": "px", "label": "Add to cart button size (mobile)", "default": 16 },
+    { "type": "range", "id": "trust_fs", "min": 8, "max": 28, "step": 1, "unit": "px", "label": "Trust text size (desktop)", "default": 14 },
+    { "type": "range", "id": "trust_fs_m", "min": 8, "max": 26, "step": 1, "unit": "px", "label": "Trust text size (mobile)", "default": 13 },
+    { "type": "range", "id": "qty_btn_fs", "min": 10, "max": 38, "step": 1, "unit": "px", "label": "Quantity button size (desktop)", "default": 19 },
+    { "type": "range", "id": "qty_btn_fs_m", "min": 10, "max": 34, "step": 1, "unit": "px", "label": "Quantity button size (mobile)", "default": 17 },
+    { "type": "range", "id": "ship_fs", "min": 8, "max": 28, "step": 1, "unit": "px", "label": "Shipping text size (desktop)", "default": 14 },
+    { "type": "range", "id": "ship_fs_m", "min": 8, "max": 24, "step": 1, "unit": "px", "label": "Shipping text size (mobile)", "default": 13 },
+    { "type": "range", "id": "track_icon_fs", "min": 10, "max": 44, "step": 1, "unit": "px", "label": "Tracking icon size (desktop)", "default": 22 },
+    { "type": "range", "id": "track_icon_fs_m", "min": 10, "max": 40, "step": 1, "unit": "px", "label": "Tracking icon size (mobile)", "default": 20 },
+    { "type": "text", "id": "add_to_cart_label", "label": "Add to cart label", "default": "Add to cart" },
+    { "type": "color", "id": "summary_highlight_bg", "label": "Summary highlight background", "default": "#e9e9e9" },
+    { "type": "color", "id": "summary_highlight_color", "label": "Summary highlight text color", "default": "#000000" }
+  ],
+  "blocks": [
+    { "type": "@app" },
+    {
+      "type": "custom_liquid",
+      "name": "Custom liquid",
+      "settings": [
+        { "type": "liquid", "id": "custom_liquid", "label": "Liquid code" }
+      ]
+    },
+    {
+      "type": "trustpilot_row",
+      "name": "Trustpilot row",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Excellent" },
+        { "type": "text", "id": "rating", "label": "Rating", "default": "4.8" },
+        { "type": "url", "id": "badge_image", "label": "Badge image URL" },
+        { "type": "text", "id": "review_count", "label": "Review count", "default": "20,921" },
+        { "type": "text", "id": "reviews_label", "label": "Reviews label", "default": "reviews" },
+        { "type": "range", "id": "label_size", "label": "Title size", "min": 10, "max": 28, "step": 1, "unit": "px", "default": 14 },
+        { "type": "select", "id": "label_weight", "label": "Title weight", "options": [
+          { "value": "400", "label": "Regular" },
+          { "value": "500", "label": "Medium" },
+          { "value": "600", "label": "Semi-bold" },
+          { "value": "700", "label": "Bold" }
+        ], "default": "600" }
+      ]
+    },
+    {
+      "type": "star_badge",
+      "name": "Star badge",
+      "limit": 1,
+      "settings": [
+        { "type": "range", "id": "star_size", "label": "Star size", "min": 10, "max": 28, "step": 1, "default": 16, "unit": "px" },
+        { "type": "color", "id": "empty_star_color", "label": "Empty star color", "default": "#e5e7eb" },
+        { "type": "color", "id": "star_color", "label": "Filled star color", "default": "#f43f5e" },
+        { "type": "range", "id": "wrapper_margin_top", "label": "Top margin", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "range", "id": "wrapper_margin_bottom", "label": "Bottom margin", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "select", "id": "align_web", "label": "Alignment", "default": "flex-start", "options": [{ "value": "flex-start", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "flex-end", "label": "Right" }] },
+        { "type": "range", "id": "gap", "label": "Gap", "min": 0, "max": 20, "step": 1, "default": 8, "unit": "px" },
+        { "type": "range", "id": "text_size", "label": "Text size", "min": 10, "max": 24, "step": 1, "default": 14, "unit": "px" },
+        { "type": "color", "id": "text_color", "label": "Text color", "default": "#111111" },
+        { "type": "text", "id": "rating_label", "label": "Rating label", "default": "Rated" },
+        { "type": "text", "id": "rating_value", "label": "Rating value", "default": "4.7" },
+        { "type": "text", "id": "reviews_count", "label": "Reviews count", "default": "137" },
+        { "type": "color", "id": "count_color", "label": "Count color", "default": "#9ca3af" },
+        { "type": "checkbox", "id": "show_badge", "label": "Show side badge", "default": true },
+        { "type": "text", "id": "badge_text", "label": "Badge text", "default": "Happy Customers" },
+        { "type": "color", "id": "badge_bg", "label": "Badge background", "default": "#ffe4e6" },
+        { "type": "color", "id": "badge_text_color", "label": "Badge text color", "default": "#f43f5e" },
+        { "type": "range", "id": "badge_radius", "label": "Badge radius", "min": 0, "max": 20, "step": 1, "default": 4, "unit": "px" },
+        { "type": "range", "id": "badge_size", "label": "Badge text size", "min": 10, "max": 20, "step": 1, "default": 13, "unit": "px" }
+      ]
+    },
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1,
+      "settings": [
+        { "type": "range", "id": "font_size", "min": 18, "max": 48, "step": 1, "unit": "px", "label": "Font size", "default": 28 },
+        { "type": "color", "id": "text_color", "label": "Color", "default": "#000000" }
+      ]
+    },
+    {
+      "type": "price",
+      "name": "Price",
+      "limit": 1,
+      "settings": [
+        { "type": "range", "id": "font_size", "min": 14, "max": 36, "step": 1, "unit": "px", "label": "Font size", "default": 17 },
+        { "type": "color", "id": "text_color", "label": "Color", "default": "#000000" },
+        { "type": "color", "id": "compare_color", "label": "Compare-at color", "default": "#444444" }
+      ]
+    },
+    {
+      "type": "summary_line",
+      "name": "Summary line",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "summary_text", "label": "Sentence", "default": "Designed to support gut health, digestion, immunity, and skin balance with probiotic + prebiotic synbiotic." },
+        { "type": "text", "id": "highlight", "label": "Highlight text", "default": "probiotic + prebiotic synbiotic" },
+        { "type": "color", "id": "highlight_bg", "label": "Highlight background", "default": "#e9e9e9" },
+        { "type": "color", "id": "highlight_text_color", "label": "Highlight text color", "default": "#000000" },
+        { "type": "range", "id": "margin_top", "label": "Top margin", "min": 0, "max": 40, "step": 1, "default": 16, "unit": "px" },
+        { "type": "range", "id": "margin_bottom", "label": "Bottom margin", "min": 0, "max": 40, "step": 1, "default": 16, "unit": "px" },
+        { "type": "paragraph", "content": "Highlight is applied inside the sentence when the same phrase is found." }
+      ]
+    },
+    {
+      "type": "stock_urgency",
+      "name": "Stock urgency",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "su_show", "label": "Show stock urgency", "default": true },
+        { "type": "header", "content": "Content" },
+        { "type": "text", "id": "su_description", "label": "Description", "default": "Limited quantities available." },
+        { "type": "range", "id": "su_sold_percent", "label": "Sold percentage", "min": 1, "max": 100, "step": 1, "unit": "%", "default": 93 },
+        {
+          "type": "text",
+          "id": "su_status_text",
+          "label": "Status line",
+          "default": "{percent}% sold",
+          "info": "Use {percent} for the sold percentage. Clear this field to hide the status line."
+        },
+        { "type": "header", "content": "Typography" },
+        { "type": "color", "id": "su_description_color", "label": "Description color", "default": "#111111" },
+        { "type": "range", "id": "su_description_size", "label": "Description size", "min": 11, "max": 20, "step": 1, "unit": "px", "default": 14 },
+        {
+          "type": "select",
+          "id": "su_description_weight",
+          "label": "Description weight",
+          "default": "400",
+          "options": [
+            { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" },
+            { "value": "600", "label": "Semi-bold" },
+            { "value": "700", "label": "Bold" }
+          ]
+        },
+        { "type": "color", "id": "su_status_color", "label": "Status color", "default": "#111111" },
+        { "type": "range", "id": "su_status_size", "label": "Status size", "min": 11, "max": 20, "step": 1, "unit": "px", "default": 14 },
+        {
+          "type": "select",
+          "id": "su_status_weight",
+          "label": "Status weight",
+          "default": "700",
+          "options": [
+            { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" },
+            { "value": "600", "label": "Semi-bold" },
+            { "value": "700", "label": "Bold" }
+          ]
+        },
+        { "type": "header", "content": "Progress Bar" },
+        { "type": "color", "id": "su_bar_fill_color", "label": "Bar fill color", "default": "#785aaf", "info": "Matches your brand button color when the template is generated." },
+        { "type": "color", "id": "su_bar_track_color", "label": "Bar track color", "default": "#e5e5e5" },
+        { "type": "range", "id": "su_bar_height", "label": "Bar height", "min": 4, "max": 20, "step": 1, "unit": "px", "default": 8 },
+        { "type": "range", "id": "su_bar_radius", "label": "Bar corner radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 50, "info": "50 = fully rounded pill shape." },
+        { "type": "range", "id": "su_bar_margin_top", "label": "Space above bar", "min": 0, "max": 32, "step": 1, "unit": "px", "default": 10 },
+        { "type": "range", "id": "su_bar_margin_bottom", "label": "Space below bar", "min": 0, "max": 32, "step": 1, "unit": "px", "default": 0 },
+        { "type": "header", "content": "Spacing" },
+        { "type": "range", "id": "su_margin_top", "label": "Margin top", "min": 0, "max": 48, "step": 1, "unit": "px", "default": 20 },
+        { "type": "range", "id": "su_margin_bottom", "label": "Margin bottom", "min": 0, "max": 48, "step": 1, "unit": "px", "default": 12 }
+      ]
+    },
+    {
+      "type": "announcement_banner",
+      "name": "Announcement banner",
+      "limit": 1,
+      "settings": [
+        { "type": "header", "content": "Content" },
+        {
+          "type": "textarea",
+          "id": "message",
+          "label": "Message",
+          "default": "Less than 0.5% of buyers use our money-back guarantee."
+        },
+        { "type": "checkbox", "id": "show_icon", "label": "Show icon", "default": true },
+        { "type": "range", "id": "icon_size", "label": "Icon size", "min": 20, "max": 48, "step": 1, "unit": "px", "default": 32 },
+        { "type": "header", "content": "Colors" },
+        { "type": "color", "id": "bg_color", "label": "Background", "default": "#f1e9fd" },
+        { "type": "color", "id": "icon_color", "label": "Icon color", "default": "#111111" },
+        { "type": "color", "id": "text_color", "label": "Text color", "default": "#111111" },
+        { "type": "header", "content": "Typography" },
+        { "type": "range", "id": "text_size", "label": "Text size", "min": 11, "max": 20, "step": 1, "unit": "px", "default": 14 },
+        {
+          "type": "select",
+          "id": "text_weight",
+          "label": "Text weight",
+          "default": "400",
+          "options": [
+            { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" },
+            { "value": "600", "label": "Semi-bold" },
+            { "value": "700", "label": "Bold" }
+          ]
+        },
+        { "type": "header", "content": "Layout" },
+        { "type": "range", "id": "content_gap", "label": "Gap between icon and text", "min": 4, "max": 32, "step": 1, "unit": "px", "default": 12 },
+        { "type": "range", "id": "padding_y", "label": "Padding vertical", "min": 6, "max": 32, "step": 1, "unit": "px", "default": 14 },
+        { "type": "range", "id": "padding_x", "label": "Padding horizontal", "min": 8, "max": 36, "step": 1, "unit": "px", "default": 16 },
+        { "type": "range", "id": "border_radius", "label": "Corner radius", "min": 0, "max": 24, "step": 1, "unit": "px", "default": 8 },
+        { "type": "range", "id": "margin_top", "label": "Margin top", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 12 },
+        { "type": "range", "id": "margin_bottom", "label": "Margin bottom", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 0 }
+      ]
+    },
+    {
+      "type": "low_stock",
+      "name": "Low stock",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "show", "label": "Show low stock line", "default": true },
+        { "type": "checkbox", "id": "show_number", "label": "Show number", "default": true },
+        { "type": "text", "id": "lead", "label": "Text before number", "default": "Low stock, only ", "info": "Shown before the count (e.g. Low stock, only )." },
+        { "type": "text", "id": "tail", "label": "Text after number", "default": " left", "info": "Shown after the count (include a leading space if needed, e.g. \" left\" → \"15 left\")." },
+        { "type": "color", "id": "accent_color", "label": "Accent (dot & number)", "default": "#dc2626" },
+        { "type": "color", "id": "text_color", "label": "Text color", "default": "#171717" },
+        { "type": "range", "id": "font_size", "min": 11, "max": 18, "step": 1, "unit": "px", "label": "Font size", "default": 14 },
+        { "type": "range", "id": "margin_top", "min": 0, "max": 24, "step": 1, "unit": "px", "label": "Margin top", "default": 6 },
+        { "type": "range", "id": "margin_bottom", "min": 0, "max": 24, "step": 1, "unit": "px", "label": "Margin bottom", "default": 0 },
+        { "type": "range", "id": "stock_min", "min": 2, "max": 20, "step": 1, "label": "Count minimum", "default": 4 },
+        { "type": "range", "id": "stock_max", "min": 8, "max": 40, "step": 1, "label": "Count maximum", "default": 22 },
+        { "type": "range", "id": "tick_min_sec", "min": 5, "max": 105, "step": 1, "unit": "s", "label": "Seconds between −1 (min)", "default": 15 },
+        { "type": "range", "id": "tick_max_sec", "min": 10, "max": 110, "step": 1, "unit": "s", "label": "Seconds between −1 (max)", "default": 30, "info": "Each tick waits a random time between min and max. Set ≥ min." },
+        { "type": "range", "id": "pause_min_sec", "min": 10, "max": 510, "step": 5, "unit": "s", "label": "Pause before new target (min)", "default": 45 },
+        { "type": "range", "id": "pause_extra_sec", "min": 0, "max": 500, "step": 5, "unit": "s", "label": "Pause before new target (extra)", "default": 60, "info": "Random 0–this many seconds added after the min pause." }
+      ]
+    },
+    {
+      "type": "variant_picker",
+      "name": "Variant picker",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "picker_style",
+          "label": "Display style",
+          "options": [
+            { "value": "dropdown", "label": "Dropdown" },
+            { "value": "buttons", "label": "Buttons" }
+          ],
+          "default": "buttons"
+        },
+        { "type": "header", "content": "Display Options" },
+        {
+          "type": "checkbox",
+          "id": "show_option_labels",
+          "label": "Show option labels",
+          "default": true,
+          "info": "Shows labels such as Size or Color above each control."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_variant_price",
+          "label": "Show price in variant dropdown",
+          "default": true,
+          "info": "Applies when the product has a single option and dropdown style is selected."
+        },
+        { "type": "header", "content": "Layout" },
+        {
+          "type": "range",
+          "id": "button_border_radius",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "Button border radius",
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "dropdown_border_radius",
+          "min": 0,
+          "max": 30,
+          "step": 1,
+          "unit": "px",
+          "label": "Dropdown border radius",
+          "default": 12
+        },
+        { "type": "header", "content": "Colors" },
+        { "type": "color", "id": "label_color", "label": "Option label", "default": "#000000" },
+        { "type": "color", "id": "control_border_color", "label": "Border", "default": "#dcdcdc" },
+        { "type": "color", "id": "dropdown_background", "label": "Dropdown background", "default": "#ffffff" },
+        { "type": "color", "id": "dropdown_text_color", "label": "Dropdown text", "default": "#000000" },
+        { "type": "color", "id": "button_background", "label": "Button background", "default": "#ffffff" },
+        { "type": "color", "id": "button_text_color", "label": "Button text", "default": "#000000" },
+        { "type": "color", "id": "button_selected_background", "label": "Selected button background", "default": "#000000" },
+        { "type": "color", "id": "button_selected_text_color", "label": "Selected button text", "default": "#ffffff" }
+      ]
+    },
+    { "type": "quantity_selector", "name": "Quantity selector", "limit": 1, "settings": [] },
+    {
+      "type": "buy_buttons",
+      "name": "Add to cart button",
+      "limit": 1,
+      "settings": [
+        { "type": "text", "id": "button_text", "label": "Button text", "default": "Add to cart" },
+        { "type": "color", "id": "button_bg", "label": "Button background", "default": "#000000" },
+        { "type": "color", "id": "button_text_color", "label": "Button text color", "default": "#ffffff" },
+        { "type": "range", "id": "button_radius", "min": 0, "max": 30, "step": 1, "unit": "px", "label": "Button radius", "default": 15 },
+        { "type": "checkbox", "id": "show_price_in_button", "label": "Show price in Add to cart button (right side)", "default": false }
+      ]
+    },
+    {
+      "type": "shipping_eta",
+      "name": "Shipping ETA",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "show", "label": "Show", "default": true },
+        { "type": "text", "id": "line_lead", "label": "Lead text", "default": "Get your order on" },
+        {
+          "type": "select",
+          "id": "date_locale",
+          "label": "Date language",
+          "default": "",
+          "info": "How the delivery date is spelled (weekday, month). “Store default” follows the shopper’s language. SL sets this when you pick a language in the app.",
+          "options": [
+            { "value": "", "label": "Store default" },
+            { "value": "en-US", "label": "English (US)" },
+            { "value": "en-GB", "label": "English (UK)" },
+            { "value": "fr-FR", "label": "French" },
+            { "value": "es-ES", "label": "Spanish" },
+            { "value": "de-DE", "label": "German" },
+            { "value": "it-IT", "label": "Italian" },
+            { "value": "pt-BR", "label": "Portuguese (Brazil)" }
+          ]
+        },
+        { "type": "range", "id": "transit_min", "label": "Transit minimum days", "min": 1, "max": 14, "step": 1, "default": 3 },
+        { "type": "range", "id": "transit_max", "label": "Transit maximum days", "min": 1, "max": 21, "step": 1, "default": 6 },
+        { "type": "color", "id": "text_color", "label": "Lead/date color", "default": "#171717" },
+        { "type": "color", "id": "muted_color", "label": "Body color", "default": "#525252" },
+        { "type": "range", "id": "font_size", "label": "Font size", "min": 10, "max": 20, "step": 1, "unit": "px", "default": 14 },
+        { "type": "range", "id": "margin_top", "label": "Margin top", "min": 0, "max": 30, "step": 1, "unit": "px", "default": 14 }
+      ]
+    },
+    {
+      "type": "trust_container",
+      "name": "Trust container",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "show", "label": "Show", "default": true },
+        {
+          "type": "select",
+          "id": "rating_icon_style",
+          "label": "Rating icon style",
+          "default": "stars",
+          "options": [
+            { "value": "trustpilot", "label": "Trustpilot stars" },
+            { "value": "stars", "label": "Standard stars" }
+          ]
+        },
+        { "type": "text", "id": "rating", "label": "Trust rating", "default": "4.8" },
+        { "type": "url", "id": "badge_image", "label": "Trustpilot stars image URL", "info": "Used when Rating icon style is Trustpilot stars. Leave blank for the default Trustpilot strip." },
+        { "type": "text", "id": "review_count", "label": "Review count", "default": "20,921" },
+        { "type": "text", "id": "reviews_label", "label": "Reviews label", "default": "reviews", "info": "Shown after the count (e.g. reviews). If review count is empty, this field can hold a full phrase instead." },
+        { "type": "text", "id": "delivery_title", "label": "Delivery title", "default": "Free delivery" },
+        { "type": "text", "id": "delivery_body", "label": "Delivery text", "default": "on orders over $50" },
+        { "type": "text", "id": "guarantee_title", "label": "Guarantee title", "default": "30-day guarantee" },
+        { "type": "text", "id": "guarantee_body", "label": "Guarantee text", "default": "— full refund, no hassle" },
+        { "type": "color", "id": "bg_color", "label": "Background", "default": "#ffffff" },
+        { "type": "color", "id": "border_color", "label": "Border", "default": "#e8e8ec" },
+        { "type": "color", "id": "text_color", "label": "Text color", "default": "#0a0a0a" },
+        { "type": "color", "id": "rating_color", "label": "Rating color", "default": "#0a0a0a" },
+        { "type": "color", "id": "divider_color", "label": "Divider color", "default": "#e8e8ec" },
+        { "type": "color", "id": "star_color", "label": "Star color", "default": "#000000" },
+        { "type": "range", "id": "padding", "label": "Padding", "min": 8, "max": 40, "step": 1, "unit": "px", "default": 18 },
+        { "type": "range", "id": "border_radius", "label": "Border radius", "min": 0, "max": 24, "step": 1, "unit": "px", "default": 12 },
+        { "type": "range", "id": "star_size", "label": "Star size", "min": 10, "max": 28, "step": 1, "unit": "px", "default": 16 },
+        { "type": "range", "id": "star_gap", "label": "Star gap", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 8 },
+        { "type": "range", "id": "font_size", "label": "Font size", "min": 11, "max": 18, "step": 1, "unit": "px", "default": 14 },
+        { "type": "range", "id": "margin_top", "label": "Margin top", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 12 },
+        { "type": "range", "id": "margin_bottom", "label": "Margin bottom", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 0 }
+      ]
+    },
+    {
+      "type": "benefits_list",
+      "name": "Benefits list",
+      "limit": 1,
+      "settings": [
+        { "type": "range", "id": "row_gap", "label": "Row gap", "min": 4, "max": 24, "step": 1, "default": 10, "unit": "px" },
+        { "type": "color", "id": "icon_color", "label": "Icon color", "default": "#0a0a0a" },
+        { "type": "color", "id": "text_color", "label": "Text color", "default": "#171717" },
+        { "type": "range", "id": "font_size", "label": "Font size", "min": 12, "max": 22, "step": 1, "default": 14, "unit": "px" },
+        { "type": "range", "id": "wrapper_margin_top", "label": "Top margin", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "range", "id": "wrapper_margin_bottom", "label": "Bottom margin", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "text", "id": "benefit_1", "label": "Benefit 1", "default": "Free shipping on orders over $50" },
+        { "type": "text", "id": "benefit_2", "label": "Benefit 2", "default": "30-day hassle-free returns" },
+        { "type": "text", "id": "benefit_3", "label": "Benefit 3", "default": "Optional third benefit" }
+      ]
+    },
+    {
+      "type": "benefits",
+      "name": "Benefits",
+      "settings": [
+        { "type": "range", "id": "row_gap", "label": "Row gap", "min": 4, "max": 24, "step": 1, "default": 10, "unit": "px" },
+        { "type": "color", "id": "icon_color", "label": "Icon color", "default": "#16a34a" },
+        { "type": "color", "id": "text_color", "label": "Text color", "default": "#171717" },
+        { "type": "range", "id": "font_size", "label": "Font size", "min": 12, "max": 22, "step": 1, "default": 14, "unit": "px" },
+        { "type": "range", "id": "wrapper_margin_top", "label": "Top margin", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "range", "id": "wrapper_margin_bottom", "label": "Bottom margin", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "text", "id": "benefit_1", "label": "Benefit 1", "default": "Free shipping on orders over $50" },
+        { "type": "text", "id": "benefit_2", "label": "Benefit 2", "default": "30-day hassle-free returns" },
+        { "type": "text", "id": "benefit_3", "label": "Benefit 3", "default": "Secure checkout & buyer protection" }
+      ]
+    },
+    {
+      "type": "benefits_with_icons",
+      "name": "Benefits with icons",
+      "settings": [
+        { "type": "range", "id": "row_gap", "label": "Row gap", "min": 4, "max": 24, "step": 1, "default": 10, "unit": "px" },
+        { "type": "color", "id": "icon_color", "label": "Icon color", "default": "#16a34a" },
+        { "type": "color", "id": "text_color", "label": "Text color", "default": "#171717" },
+        { "type": "range", "id": "font_size", "label": "Font size", "min": 12, "max": 22, "step": 1, "default": 14, "unit": "px" },
+        { "type": "range", "id": "wrapper_margin_top", "label": "Top margin", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "range", "id": "wrapper_margin_bottom", "label": "Bottom margin", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "text", "id": "benefit_1", "label": "Benefit 1", "default": "Free shipping on orders over $50" },
+        { "type": "text", "id": "benefit_2", "label": "Benefit 2", "default": "30-day hassle-free returns" },
+        { "type": "text", "id": "benefit_3", "label": "Benefit 3", "default": "Secure checkout & buyer protection" },
+        { "type": "select", "id": "icon_1", "label": "Icon 1", "default": "heart", "options": [{ "value": "drop-simple", "label": "DropSimple" }, { "value": "eyedropper-sample", "label": "EyedropperSample" }, { "value": "heart", "label": "Heart" }, { "value": "hand-heart", "label": "HandHeart" }, { "value": "star", "label": "Star" }, { "value": "star-four", "label": "StarFour" }, { "value": "sparkle", "label": "Sparkle" }, { "value": "brain", "label": "Brain" }, { "value": "calendar", "label": "Calendar" }, { "value": "check-circle", "label": "CheckCircle" }, { "value": "drop-slash", "label": "DropSlash" }, { "value": "fire", "label": "Fire" }, { "value": "flower", "label": "Flower" }, { "value": "hands-clapping", "label": "HandsClapping" }, { "value": "magic-wand", "label": "MagicWand" }, { "value": "plant", "label": "Plant" }, { "value": "push-pin", "label": "PushPin" }, { "value": "rocket-launch", "label": "RocketLaunch" }, { "value": "scan-smiley", "label": "ScanSmiley" }, { "value": "scroll", "label": "Scroll" }, { "value": "seal-check", "label": "SealCheck" }, { "value": "shield-check", "label": "ShieldCheck" }, { "value": "shooting-star", "label": "ShootingStar" }, { "value": "smiley-sticker", "label": "SmileySticker" }, { "value": "tree", "label": "Tree" }, { "value": "virus", "label": "Virus" }, { "value": "waves", "label": "Waves" }, { "value": "x-circle", "label": "XCircle" }, { "value": "trophy", "label": "Trophy" }, { "value": "user", "label": "User" }, { "value": "users", "label": "Users" }, { "value": "timer", "label": "Timer" }, { "value": "thermometer", "label": "Thermometer" }, { "value": "syringe", "label": "Syringe" }, { "value": "spray-bottle", "label": "SprayBottle" }, { "value": "speedometer", "label": "Speedometer" }, { "value": "shower", "label": "Shower" }, { "value": "shirt-folded", "label": "ShirtFolded" }, { "value": "security-camera", "label": "SecurityCamera" }, { "value": "ranking", "label": "Ranking" }, { "value": "plus-circle", "label": "PlusCircle" }, { "value": "pill", "label": "Pill" }, { "value": "person", "label": "Person" }, { "value": "paw-print", "label": "PawPrint" }, { "value": "pants", "label": "Pants" }, { "value": "paint-brush", "label": "PaintBrush" }, { "value": "orange", "label": "Orange" }, { "value": "medal", "label": "Medal" }] },
+        { "type": "select", "id": "icon_2", "label": "Icon 2", "default": "shield-check", "options": [{ "value": "drop-simple", "label": "DropSimple" }, { "value": "eyedropper-sample", "label": "EyedropperSample" }, { "value": "heart", "label": "Heart" }, { "value": "hand-heart", "label": "HandHeart" }, { "value": "star", "label": "Star" }, { "value": "star-four", "label": "StarFour" }, { "value": "sparkle", "label": "Sparkle" }, { "value": "brain", "label": "Brain" }, { "value": "calendar", "label": "Calendar" }, { "value": "check-circle", "label": "CheckCircle" }, { "value": "drop-slash", "label": "DropSlash" }, { "value": "fire", "label": "Fire" }, { "value": "flower", "label": "Flower" }, { "value": "hands-clapping", "label": "HandsClapping" }, { "value": "magic-wand", "label": "MagicWand" }, { "value": "plant", "label": "Plant" }, { "value": "push-pin", "label": "PushPin" }, { "value": "rocket-launch", "label": "RocketLaunch" }, { "value": "scan-smiley", "label": "ScanSmiley" }, { "value": "scroll", "label": "Scroll" }, { "value": "seal-check", "label": "SealCheck" }, { "value": "shield-check", "label": "ShieldCheck" }, { "value": "shooting-star", "label": "ShootingStar" }, { "value": "smiley-sticker", "label": "SmileySticker" }, { "value": "tree", "label": "Tree" }, { "value": "virus", "label": "Virus" }, { "value": "waves", "label": "Waves" }, { "value": "x-circle", "label": "XCircle" }, { "value": "trophy", "label": "Trophy" }, { "value": "user", "label": "User" }, { "value": "users", "label": "Users" }, { "value": "timer", "label": "Timer" }, { "value": "thermometer", "label": "Thermometer" }, { "value": "syringe", "label": "Syringe" }, { "value": "spray-bottle", "label": "SprayBottle" }, { "value": "speedometer", "label": "Speedometer" }, { "value": "shower", "label": "Shower" }, { "value": "shirt-folded", "label": "ShirtFolded" }, { "value": "security-camera", "label": "SecurityCamera" }, { "value": "ranking", "label": "Ranking" }, { "value": "plus-circle", "label": "PlusCircle" }, { "value": "pill", "label": "Pill" }, { "value": "person", "label": "Person" }, { "value": "paw-print", "label": "PawPrint" }, { "value": "pants", "label": "Pants" }, { "value": "paint-brush", "label": "PaintBrush" }, { "value": "orange", "label": "Orange" }, { "value": "medal", "label": "Medal" }] },
+        { "type": "select", "id": "icon_3", "label": "Icon 3", "default": "rocket-launch", "options": [{ "value": "drop-simple", "label": "DropSimple" }, { "value": "eyedropper-sample", "label": "EyedropperSample" }, { "value": "heart", "label": "Heart" }, { "value": "hand-heart", "label": "HandHeart" }, { "value": "star", "label": "Star" }, { "value": "star-four", "label": "StarFour" }, { "value": "sparkle", "label": "Sparkle" }, { "value": "brain", "label": "Brain" }, { "value": "calendar", "label": "Calendar" }, { "value": "check-circle", "label": "CheckCircle" }, { "value": "drop-slash", "label": "DropSlash" }, { "value": "fire", "label": "Fire" }, { "value": "flower", "label": "Flower" }, { "value": "hands-clapping", "label": "HandsClapping" }, { "value": "magic-wand", "label": "MagicWand" }, { "value": "plant", "label": "Plant" }, { "value": "push-pin", "label": "PushPin" }, { "value": "rocket-launch", "label": "RocketLaunch" }, { "value": "scan-smiley", "label": "ScanSmiley" }, { "value": "scroll", "label": "Scroll" }, { "value": "seal-check", "label": "SealCheck" }, { "value": "shield-check", "label": "ShieldCheck" }, { "value": "shooting-star", "label": "ShootingStar" }, { "value": "smiley-sticker", "label": "SmileySticker" }, { "value": "tree", "label": "Tree" }, { "value": "virus", "label": "Virus" }, { "value": "waves", "label": "Waves" }, { "value": "x-circle", "label": "XCircle" }, { "value": "trophy", "label": "Trophy" }, { "value": "user", "label": "User" }, { "value": "users", "label": "Users" }, { "value": "timer", "label": "Timer" }, { "value": "thermometer", "label": "Thermometer" }, { "value": "syringe", "label": "Syringe" }, { "value": "spray-bottle", "label": "SprayBottle" }, { "value": "speedometer", "label": "Speedometer" }, { "value": "shower", "label": "Shower" }, { "value": "shirt-folded", "label": "ShirtFolded" }, { "value": "security-camera", "label": "SecurityCamera" }, { "value": "ranking", "label": "Ranking" }, { "value": "plus-circle", "label": "PlusCircle" }, { "value": "pill", "label": "Pill" }, { "value": "person", "label": "Person" }, { "value": "paw-print", "label": "PawPrint" }, { "value": "pants", "label": "Pants" }, { "value": "paint-brush", "label": "PaintBrush" }, { "value": "orange", "label": "Orange" }, { "value": "medal", "label": "Medal" }] }
+      ]
+    },
+    {
+      "type": "benefits_grid",
+      "name": "Benefits grid",
+      "settings": [
+        { "type": "text", "id": "benefit_1", "label": "Benefit 1", "default": "Free Shipping" },
+        { "type": "text", "id": "benefit_2", "label": "Benefit 2", "default": "30 Days Guarantee" },
+        { "type": "text", "id": "benefit_3", "label": "Benefit 3", "default": "Secure checkout" },
+        { "type": "text", "id": "benefit_4", "label": "Benefit 4", "default": "Buyer protection" },
+        { "type": "range", "id": "font_size_desktop", "label": "Font size desktop", "min": 10, "max": 24, "step": 1, "unit": "px", "default": 12 },
+        { "type": "range", "id": "font_size_mobile", "label": "Font size mobile", "min": 10, "max": 24, "step": 1, "unit": "px", "default": 12 },
+        { "type": "color", "id": "text_color", "label": "Text color", "default": "#000000" },
+        { "type": "color", "id": "checkmark_bg_color", "label": "Checkmark background", "default": "#000000" },
+        { "type": "color", "id": "checkmark_color", "label": "Checkmark color", "default": "#FFFFFF" },
+        { "type": "color", "id": "border_color", "label": "Border color", "default": "#000000" },
+        {
+          "type": "select",
+          "id": "border_style",
+          "label": "Border style",
+          "default": "dashed",
+          "options": [
+            { "value": "solid", "label": "Solid" },
+            { "value": "dashed", "label": "Dashed" },
+            { "value": "dotted", "label": "Dotted" }
+          ]
+        },
+        { "type": "range", "id": "border_width", "label": "Border width", "min": 0, "max": 4, "step": 1, "unit": "px", "default": 1 },
+        { "type": "range", "id": "border_radius", "label": "Border radius", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 20 },
+        { "type": "range", "id": "gap", "label": "Grid gap", "min": 0, "max": 24, "step": 1, "unit": "px", "default": 10 },
+        { "type": "range", "id": "margin_top", "label": "Top margin", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 0 },
+        { "type": "range", "id": "margin_bottom", "label": "Bottom margin", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 0 }
+      ]
+    },
+    {
+      "type": "shipping_timeline",
+      "name": "Shipping estimation",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "use_dynamic_dates", "label": "Use dynamic dates", "default": true },
+        {
+          "type": "select",
+          "id": "date_locale",
+          "label": "Date language",
+          "default": "",
+          "info": "How dates are spelled. “Store default” follows the shopper’s language. SL sets this when you pick a language in the app.",
+          "options": [
+            { "value": "", "label": "Store default" },
+            { "value": "en-US", "label": "English (US)" },
+            { "value": "en-GB", "label": "English (UK)" },
+            { "value": "fr-FR", "label": "French" },
+            { "value": "es-ES", "label": "Spanish" },
+            { "value": "de-DE", "label": "German" },
+            { "value": "it-IT", "label": "Italian" },
+            { "value": "pt-BR", "label": "Portuguese (Brazil)" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "date_format",
+          "label": "Date format",
+          "default": "month_long_day",
+          "options": [
+            { "value": "month_long_day", "label": "April 22" },
+            { "value": "month_short_day", "label": "Apr 22" }
+          ]
+        },
+        { "type": "color", "id": "accent_color", "label": "Accent color", "default": "#4c1d95" },
+        { "type": "color", "id": "icon_bg_color", "label": "Icon background", "default": "#f3e8ff" },
+        { "type": "color", "id": "line_color", "label": "Connector line color", "default": "#e9d5ff" },
+        { "type": "color", "id": "text_color", "label": "Date & label text color", "default": "#171717" },
+        { "type": "range", "id": "icon_size", "label": "Icon size", "min": 24, "max": 56, "step": 1, "default": 45, "unit": "px" },
+        { "type": "range", "id": "font_size", "label": "Text size", "min": 12, "max": 20, "step": 1, "default": 14, "unit": "px" },
+        { "type": "text", "id": "step1_date", "label": "Step 1 date", "default": "12 Apr." },
+        { "type": "range", "id": "step1_offset", "label": "Step 1 offset (days from today)", "min": 0, "max": 21, "step": 1, "default": 0 },
+        { "type": "text", "id": "step1_label", "label": "Step 1 label", "default": "Order placed" },
+        { "type": "text", "id": "step2_date", "label": "Step 2 date", "default": "13 Apr." },
+        { "type": "range", "id": "step2_offset", "label": "Step 2 offset (days from today)", "min": 0, "max": 30, "step": 1, "default": 1 },
+        { "type": "text", "id": "step2_label", "label": "Step 2 label", "default": "Order dispatches" },
+        { "type": "text", "id": "step3_date", "label": "Step 3 date", "default": "15 Apr." },
+        { "type": "range", "id": "step3_offset", "label": "Step 3 offset (days from today)", "min": 0, "max": 45, "step": 1, "default": 3 },
+        { "type": "text", "id": "step3_label", "label": "Step 3 label", "default": "Delivered!" }
+      ]
+    },
+    {
+      "type": "star_rating",
+      "name": "Star rating",
+      "settings": [
+        {
+          "type": "select",
+          "id": "alignment",
+          "label": "Alignment",
+          "default": "center",
+          "options": [
+            { "value": "flex-start", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "flex-end", "label": "Right" }
+          ]
+        },
+        { "type": "range", "id": "layout_gap", "label": "Gap", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "color", "id": "star_color", "label": "Star color", "default": "#f59e0b" },
+        { "type": "range", "id": "star_size", "label": "Star size", "min": 10, "max": 30, "step": 1, "default": 20, "unit": "px" },
+        { "type": "text", "id": "label_text", "label": "Label text", "default": "+1 Million Happy Customers" },
+        { "type": "color", "id": "text_color", "label": "Text color", "default": "#0a0a0a" },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "label": "Text weight",
+          "default": "400",
+          "options": [
+            { "value": "400", "label": "Regular" },
+            { "value": "500", "label": "Medium" },
+            { "value": "600", "label": "Semi-bold" },
+            { "value": "700", "label": "Bold" }
+          ]
+        },
+        { "type": "range", "id": "text_size", "label": "Text size", "min": 10, "max": 24, "step": 1, "default": 15, "unit": "px" },
+        { "type": "range", "id": "margin_top", "label": "Top margin", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "range", "id": "margin_bottom", "label": "Bottom margin", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" }
+      ]
+    },
+    {
+      "type": "payment_badge",
+      "name": "Payment badge",
+      "settings": [
+        { "type": "select", "id": "alignment", "label": "Alignment", "default": "center", "options": [{ "value": "flex-start", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "flex-end", "label": "Right" }] },
+        { "type": "range", "id": "gap", "label": "Gap", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "range", "id": "padding", "label": "Padding", "min": 0, "max": 24, "step": 1, "default": 12, "unit": "px" },
+        { "type": "color", "id": "bg_color", "label": "Background color", "default": "transparent" },
+        { "type": "range", "id": "border_radius", "label": "Border radius", "min": 0, "max": 24, "step": 1, "default": 8, "unit": "px" },
+        { "type": "range", "id": "icon_height", "label": "Icon height", "min": 12, "max": 40, "step": 1, "default": 28, "unit": "px" },
+        { "type": "range", "id": "icon_height_mobile", "label": "Icon height mobile", "min": 10, "max": 32, "step": 1, "default": 20, "unit": "px" },
+        { "type": "range", "id": "gap_mobile", "label": "Gap mobile", "min": 0, "max": 20, "step": 1, "default": 6, "unit": "px" },
+        { "type": "range", "id": "padding_mobile", "label": "Padding mobile", "min": 0, "max": 20, "step": 1, "default": 8, "unit": "px" },
+        { "type": "select", "id": "icon_style", "label": "Icon style", "default": "none", "options": [{ "value": "none", "label": "None" }, { "value": "grayscale(1)", "label": "Grayscale" }] },
+        { "type": "range", "id": "margin_top", "label": "Top margin", "min": 0, "max": 24, "step": 1, "default": 4, "unit": "px" },
+        { "type": "range", "id": "margin_bottom", "label": "Bottom margin", "min": 0, "max": 24, "step": 1, "default": 4, "unit": "px" },
+        { "type": "select", "id": "show_visa", "label": "Show Visa", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_mastercard", "label": "Show Mastercard", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_amex", "label": "Show American Express", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_discover", "label": "Show Discover", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_paypal", "label": "Show PayPal", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_stripe", "label": "Show Stripe", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_apple_pay", "label": "Show Apple Pay", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_google_pay", "label": "Show Google Pay", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_ideal", "label": "Show iDEAL", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_klarna", "label": "Show Klarna", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_afterpay", "label": "Show Afterpay", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_shop_pay", "label": "Show Shop Pay", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_venmo", "label": "Show Venmo", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_diners", "label": "Show Diners Club", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_jcb", "label": "Show JCB", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_unionpay", "label": "Show UnionPay", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] },
+        { "type": "select", "id": "show_alipay", "label": "Show Alipay", "default": "block", "options": [{ "value": "block", "label": "Show" }, { "value": "none", "label": "Hide" }] }
+      ]
+    },
+    {
+      "type": "description",
+      "name": "Description",
+      "limit": 1,
+      "settings": [
+        { "type": "range", "id": "margin_top", "label": "Top margin", "min": 0, "max": 40, "step": 1, "default": 0, "unit": "px" },
+        { "type": "range", "id": "margin_bottom", "label": "Bottom margin", "min": 0, "max": 40, "step": 1, "default": 0, "unit": "px" }
+      ]
+    },
+    {
+      "type": "collapsible_row",
+      "name": "Collapsible row",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "How does this synbiotic work?" },
+        { "type": "richtext", "id": "content", "label": "Content", "default": "<p>It combines probiotic strains and prebiotic support to help maintain digestive balance.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product information 2",
+      "blocks": [
+        { "type": "trustpilot_row" },
+        { "type": "title" },
+        { "type": "price" },
+        { "type": "summary_line" },
+        { "type": "stock_urgency" },
+        { "type": "low_stock" },
+        { "type": "buy_buttons" },
+        { "type": "shipping_eta" },
+        { "type": "collapsible_row" },
+        { "type": "collapsible_row", "settings": { "title": "When should I take it?", "content": "<p>Take daily, as directed on your product label.</p>" } },
+        { "type": "collapsible_row", "settings": { "title": "How long until I notice results?", "content": "<p>Many customers report noticeable changes after consistent daily use.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
