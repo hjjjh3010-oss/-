@@ -1,0 +1,393 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "storelaunch-product-information",
+      "blocks": {
+        "b_star": {
+          "type": "star_badge",
+          "settings": {}
+        },
+        "b_title": {
+          "type": "title",
+          "settings": {}
+        },
+        "b_price": {
+          "type": "price",
+          "settings": {}
+        },
+        "b_benefits": {
+          "type": "benefits_list",
+          "settings": {
+            "benefit_1": "Vibrant Holographic Design",
+            "benefit_2": "Personalization Made Easy",
+            "benefit_3": "Perfect for Everyone"
+          }
+        },
+        "b_buy": {
+          "type": "buy_buttons",
+          "settings": {}
+        },
+        "b_ship_tl": {
+          "type": "shipping_timeline",
+          "settings": {}
+        },
+        "b_how_works": {
+          "type": "collapsible_row",
+          "settings": {
+            "title": "How It Works",
+            "content": "<p>Make Gifting Magical This Season!</p>"
+          }
+        },
+        "b_how_use": {
+          "type": "collapsible_row",
+          "settings": {
+            "title": "How to Use",
+            "content": "<p>Perfect for any occasion, this booklet not only brings joy but also allows you to express your creativity.</p>"
+          }
+        },
+        "b_shipping": {
+          "type": "collapsible_row",
+          "settings": {
+            "title": "Shipping",
+            "content": "<p>Standard shipping typically takes 7–15 business days. We also offer expedited shipping options at checkout if you need your order faster.</p>"
+          }
+        },
+        "b_return": {
+          "type": "collapsible_row",
+          "settings": {
+            "title": "Return",
+            "content": "<p>Simply email us within 30 days and we'll process a full refund immediately. No return shipping required, no questions asked. We stand behind every order.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "b_star",
+        "b_title",
+        "b_price",
+        "b_benefits",
+        "b_buy",
+        "b_ship_tl",
+        "b_how_works",
+        "b_how_use",
+        "b_shipping",
+        "b_return"
+      ],
+      "settings": {
+        "accent_color": "#FF4B4B"
+      }
+    },
+    "sl_features": {
+      "type": "storelaunch-comparison-features",
+      "blocks": {
+        "f_l1_0": {
+          "type": "block-left",
+          "settings": {
+            "block-title-left": "Vibrant Holographic Design",
+            "block-des-left": "<p>Captivate your loved ones with brilliant colors that sparkle and shine, making every gift feel special.</p>"
+          }
+        },
+        "f_l2_1": {
+          "type": "block-left",
+          "settings": {
+            "block-title-left": "Personalization Made Easy",
+            "block-des-left": "<p>With multiple pages ready for your personal messages and wishes, transform gifts into cherished memories.</p>"
+          }
+        },
+        "f_r1_0": {
+          "type": "block-right",
+          "settings": {
+            "block-title": "Perfect for Everyone",
+            "block-des": "<p>Whether for kids or adults, this gift card booklet is the ideal way to spread holiday cheer to anyone on your…</p>"
+          }
+        },
+        "f_r2_1": {
+          "type": "block-right",
+          "settings": {
+            "block-title": "User-Friendly Spiral-Bound",
+            "block-des": "<p>Easily flip through pages and write down your thoughtful messages, making gift-giving a breeze!</p>"
+          }
+        }
+      },
+      "block_order": [
+        "f_l1_0",
+        "f_l2_1",
+        "f_r1_0",
+        "f_r2_1"
+      ],
+      "settings": {
+        "title": "Why You'll Love It",
+        "des": "<p>Make Gifting Magical This Season!</p>",
+        "page_width": 1200,
+        "bg_color": "#ffffff",
+        "accent_color": "#a891f6",
+        "heading_color": "#121212",
+        "text_color": "#121212",
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
+    },
+    "sl_video": {
+      "type": "storelaunch-video-with-text",
+      "blocks": {
+        "b1_0": {
+          "type": "bar",
+          "settings": {
+            "bar_no": 78,
+            "bar_des": "<p>Vibrant Holographic Design</p>"
+          }
+        },
+        "b2_1": {
+          "type": "bar",
+          "settings": {
+            "bar_no": 84,
+            "bar_des": "<p>Personalization Made Easy</p>"
+          }
+        },
+        "b3_2": {
+          "type": "bar",
+          "settings": {
+            "bar_no": 71,
+            "bar_des": "<p>Perfect for Everyone</p>"
+          }
+        }
+      },
+      "block_order": [
+        "b1_0",
+        "b2_1",
+        "b3_2"
+      ],
+      "settings": {
+        "heading": "See It In Action",
+        "video_url": "",
+        "pre_btn": "<p>Make Gifting Magical This Season!</p>",
+        "buybutton": "Shop now",
+        "page_width": 1200,
+        "bg_color": "#ffffff",
+        "primary_color": "#7069bc",
+        "secondary_color": "#e3d2fd",
+        "heading_color": "#121212",
+        "text_color": "#121212",
+        "button_bg": "#000000",
+        "button_text": "#ffffff",
+        "button_radius": 8,
+        "padding_top": 40,
+        "padding_bottom": 40
+      }
+    },
+    "sl_compare": {
+      "type": "storelaunch-comparison-table",
+      "blocks": {
+        "c1_0": {
+          "type": "feature",
+          "settings": {
+            "title": "Vibrant Holographic Design",
+            "this_store": "yes",
+            "other_store": "no"
+          }
+        },
+        "c2_1": {
+          "type": "feature",
+          "settings": {
+            "title": "Personalization Made Easy",
+            "this_store": "yes",
+            "other_store": "no"
+          }
+        },
+        "c3_2": {
+          "type": "feature",
+          "settings": {
+            "title": "Perfect for Everyone",
+            "this_store": "yes",
+            "other_store": "no"
+          }
+        },
+        "c4_3": {
+          "type": "feature",
+          "settings": {
+            "title": "User-Friendly Spiral-Bound",
+            "this_store": "yes",
+            "other_store": "no"
+          }
+        }
+      },
+      "block_order": [
+        "c1_0",
+        "c2_1",
+        "c3_2",
+        "c4_3"
+      ],
+      "settings": {
+        "title": "Why Choose Our Booklet?",
+        "des": "<p>Unlike traditional gift cards, this booklet adds a personal touch, ensuring that your gifts not only convey love but also creativity.</p>",
+        "store_name": "This product",
+        "other": "Typical listing",
+        "page_width": 1200,
+        "padding_desktop": 50,
+        "padding_mobile": 15,
+        "column_width": "half",
+        "bg_color": "#ffffff",
+        "table_bg": "#000000",
+        "table_text": "#ffffff",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "sl_reviews_img": {
+      "type": "storelaunch-reviews-image",
+      "blocks": {
+        "r1": {
+          "type": "image",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "r1"
+      ],
+      "settings": {
+        "heading": "See It In Action",
+        "body": "<p>Make Gifting Magical This Season!</p>",
+        "rating_text": "",
+        "button_label": "Shop now",
+        "page_width": 1200,
+        "bg_color": "#ffffff",
+        "heading_color": "#121212",
+        "text_color": "#121212",
+        "star_color": "#ffd700",
+        "button_bg": "#000000",
+        "button_text": "#ffffff",
+        "button_radius": 8,
+        "padding_top": 40,
+        "padding_bottom": 40
+      }
+    },
+    "sl_testimonials": {
+      "type": "storelaunch-testimonials",
+      "blocks": {
+        "t1_0": {
+          "type": "review",
+          "settings": {
+            "rev_title": "Absolutely Stunning!",
+            "rev_description": "<p>The holographic design is even more beautiful in person! My family loved the personalized touch.</p>",
+            "author": "Emily R."
+          }
+        },
+        "t2_1": {
+          "type": "review",
+          "settings": {
+            "rev_title": "Perfect Holiday Gift!",
+            "rev_description": "<p>This booklet made giving gift cards so much more special. Highly recommend it!</p>",
+            "author": "James T."
+          }
+        },
+        "t3_2": {
+          "type": "review",
+          "settings": {
+            "rev_title": "Great Quality!",
+            "rev_description": "<p>The pages are durable and easy to write on. I will be buying more for next year!</p>",
+            "author": "Sophie L."
+          }
+        }
+      },
+      "block_order": [
+        "t1_0",
+        "t2_1",
+        "t3_2"
+      ],
+      "settings": {
+        "title": "Notes from buyers",
+        "heading_align": "center",
+        "page_width": 1200,
+        "bg_color": "#ffffff",
+        "card_bg": "#f7f7f7",
+        "heading_color": "#121212",
+        "text_color": "#121212",
+        "star_color": "#ffd700",
+        "padding_top": 40,
+        "padding_bottom": 40
+      }
+    },
+    "sl_faq": {
+      "type": "storelaunch-faq",
+      "blocks": {
+        "q1_0": {
+          "type": "question",
+          "settings": {
+            "question": "Is this booklet suitable for all ages?",
+            "answer": "<p>Absolutely! It's designed to be a fun and festive gift option for everyone.</p>"
+          }
+        },
+        "q2_1": {
+          "type": "question",
+          "settings": {
+            "question": "Can I customize the pages?",
+            "answer": "<p>Yes! Each page is perfect for your personal messages, wishes, or coupons.</p>"
+          }
+        },
+        "q3_2": {
+          "type": "question",
+          "settings": {
+            "question": "What is the size of the booklet?",
+            "answer": "<p>It's compact and lightweight, making it easy to carry around.</p>"
+          }
+        },
+        "q4_3": {
+          "type": "question",
+          "settings": {
+            "question": "What material is used for the booklet?",
+            "answer": "<p>We use high-quality, durable paper for a premium feel and lasting use.</p>"
+          }
+        },
+        "q5_4": {
+          "type": "question",
+          "settings": {
+            "question": "What is Ever Wish Gift Card book?",
+            "answer": "<p>Make Gifting Magical This Season!</p>"
+          }
+        },
+        "q6_5": {
+          "type": "question",
+          "settings": {
+            "question": "How do I use Ever Wish Gift Card book?",
+            "answer": "<p>Perfect for both boys and girls, this festive collection offers a delightful way to present greeting cards or coupons during the holiday season.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1_0",
+        "q2_1",
+        "q3_2",
+        "q4_3",
+        "q5_4",
+        "q6_5"
+      ],
+      "settings": {
+        "heading": "Frequently Asked Questions",
+        "open_first": true,
+        "bg_color": "#fafafa",
+        "secondary_color": "#ffffff",
+        "heading_color": "#121212",
+        "text_color": "#121212",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    }
+  },
+  "order": [
+    "main",
+    "sl_features",
+    "sl_video",
+    "sl_compare",
+    "sl_reviews_img",
+    "sl_testimonials",
+    "sl_faq"
+  ]
+}
