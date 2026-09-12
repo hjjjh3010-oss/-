@@ -1,0 +1,330 @@
+{% comment %}
+  StoreLaunch — Video / Image With Text + animated stat bars
+  Decoupled: replaced Dawn color-scheme + relied-upon theme layout CSS with
+  self-contained flexbox. Conic-gradient progress rings kept (they were already
+  self-contained). All colors via settings. Scoped to the section.
+{% endcomment %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Assistant:wght@400;600;700&display=swap">
+
+{%- style -%}
+  #shopify-section-{{ section.id }} .sl-fadeup{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1);will-change:opacity,transform;}
+  #shopify-section-{{ section.id }} .sl-fadeup.is-in{opacity:1;transform:none;}
+  @media (prefers-reduced-motion: reduce){#shopify-section-{{ section.id }} .sl-fadeup{opacity:1!important;transform:none!important;transition:none!important;}}
+
+  {{ section.settings.sl_mt_font | font_face: font_display: 'swap' }}
+  #shopify-section-{{ section.id }}, #shopify-section-{{ section.id }} * { font-family: {{ section.settings.sl_mt_font.family }}, {{ section.settings.sl_mt_font.fallback_families }} !important; }
+  @property --sl-vwt-pct-{{ section.id }} { syntax: '<number>'; inherits: true; initial-value: 0; }
+  @keyframes sl-vwt-progress-{{ section.id }} { 0% { --sl-vwt-pct-{{ section.id }}: 0; } 100% { --sl-vwt-pct-{{ section.id }}: var(--sl-vwt-val); } }
+
+  #shopify-section-{{ section.id }} .sl-vwt {
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  #shopify-section-{{ section.id }} .sl-vwt__inner {
+    max-width: {{ section.settings.page_width }}px;
+    margin: 0 auto; padding-left: 1.5rem; padding-right: 1.5rem;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 2.4rem;
+  }
+  #shopify-section-{{ section.id }} .sl-vwt__media { flex: 1 1 380px; }
+  #shopify-section-{{ section.id }} .sl-vwt__text { flex: 1 1 380px; }
+  #shopify-section-{{ section.id }} .sl-vwt__media video,
+  #shopify-section-{{ section.id }} .sl-vwt__media img { width: 100%; border-radius: 25px; display: block; }
+  #shopify-section-{{ section.id }} .sl-vwt__fallback {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; aspect-ratio: 1/1; border-radius: 16px;
+    background: {{ section.settings.primary_color | color_modify: 'alpha', 0.06 }};
+    border: 1px dashed {{ section.settings.text_color | color_modify: 'alpha', 0.15 }};
+    color: var(--sl-accent, {{ section.settings.primary_color }});
+  }
+  #shopify-section-{{ section.id }} .sl-vwt__heading { color: {{ section.settings.heading_color }}; margin: 0 0 1.6rem; font-family: {{ section.settings.sl_mt_font.family }}, {{ section.settings.sl_mt_font.fallback_families }};font-size: {{ section.settings.heading_fs }}px;line-height: 1.2;font-weight: 700;margin: 0 0 1rem;text-wrap: balance; }
+  #shopify-section-{{ section.id }} .sl-vwt__stat { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.4rem; }
+  #shopify-section-{{ section.id }} .sl-vwt__ring {
+    --sl-vwt-val: 0; width: 64px; height: 64px; border-radius: 50%; flex: 0 0 64px; position: relative;
+    animation: sl-vwt-progress-{{ section.id }} 1.4s ease forwards;
+  }
+  #shopify-section-{{ section.id }} .sl-vwt__ring::before {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background: conic-gradient(var(--sl-accent, {{ section.settings.primary_color }}) calc(var(--sl-vwt-pct-{{ section.id }}) * 1%), color-mix(in srgb, var(--sl-accent, {{ section.settings.primary_color }}) 22%, #ffffff) 0);
+    -webkit-mask: radial-gradient(#0000 55%, #000 0); mask: radial-gradient(transparent 55%, #000 0);
+  }
+  #shopify-section-{{ section.id }} .sl-vwt__ring::after {
+    content: attr(data-val) "%"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: {{ section.settings.ring_fs }}px; font-weight: 700; color: var(--sl-accent, {{ section.settings.primary_color }});
+  }
+  #shopify-section-{{ section.id }} .sl-vwt__stat .sl-vwt__stat-text { color: {{ section.settings.text_color }}; opacity: 0.85; font-size: {{ section.settings.stat_fs }}px; }
+  #shopify-section-{{ section.id }} .sl-vwt__stat .sl-vwt__stat-text p { margin: 0; }
+  #shopify-section-{{ section.id }} .sl-vwt__pre { color: {{ section.settings.text_color }}; opacity: 0.8; font-size: {{ section.settings.pre_fs }}px; line-height: 1.55; margin: 1rem 0; max-width: 60ch; }
+  #shopify-section-{{ section.id }} .sl-vwt__btn {
+    display: inline-block; padding: 14px 32px; border-radius: {{ section.settings.button_radius }}px;
+    background: {{ section.settings.button_bg }}; color: {{ section.settings.button_text }};
+    text-decoration: none; font-weight: 600;
+  }
+  @media (max-width: 749px) {
+    #shopify-section-{{ section.id }} .sl-vwt__inner { flex-direction: column; padding-left: 1rem; padding-right: 1rem; }
+    #shopify-section-{{ section.id }} .sl-vwt__heading { font-size: {{ section.settings.heading_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-vwt__ring::after { font-size: {{ section.settings.ring_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-vwt__stat .sl-vwt__stat-text { font-size: {{ section.settings.stat_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-vwt__pre { font-size: {{ section.settings.pre_fs_m }}px; }
+  }
+{%- endstyle -%}
+
+<div class="sl-vwt">
+  <div class="sl-vwt__inner">
+    <div class="sl-vwt__media">
+      {%- liquid
+        # Auto-rotate: when the merchant hasn't set a video or photo, show a
+        # product image that is NOT the main one (fixed slot 3) so this section
+        # surfaces a different shot. Merchant video/photo always win below.
+        assign vwt_img = product.featured_image
+        assign vwt_count = product.images.size | default: 0
+        if vwt_count > 0
+          assign vwt_idx = 3 | modulo: vwt_count
+          assign vwt_rot = product.images[vwt_idx]
+          if vwt_rot != blank
+            assign vwt_img = vwt_rot
+          endif
+        endif
+      -%}
+      {% if section.settings.video_url != blank %}
+        <video autoplay loop muted playsinline controlslist="nodownload" src="{{ section.settings.video_url }}"></video>
+      {% elsif section.settings.photo != blank %}
+        <img loading="lazy" src="{{ section.settings.photo | image_url: width: 800 }}" alt="{{ section.settings.heading | escape }}">
+      {% elsif vwt_img != blank %}
+        <img loading="lazy" src="{{ vwt_img | image_url: width: 800 }}" alt="{{ section.settings.heading | escape }}">
+      {% else %}
+        <div class="sl-vwt__fallback" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="64" height="64">
+            <rect x="6" y="10" width="52" height="44" rx="8" stroke="currentColor" stroke-width="2.5" opacity="0.5"/>
+            <path d="M27 26.5v11l9.5-5.5L27 26.5Z" fill="currentColor" opacity="0.5"/>
+          </svg>
+        </div>
+      {% endif %}
+    </div>
+    <div class="sl-vwt__text">
+      {% if section.settings.heading != blank %}<h2 class="sl-vwt__heading">{{ section.settings.heading }}</h2>{% endif %}
+      {% for block in section.blocks %}
+        <div class="sl-vwt__stat" {{ block.shopify_attributes }}>
+          <div class="sl-vwt__ring" style="--sl-vwt-val: {{ block.settings.bar_no }};" data-val="{{ block.settings.bar_no }}"
+               role="progressbar" aria-valuenow="{{ block.settings.bar_no }}" aria-valuemin="0" aria-valuemax="100"></div>
+          <div class="sl-vwt__stat-text">{{ block.settings.bar_des }}</div>
+        </div>
+      {% endfor %}
+      {% if section.settings.pre_btn != blank %}<div class="sl-vwt__pre">{{ section.settings.pre_btn }}</div>{% endif %}
+      {% if section.settings.buybutton != blank %}
+        <a class="sl-vwt__btn" {% if section.settings.buybutton_link == blank %}href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;"{% else %}href="{{ section.settings.buybutton_link }}"{% endif %}>{{ section.settings.buybutton }}</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{%- if section.settings.sl_fade_up != false -%}
+<script>
+(function(){
+  var root=document.getElementById('shopify-section-{{ section.id }}');
+  if(!root||root.dataset.slFadeBound)return;root.dataset.slFadeBound='1';
+  var targets=root.querySelectorAll(':scope > .shopify-section, :scope > div, :scope > section');
+  targets.forEach(function(t){t.classList.add('sl-fadeup');});
+  if(!('IntersectionObserver' in window)){targets.forEach(function(t){t.classList.add('is-in');});return;}
+  var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target);}});},{threshold:0.12,rootMargin:'0px 0px -8% 0px'});
+  targets.forEach(function(t){io.observe(t);});
+})();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "SL Video With Text",
+  "tag": "section",
+  "class": "sl-video-with-text",
+  "settings": [
+    {
+      "type": "font_picker",
+      "id": "sl_mt_font",
+      "label": "Font family",
+      "default": "montserrat_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "sl_fade_up",
+      "label": "Entrance animation (fade up on scroll)",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Proven Results"
+    },
+    {
+      "type": "text",
+      "id": "video_url",
+      "label": "Video URL (.mp4)",
+      "info": "Leave blank to use an image instead"
+    },
+    {
+      "type": "image_picker",
+      "id": "photo",
+      "label": "Image (fallback if no video)"
+    },
+    {
+      "type": "richtext",
+      "id": "pre_btn",
+      "label": "Text above button",
+      "default": "<p>Results based on consistent use.</p>"
+    },
+    {
+      "type": "text",
+      "id": "buybutton",
+      "label": "Button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "buybutton_link",
+      "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "page_width",
+      "min": 800,
+      "max": 1600,
+      "step": 100,
+      "default": 1200,
+      "unit": "px",
+      "label": "Max width"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Progress / accent",
+      "default": "#7069bc"
+    },
+    {
+      "type": "color",
+      "id": "secondary_color",
+      "label": "Progress track",
+      "default": "#e3d2fd"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "button_bg",
+      "label": "Button background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Button radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Font Sizes"
+    },
+    { "type": "range", "id": "heading_fs", "min": 18, "max": 64, "step": 1, "unit": "px", "label": "Heading size (desktop)", "default": 38 },
+    { "type": "range", "id": "heading_fs_m", "min": 16, "max": 52, "step": 1, "unit": "px", "label": "Heading size (mobile)", "default": 26 },
+    { "type": "range", "id": "stat_fs", "min": 10, "max": 24, "step": 1, "unit": "px", "label": "Stat text size (desktop)", "default": 14 },
+    { "type": "range", "id": "stat_fs_m", "min": 10, "max": 22, "step": 1, "unit": "px", "label": "Stat text size (mobile)", "default": 13 },
+    { "type": "range", "id": "ring_fs", "min": 8, "max": 22, "step": 1, "unit": "px", "label": "Ring percentage size (desktop)", "default": 13 },
+    { "type": "range", "id": "ring_fs_m", "min": 8, "max": 20, "step": 1, "unit": "px", "label": "Ring percentage size (mobile)", "default": 12 },
+    { "type": "range", "id": "pre_fs", "min": 10, "max": 24, "step": 1, "unit": "px", "label": "Text above button size (desktop)", "default": 14 },
+    { "type": "range", "id": "pre_fs_m", "min": 10, "max": 22, "step": 1, "unit": "px", "label": "Text above button size (mobile)", "default": 13 },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "type": "bar",
+      "name": "Stat bar",
+      "settings": [
+        {
+          "type": "range",
+          "id": "bar_no",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "label": "Percentage",
+          "default": 90
+        },
+        {
+          "type": "richtext",
+          "id": "bar_des",
+          "label": "Description",
+          "default": "<p>of users saw results.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL Video With Text",
+      "blocks": [
+        {
+          "type": "bar"
+        },
+        {
+          "type": "bar"
+        },
+        {
+          "type": "bar"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

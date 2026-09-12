@@ -1,0 +1,300 @@
+{% comment %}
+  StoreLaunch — Product Reviews With Image
+  Full rebuild of the old scraped static block. Now has real settings + blocks
+  so it can be populated per-product. No accentuate.io CDN, no FontAwesome,
+  no fake Slick markup. Inline SVG stars. Scoped CSS.
+{% endcomment %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Assistant:wght@400;600;700&display=swap">
+
+{%- style -%}
+  #shopify-section-{{ section.id }} .sl-fadeup{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1);will-change:opacity,transform;}
+  #shopify-section-{{ section.id }} .sl-fadeup.is-in{opacity:1;transform:none;}
+  @media (prefers-reduced-motion: reduce){#shopify-section-{{ section.id }} .sl-fadeup{opacity:1!important;transform:none!important;transition:none!important;}}
+
+  {{ section.settings.sl_mt_font | font_face: font_display: 'swap' }}
+  #shopify-section-{{ section.id }}, #shopify-section-{{ section.id }} * { font-family: {{ section.settings.sl_mt_font.family }}, {{ section.settings.sl_mt_font.fallback_families }} !important; }
+  #shopify-section-{{ section.id }} .sl-rev {
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  #shopify-section-{{ section.id }} .sl-rev__inner {
+    max-width: {{ section.settings.page_width }}px;
+    margin: 0 auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2.4rem;
+  }
+  #shopify-section-{{ section.id }} .sl-rev__text { flex: 1 1 360px; text-align: left; }
+  #shopify-section-{{ section.id }} .sl-rev__media { flex: 1 1 360px; }
+  #shopify-section-{{ section.id }} .sl-rev__heading {
+    color: {{ section.settings.heading_color }};
+    font-family: {{ section.settings.sl_mt_font.family }}, {{ section.settings.sl_mt_font.fallback_families }};font-size: {{ section.settings.heading_fs }}px;line-height: 1.15;font-weight: 700;margin: 0 0 1rem;text-wrap: balance;
+  }
+  #shopify-section-{{ section.id }} .sl-rev__text p {
+    color: {{ section.settings.text_color }}; opacity: 0.85; margin: 0 0 1.4rem;
+    max-width: 60ch;font-size: {{ section.settings.body_fs }}px;line-height: 1.6;
+  }
+  #shopify-section-{{ section.id }} .sl-rev__stars {
+    display: inline-flex; gap: 3px; margin-bottom: .6rem;
+  }
+  #shopify-section-{{ section.id }} .sl-rev__stars svg { width: 20px; height: 20px; color: var(--sl-accent, {{ section.settings.star_color }}); }
+  #shopify-section-{{ section.id }} .sl-rev__rating { font-size: {{ section.settings.rating_fs }}px; color: {{ section.settings.text_color }}; opacity: 0.8; }
+  #shopify-section-{{ section.id }} .sl-rev__btn {
+    display: inline-block; margin-top: 1.4rem; padding: 14px 30px;
+    background: var(--sl-accent, {{ section.settings.button_bg }}); color: {{ section.settings.button_text }};
+    border-radius: {{ section.settings.button_radius }}px; text-decoration: none; font-weight: 600;
+  }
+  #shopify-section-{{ section.id }} .sl-rev__grid {
+    display: grid; grid-template-columns: 1fr; gap: 12px; max-width: 360px; margin: 0 auto;
+  }
+  #shopify-section-{{ section.id }} .sl-rev__grid img {
+    width: 100%; border-radius: 14px; display: block; aspect-ratio: 4/5; max-height: 450px; object-fit: cover;
+  }
+  #shopify-section-{{ section.id }} .sl-rev__fallback {
+    aspect-ratio: 1/1; border-radius: 14px;
+    background: {{ section.settings.star_color | color_modify: 'alpha', 0.08 }};
+    border: 1px dashed {{ section.settings.text_color | color_modify: 'alpha', 0.15 }};
+  }
+  @media (max-width: 749px) {
+    #shopify-section-{{ section.id }} .sl-rev__inner { flex-direction: column; padding-left: 1rem; padding-right: 1rem; }
+    #shopify-section-{{ section.id }} .sl-rev__heading { font-size: {{ section.settings.heading_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-rev__text p { font-size: {{ section.settings.body_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-rev__rating { font-size: {{ section.settings.rating_fs_m }}px; }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  capture star
+    echo '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 15.9 4.8 17.6l1-5.8L1.5 7.7l5.9-.9z"/></svg>'
+  endcapture
+-%}
+
+<div class="sl-rev">
+  <div class="sl-rev__inner">
+    <div class="sl-rev__text">
+      {% if section.settings.heading != blank %}<h2 class="sl-rev__heading">{{ section.settings.heading }}</h2>{% endif %}
+      {% if section.settings.body != blank %}<p>{{ section.settings.body }}</p>{% endif %}
+      <div class="sl-rev__stars">{{ star }}{{ star }}{{ star }}{{ star }}{{ star }}</div>
+      {% if section.settings.rating_text != blank %}
+        <div class="sl-rev__rating">{{ section.settings.rating_text }}</div>
+      {% endif %}
+      {% if section.settings.button_label != blank %}
+        <a href="{{ section.settings.button_link | default: '#' }}" class="sl-rev__btn">{{ section.settings.button_label }}</a>
+      {% endif %}
+    </div>
+    <div class="sl-rev__media">
+      <div class="sl-rev__grid">
+        {% for block in section.blocks %}
+          {%- if block.settings.image != blank -%}
+            <img loading="lazy" src="{{ block.settings.image | image_url: width: 600 }}" alt="Customer review" {{ block.shopify_attributes }}>
+          {%- else -%}
+            {%- liquid
+              # Auto-rotate through ALL product images so each review tile shows a
+              # different shot (instead of reusing the single featured image).
+              # A merchant-set block image always wins (handled above).
+              assign rev_img = product.featured_image
+              assign rev_count = product.images.size | default: 0
+              if rev_count > 0
+                assign rev_idx = forloop.index0 | plus: 1 | modulo: rev_count
+                assign rev_rot = product.images[rev_idx]
+                if rev_rot != blank
+                  assign rev_img = rev_rot
+                endif
+              endif
+            -%}
+            {%- if rev_img != blank -%}
+              <img loading="lazy" src="{{ rev_img | image_url: width: 600 }}" alt="Customer review" {{ block.shopify_attributes }}>
+            {%- else -%}
+              <div class="sl-rev__fallback" {{ block.shopify_attributes }}></div>
+            {%- endif -%}
+          {%- endif -%}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- if section.settings.sl_fade_up != false -%}
+<script>
+(function(){
+  var root=document.getElementById('shopify-section-{{ section.id }}');
+  if(!root||root.dataset.slFadeBound)return;root.dataset.slFadeBound='1';
+  var targets=root.querySelectorAll(':scope > .shopify-section, :scope > div, :scope > section');
+  targets.forEach(function(t){t.classList.add('sl-fadeup');});
+  if(!('IntersectionObserver' in window)){targets.forEach(function(t){t.classList.add('is-in');});return;}
+  var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target);}});},{threshold:0.12,rootMargin:'0px 0px -8% 0px'});
+  targets.forEach(function(t){io.observe(t);});
+})();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "SL Reviews With Image",
+  "tag": "section",
+  "class": "sl-reviews-image",
+  "settings": [
+    {
+      "type": "font_picker",
+      "id": "sl_mt_font",
+      "label": "Font family",
+      "default": "montserrat_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "sl_fade_up",
+      "label": "Entrance animation (fade up on scroll)",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "See How Others Love It"
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body text",
+      "default": "<p>Real results from real customers.</p>"
+    },
+    {
+      "type": "text",
+      "id": "rating_text",
+      "label": "Rating line",
+      "default": "Rated 4.9/5 by 175,000+ Happy Customers"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Claim Offer"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "range",
+      "id": "page_width",
+      "min": 800,
+      "max": 1600,
+      "step": 100,
+      "default": 1200,
+      "unit": "px",
+      "label": "Max width"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star color",
+      "default": "#ffd700"
+    },
+    {
+      "type": "color",
+      "id": "button_bg",
+      "label": "Button background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Button radius",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Font Sizes"
+    },
+    { "type": "range", "id": "heading_fs", "min": 18, "max": 64, "step": 1, "unit": "px", "label": "Heading size (desktop)", "default": 38 },
+    { "type": "range", "id": "heading_fs_m", "min": 16, "max": 52, "step": 1, "unit": "px", "label": "Heading size (mobile)", "default": 26 },
+    { "type": "range", "id": "body_fs", "min": 12, "max": 28, "step": 1, "unit": "px", "label": "Body text size (desktop)", "default": 17 },
+    { "type": "range", "id": "body_fs_m", "min": 12, "max": 24, "step": 1, "unit": "px", "label": "Body text size (mobile)", "default": 15 },
+    { "type": "range", "id": "rating_fs", "min": 10, "max": 24, "step": 1, "unit": "px", "label": "Rating line size (desktop)", "default": 14 },
+    { "type": "range", "id": "rating_fs_m", "min": 10, "max": 22, "step": 1, "unit": "px", "label": "Rating line size (mobile)", "default": 13 },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 40
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Review image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL Reviews With Image",
+      "blocks": [
+        {
+          "type": "image"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
