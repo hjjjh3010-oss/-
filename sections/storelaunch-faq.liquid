@@ -1,0 +1,158 @@
+{% comment %}
+  StoreLaunch — FAQ (portable, self-contained)
+  Accordion with no theme deps. Scoped to #shopify-section-{{ section.id }}.
+  Uses <details>/<summary> for zero-JS open/close + keyboard accessibility.
+{% endcomment %}
+
+{%- liquid
+  assign sl_font = section.settings.sl_mt_font
+-%}
+
+{%- style -%}
+  {{ sl_font | font_face: font_display: 'swap' }}
+{%- endstyle -%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }}, #shopify-section-{{ section.id }} * { font-family: {{ sl_font.family }}, {{ sl_font.fallback_families }} !important; }
+  #shopify-section-{{ section.id }} .sl-faq {
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+  #shopify-section-{{ section.id }} .sl-faq__inner {
+    max-width: {{ section.settings.page_width }}px;
+    margin: 0 auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  #shopify-section-{{ section.id }} .sl-faq__title {
+    text-align: center;
+    font-size: {{ section.settings.heading_fs }}px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 28px;
+    color: {{ section.settings.heading_color }};
+    text-wrap: balance;
+  }
+  #shopify-section-{{ section.id }} .sl-faq__item {
+    margin-bottom: 12px;
+    border: 1px solid rgba(0,0,0,0.10);
+    border-radius: 10px;
+    background-color: {{ section.settings.secondary_color }};
+    overflow: hidden;
+    transition: border-color .2s ease;
+  }
+  #shopify-section-{{ section.id }} .sl-faq__item[open] { border-color: rgba(0,0,0,0.22); }
+  #shopify-section-{{ section.id }} .sl-faq__q {
+    list-style: none;
+    cursor: pointer;
+    font-size: {{ section.settings.question_fs }}px;
+    font-weight: 600;
+    line-height: 1.4;
+    padding: 18px 52px 18px 20px;
+    margin: 0;
+    position: relative;
+    color: {{ section.settings.text_color }};
+  }
+  #shopify-section-{{ section.id }} .sl-faq__q::-webkit-details-marker { display: none; }
+  #shopify-section-{{ section.id }} .sl-faq__q::before,
+  #shopify-section-{{ section.id }} .sl-faq__q::after {
+    content: "";
+    position: absolute;
+    background: {{ section.settings.text_color }};
+    border-radius: 2px;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  #shopify-section-{{ section.id }} .sl-faq__q::before {
+    width: 13px; height: 2px; right: 20px; top: 50%; margin-top: -1px;
+  }
+  #shopify-section-{{ section.id }} .sl-faq__q::after {
+    width: 2px; height: 13px; right: 25px; top: 50%; margin-top: -6px;
+  }
+  #shopify-section-{{ section.id }} .sl-faq__item[open] .sl-faq__q::after { opacity: 0; }
+  #shopify-section-{{ section.id }} .sl-faq__a {
+    padding: 0 20px 18px;
+  }
+  #shopify-section-{{ section.id }} .sl-faq__a p {
+    font-size: {{ section.settings.answer_fs }}px;
+    line-height: 1.6;
+    color: {{ section.settings.text_color }};
+    opacity: 0.85;
+    margin: 0;
+  }
+  @media (max-width: 749px) {
+    #shopify-section-{{ section.id }} .sl-faq__inner { padding-left: 1rem; padding-right: 1rem; }
+    #shopify-section-{{ section.id }} .sl-faq__title { font-size: {{ section.settings.heading_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-faq__q { font-size: {{ section.settings.question_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-faq__a p { font-size: {{ section.settings.answer_fs_m }}px; }
+  }
+{%- endstyle -%}
+
+<div class="sl-faq">
+  <div class="sl-faq__inner">
+    {% if section.settings.heading != blank %}
+      <h2 class="sl-faq__title">{{ section.settings.heading }}</h2>
+    {% endif %}
+    {% for block in section.blocks %}
+      <details class="sl-faq__item" name="sl-faq-{{ section.id }}"{% if forloop.first and section.settings.open_first %} open{% endif %} {{ block.shopify_attributes }}>
+        <summary class="sl-faq__q">{{ block.settings.question }}</summary>
+        <div class="sl-faq__a">{{ block.settings.answer }}</div>
+      </details>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+(function(){
+  var root=document.getElementById('shopify-section-{{ section.id }}');
+  if(!root||root.dataset.slFaqBound)return;root.dataset.slFaqBound='1';
+  var items=root.querySelectorAll('.sl-faq__item');
+  items.forEach(function(d){
+    d.addEventListener('toggle',function(){
+      if(d.open){items.forEach(function(o){if(o!==d){o.open=false;}});}
+    });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "SL FAQ",
+  "tag": "section",
+  "class": "sl-faq-section",
+  "settings": [
+    { "type": "font_picker", "id": "sl_mt_font", "label": "Font family", "default": "montserrat_n4" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Frequently Asked Questions" },
+    { "type": "checkbox", "id": "open_first", "label": "Open first item by default", "default": true },
+    { "type": "range", "id": "page_width", "min": 600, "max": 1200, "step": 20, "unit": "px", "label": "Section max width", "default": 760 },
+    { "type": "color", "id": "bg_color", "label": "Background color", "default": "#fafafa" },
+    { "type": "color", "id": "secondary_color", "label": "Item background color", "default": "#ffffff" },
+    { "type": "color", "id": "heading_color", "label": "Heading color", "default": "#121212" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#121212" },
+    { "type": "header", "content": "Font Sizes" },
+    { "type": "range", "id": "heading_fs", "min": 18, "max": 64, "step": 1, "unit": "px", "label": "Heading size (desktop)", "default": 38 },
+    { "type": "range", "id": "heading_fs_m", "min": 16, "max": 48, "step": 1, "unit": "px", "label": "Heading size (mobile)", "default": 26 },
+    { "type": "range", "id": "question_fs", "min": 12, "max": 28, "step": 1, "unit": "px", "label": "Question size (desktop)", "default": 16 },
+    { "type": "range", "id": "question_fs_m", "min": 12, "max": 24, "step": 1, "unit": "px", "label": "Question size (mobile)", "default": 14 },
+    { "type": "range", "id": "answer_fs", "min": 11, "max": 24, "step": 1, "unit": "px", "label": "Answer size (desktop)", "default": 15 },
+    { "type": "range", "id": "answer_fs_m", "min": 11, "max": 22, "step": 1, "unit": "px", "label": "Answer size (mobile)", "default": 14 },
+    { "type": "header", "content": "Section Padding" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 36 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 36 }
+  ],
+  "blocks": [
+    {
+      "name": "Question",
+      "type": "question",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "How does it work?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>Add your answer here.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "SL FAQ", "blocks": [ { "type": "question" }, { "type": "question" }, { "type": "question" } ] }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,248 @@
+{% comment %}
+  StoreLaunch — Comparison Table (portable)
+  Fully self-contained: all CSS scoped to #shopify-section-{{ section.id }},
+  no theme global classes, no theme locale keys, no third-party image CDNs.
+  Drops into ANY theme additively.
+{% endcomment %}
+
+{% liquid
+  assign column_width = section.settings.column_width
+  assign force_column_width = false
+  if column_width == 'full'
+    assign force_column_width = true
+  endif
+%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    --sl-cmp-table-bg: var(--sl-accent, {{ section.settings.table_bg }});
+    --sl-cmp-table-text: {{ section.settings.table_text }};
+    --sl-cmp-section-bg: {{ section.settings.bg_color }};
+    --sl-cmp-max-width: {{ section.settings.page_width | divided_by: 10.0 }}rem;
+    --sl-cmp-pad-side: {{ section.settings.padding_mobile | divided_by: 10.0 }}rem;
+    --sl-cmp-pad-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    --sl-cmp-pad-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  #shopify-section-{{ section.id }} .sl-cmp {
+    background-color: var(--sl-cmp-section-bg);
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding-top: var(--sl-cmp-pad-top);
+    padding-bottom: var(--sl-cmp-pad-bottom);
+  }
+  #shopify-section-{{ section.id }} .sl-cmp__inner {
+    max-width: var(--sl-cmp-max-width);
+    margin: 0 auto;
+    padding-left: var(--sl-cmp-pad-side);
+    padding-right: var(--sl-cmp-pad-side);
+  }
+  #shopify-section-{{ section.id }} .sl-cmp__box {
+    display: block;
+    padding: 0;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp__left { width: 100%; text-align: center; margin-bottom: 2rem; }
+  #shopify-section-{{ section.id }} .sl-cmp__right-wrap { width: 100%; max-width: 900px; margin: 0 auto; }
+  #shopify-section-{{ section.id }} .sl-cmp__heading {color: #2e2a39;text-align: center;max-width: 100%;width: 100%;font-family: inherit;font-size: {{ section.settings.heading_fs }}px;line-height: 1.15;font-weight: 700;margin: 0 0 .85rem;text-wrap: balance;}
+  #shopify-section-{{ section.id }} .sl-cmp__desc { margin: 0 auto; max-width: 60ch;font-size: {{ section.settings.description_fs }}px;line-height: 1.6; opacity: 0.85; text-align: center; }
+
+  #shopify-section-{{ section.id }} .sl-cmp__head-table,
+  #shopify-section-{{ section.id }} .sl-cmp__rows-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-bottom: 0;
+    background: transparent;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp__head-table th {
+    vertical-align: bottom;
+    text-align: center;
+    background: transparent;
+    border: none;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp__head-table th.sl-cmp__head-left { text-align: left; width: 50%; }
+  #shopify-section-{{ section.id }} .sl-cmp__head-table th.sl-cmp__head-col { width: 25%; }
+  #shopify-section-{{ section.id }} .sl-cmp__head-table .sl-cmp__bigtext {
+    margin: 0 0 10px 0;
+    color: #000;
+    font-size: {{ section.settings.column_label_fs }}px;
+    line-height: 1.2;
+    font-weight: 600;
+  }
+
+  #shopify-section-{{ section.id }} .sl-cmp__right-wrap { padding-left: 0; }
+  #shopify-section-{{ section.id }} .sl-cmp__rows-table {
+    background-color: #fff;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp__row {
+    background-color: var(--sl-cmp-table-bg);
+    border-radius: 3px 0 0;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp__cell {
+    text-align: center;
+    font-size: {{ section.settings.cell_fs }}px;
+    line-height: 1.55;
+    padding: 15px 10px;
+    color: var(--sl-cmp-table-text);
+    font-weight: 400;
+    border: none;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp__cell--label { background-color: var(--sl-cmp-table-bg); }
+  #shopify-section-{{ section.id }} .sl-cmp__cell--yes {
+    background: #fff;
+    color: #000;
+    width: 25%;
+    text-align: center;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp__cell--no {
+    background-color: #fff;
+    width: 25%;
+    text-align: center;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp__icon {
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  @media only screen and (max-width: 925px) {
+    #shopify-section-{{ section.id }} .sl-cmp__left,
+    #shopify-section-{{ section.id }} .sl-cmp__right-wrap { width: 100%; }
+    #shopify-section-{{ section.id }} .sl-cmp__right-wrap { padding-left: 0; }
+  }
+
+  @media screen and (min-width: 750px) {
+    #shopify-section-{{ section.id }} .sl-cmp {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+    #shopify-section-{{ section.id }} .sl-cmp__inner {
+      padding-left: {{ section.settings.padding_desktop | divided_by: 10.0 }}rem;
+      padding-right: {{ section.settings.padding_desktop | divided_by: 10.0 }}rem;
+    }
+  }
+
+  @media (max-width: 749px) {
+    #shopify-section-{{ section.id }} .sl-cmp__heading { font-size: {{ section.settings.heading_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-cmp__desc { font-size: {{ section.settings.description_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-cmp__head-table .sl-cmp__bigtext { font-size: {{ section.settings.column_label_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-cmp__cell { font-size: {{ section.settings.cell_fs_m }}px; padding: 12px 6px; }
+    #shopify-section-{{ section.id }} .sl-cmp__right-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    #shopify-section-{{ section.id }} .sl-cmp__head-table,
+    #shopify-section-{{ section.id }} .sl-cmp__rows-table { min-width: 420px; }
+  }
+
+  {% if force_column_width %}
+    #shopify-section-{{ section.id }} .sl-cmp__left,
+    #shopify-section-{{ section.id }} .sl-cmp__right-wrap {
+      width: 100%;
+      max-width: {{ section.settings.page_width }}px;
+      margin: 0 auto;
+    }
+  {% endif %}
+{%- endstyle -%}
+
+{%- liquid
+  capture icon_check
+    echo '<svg class="sl-cmp__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#1db954"/><path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  endcapture
+  capture icon_cross
+    echo '<svg class="sl-cmp__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#d9d9d9"/><path d="M8 8l8 8M16 8l-8 8" stroke="#666" stroke-width="2.2" stroke-linecap="round"/></svg>'
+  endcapture
+-%}
+
+<div class="sl-cmp">
+  <div class="sl-cmp__inner{% if force_column_width %} sl-cmp--full{% endif %}">
+    <div class="sl-cmp__box">
+      <div class="sl-cmp__left">
+        <h2 class="sl-cmp__heading">{{ section.settings.title }}</h2>
+        {% if section.settings.des != blank %}
+          <div class="sl-cmp__desc">{{ section.settings.des }}</div>
+        {% endif %}
+      </div>
+      <div class="sl-cmp__right-wrap">
+        <table class="sl-cmp__head-table">
+          <tbody>
+            <tr>
+              <th class="sl-cmp__head-left">&nbsp;</th>
+              <th class="sl-cmp__head-col"><p class="sl-cmp__bigtext">{{ section.settings.store_name }}</p></th>
+              <th class="sl-cmp__head-col"><p class="sl-cmp__bigtext">{{ section.settings.other }}</p></th>
+            </tr>
+          </tbody>
+        </table>
+        <table class="sl-cmp__rows-table">
+          <tbody>
+            {% for block in section.blocks %}
+              <tr class="sl-cmp__row" {{ block.shopify_attributes }}>
+                <td class="sl-cmp__cell sl-cmp__cell--label">{{ block.settings.title }}</td>
+                {% if block.settings.this_store == 'yes' %}
+                  <td class="sl-cmp__cell--yes">{{ icon_check }}</td>
+                {% else %}
+                  <td class="sl-cmp__cell--no">{{ icon_cross }}</td>
+                {% endif %}
+                {% if block.settings.other_store == 'no' %}
+                  <td class="sl-cmp__cell--no">{{ icon_cross }}</td>
+                {% else %}
+                  <td class="sl-cmp__cell--yes">{{ icon_check }}</td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "SL Comparison Table",
+  "tag": "section",
+  "class": "sl-comparison-table",
+  "settings": [
+    { "type": "header", "content": "Base Settings" },
+    { "type": "range", "id": "page_width", "min": 500, "max": 1600, "step": 100, "default": 1200, "unit": "px", "label": "Section max width" },
+    { "type": "range", "id": "padding_desktop", "min": 15, "max": 100, "step": 1, "default": 50, "unit": "px", "label": "Desktop side padding" },
+    { "type": "range", "id": "padding_mobile", "min": 15, "max": 100, "step": 1, "default": 15, "unit": "px", "label": "Mobile side padding" },
+    { "type": "select", "id": "column_width", "options": [ { "value": "half", "label": "Half" }, { "value": "full", "label": "Full" } ], "default": "half", "label": "Column width" },
+    { "type": "color", "id": "bg_color", "label": "Section background", "default": "#ffffff" },
+    { "type": "color", "id": "table_bg", "label": "Table background", "default": "#a891f6" },
+    { "type": "color", "id": "table_text", "label": "Table text color", "default": "#ffffff" },
+    { "type": "text", "id": "title", "label": "Heading", "default": "What Makes Us Special" },
+    { "type": "richtext", "id": "des", "label": "Description", "default": "<p>Find out why you should choose us instead of other options.</p>" },
+    { "type": "text", "id": "store_name", "label": "Your store name", "default": "Us" },
+    { "type": "text", "id": "other", "label": "Others", "default": "Others" },
+    { "type": "header", "content": "Font Sizes" },
+    { "type": "range", "id": "heading_fs", "min": 20, "max": 72, "step": 1, "unit": "px", "label": "Heading size (desktop)", "default": 48 },
+    { "type": "range", "id": "heading_fs_m", "min": 18, "max": 56, "step": 1, "unit": "px", "label": "Heading size (mobile)", "default": 32 },
+    { "type": "range", "id": "description_fs", "min": 11, "max": 28, "step": 1, "unit": "px", "label": "Description size (desktop)", "default": 17 },
+    { "type": "range", "id": "description_fs_m", "min": 11, "max": 24, "step": 1, "unit": "px", "label": "Description size (mobile)", "default": 15 },
+    { "type": "range", "id": "column_label_fs", "min": 12, "max": 32, "step": 1, "unit": "px", "label": "Column label size (desktop)", "default": 18 },
+    { "type": "range", "id": "column_label_fs_m", "min": 12, "max": 26, "step": 1, "unit": "px", "label": "Column label size (mobile)", "default": 16 },
+    { "type": "range", "id": "cell_fs", "min": 11, "max": 30, "step": 1, "unit": "px", "label": "Table cell size (desktop)", "default": 18 },
+    { "type": "range", "id": "cell_fs_m", "min": 11, "max": 24, "step": 1, "unit": "px", "label": "Table cell size (mobile)", "default": 15 },
+    { "type": "header", "content": "Section Padding" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding top", "default": 36 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "Padding bottom", "default": 36 }
+  ],
+  "max_blocks": 5,
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Feature title", "default": "Painless" },
+        { "type": "select", "id": "this_store", "options": [ { "value": "yes", "label": "Yes" }, { "value": "no", "label": "No" } ], "default": "yes", "label": "This store" },
+        { "type": "select", "id": "other_store", "options": [ { "value": "yes", "label": "Yes" }, { "value": "no", "label": "No" } ], "default": "no", "label": "Other store" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "SL Comparison Table", "blocks": [ { "type": "feature" }, { "type": "feature" }, { "type": "feature" }, { "type": "feature" } ] }
+  ]
+}
+{% endschema %}

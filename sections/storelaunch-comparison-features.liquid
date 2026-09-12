@@ -1,0 +1,564 @@
+{% comment %}
+  StoreLaunch — Comparison Section (3-column: pros left, image center, pros right)
+  Decoupled from Dawn: no color-scheme classes, no grid classes, no theme CSS vars.
+  All layout is self-contained flexbox scoped to the section.
+{% endcomment %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Assistant:wght@400;600;700&display=swap">
+
+{%- liquid
+  assign accent = section.settings.accent_color
+-%}
+
+{%- style -%}
+  #shopify-section-{{ section.id }} .sl-fadeup{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1);will-change:opacity,transform;}
+  #shopify-section-{{ section.id }} .sl-fadeup.is-in{opacity:1;transform:none;}
+  @media (prefers-reduced-motion: reduce){#shopify-section-{{ section.id }} .sl-fadeup{opacity:1!important;transform:none!important;transition:none!important;}}
+
+  {{ section.settings.sl_mt_font | font_face: font_display: 'swap' }}
+  #shopify-section-{{ section.id }}, #shopify-section-{{ section.id }} * { font-family: {{ section.settings.sl_mt_font.family }}, {{ section.settings.sl_mt_font.fallback_families }} !important; }
+  #shopify-section-{{ section.id }} .sl-cmp2 {
+    background-color: {{ section.settings.bg_color }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp2__inner {
+    max-width: {{ section.settings.page_width }}px;
+    margin: 0 auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp2__head { text-align: center; margin-bottom: 2rem; }
+  #shopify-section-{{ section.id }} .sl-cmp2__head h2 {
+    color: {{ section.settings.heading_color }};
+    font-family: {{ section.settings.sl_mt_font.family }}, {{ section.settings.sl_mt_font.fallback_families }};font-size: {{ section.settings.heading_fs }}px;line-height: 1.15;font-weight: 700;margin: 0 0 .85rem;text-wrap: balance;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp2__head .sl-cmp2__desc {
+    color: {{ section.settings.text_color }};
+    opacity: 0.85;
+    max-width: 60ch;font-size: {{ section.settings.description_fs }}px;line-height: 1.6;margin-left: auto;margin-right: auto;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp2__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.2rem;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp2__col { flex: 1 1 22%; min-width: 200px; }
+  #shopify-section-{{ section.id }} .sl-cmp2__col--center { flex: 1 1 36%; min-width: 280px; }
+  #shopify-section-{{ section.id }} .sl-cmp2__feature { text-align: center; margin-bottom: 1.2rem; }
+  #shopify-section-{{ section.id }} .sl-cmp2__feature:last-child { margin-bottom: 0; }
+  #shopify-section-{{ section.id }} .sl-cmp2__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: {{ accent | color_modify: 'alpha', 0.12 }};
+    margin: 0 auto .75rem;
+  }
+  #shopify-section-{{ section.id }} .sl-cmp2__icon svg { color: var(--sl-accent, {{ accent }}); }
+  #shopify-section-{{ section.id }} .sl-cmp2__icon img { width: 2.2rem; height: 2.2rem; object-fit: contain; }
+  #shopify-section-{{ section.id }} .sl-cmp2__feature h4 { margin: 0 0 .4rem; color: {{ section.settings.heading_color }}; font-size: {{ section.settings.feature_title_fs }}px; font-weight: 700; }
+  #shopify-section-{{ section.id }} .sl-cmp2__feature p { margin: 0; color: {{ section.settings.text_color }}; opacity: 0.8; font-size: {{ section.settings.feature_text_fs }}px; line-height: 1.5; }
+  #shopify-section-{{ section.id }} .sl-cmp2__media { aspect-ratio: 4 / 5; border-radius: 16px; overflow: hidden; width: 100%; max-width: 360px; max-height: 450px; margin: 0 auto; }
+  #shopify-section-{{ section.id }} .sl-cmp2__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #shopify-section-{{ section.id }} .sl-cmp2__media-fallback {
+    display: flex; align-items: center; justify-content: center;
+    aspect-ratio: 1 / 1; width: 100%; border-radius: 16px;
+    background: {{ accent | color_modify: 'alpha', 0.06 }};
+    border: 1px dashed {{ section.settings.text_color | color_modify: 'alpha', 0.15 }};
+    color: var(--sl-accent, {{ accent }});
+  }
+  @media (max-width: 749px) {
+    #shopify-section-{{ section.id }} .sl-cmp2__col,
+    #shopify-section-{{ section.id }} .sl-cmp2__col--center { flex: 1 1 100%; }
+    #shopify-section-{{ section.id }} .sl-cmp2__inner { padding-left: 1rem; padding-right: 1rem; }
+    #shopify-section-{{ section.id }} .sl-cmp2__head h2 { font-size: {{ section.settings.heading_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-cmp2__head .sl-cmp2__desc { font-size: {{ section.settings.description_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-cmp2__feature h4 { font-size: {{ section.settings.feature_title_fs_m }}px; }
+    #shopify-section-{{ section.id }} .sl-cmp2__feature p { font-size: {{ section.settings.feature_text_fs_m }}px; }
+  }
+{%- endstyle -%}
+
+{%- capture sl_check -%}<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="26" height="26" aria-hidden="true"><path d="M16.704 5.292a1 1 0 0 1 .004 1.414l-7.5 7.6a1 1 0 0 1-1.43-.006l-3.49-3.6a1 1 0 0 1 1.435-1.392l2.777 2.864 6.788-6.88a1 1 0 0 1 1.416-.004Z" fill-rule="evenodd"/></svg>{%- endcapture -%}
+
+<div class="sl-cmp2">
+  <div class="sl-cmp2__inner">
+    <div class="sl-cmp2__head">
+      {% if section.settings.title != blank %}<h2>{{ section.settings.title }}</h2>{% endif %}
+      {% if section.settings.des != blank %}<div class="sl-cmp2__desc">{{ section.settings.des }}</div>{% endif %}
+    </div>
+
+    <div class="sl-cmp2__row">
+      <div class="sl-cmp2__col">
+        {% for block in section.blocks %}{% if block.type == 'block-left' %}
+          <div class="sl-cmp2__feature" {{ block.shopify_attributes }}>
+            <div class="sl-cmp2__icon">
+              {% if block.settings.block-icon-left != blank %}
+                <img loading="lazy" src="{{ block.settings.block-icon-left | image_url: width: 100 }}" alt="">
+              {% else %}
+  {%- assign icon_choice = block.settings.icon_left | default: 'check' -%}
+  {%- case icon_choice -%}
+    {%- when 'check' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><polyline points="20 6 9 17 4 12"/></svg>
+    {%- when 'star' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    {%- when 'heart' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.5 4.5 4.5 8.5C19 16.65 12 21 12 21z"/></svg>
+    {%- when 'leaf' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19.2 2.96c.97 6.93-2.78 18.4-8.2 17.04z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+    {%- when 'shield' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    {%- when 'sparkle' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 2l1.8 5.4L19 9.3l-5 1.7L12 17l-2-6L5 9.3l5.2-1.9L12 2z"/></svg>
+    {%- when 'bolt' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+    {%- when 'droplet' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+    {%- when 'sun' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    {%- when 'moon' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    {%- when 'smile' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+    {%- when 'thumb-up' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M2 21h4V9H2v12zM23 10a2 2 0 0 0-2-2h-6.31l.95-4.57.03-.32a1.5 1.5 0 0 0-.44-1.06L14.17 1 7.59 7.59A2 2 0 0 0 7 9v10a2 2 0 0 0 2 2h9a2 2 0 0 0 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+    {%- when 'clock' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    {%- when 'gift' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+    {%- when 'flame' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14a8 8 0 0 0 16 0C20 9.33 17.06 5.32 13.5.67z"/></svg>
+    {%- when 'target' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    {%- when 'award' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+    {%- when 'package' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    {%- when 'truck' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    {%- when 'lock' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    {%- else -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><polyline points="20 6 9 17 4 12"/></svg>
+  {%- endcase -%}
+{% endif %}
+            </div>
+            <h4>{{ block.settings.block-title-left }}</h4>
+            {{ block.settings.block-des-left }}
+          </div>
+        {% endif %}{% endfor %}
+      </div>
+
+      <div class="sl-cmp2__col sl-cmp2__col--center">
+        <div class="sl-cmp2__media">
+          {%- assign sl_product = closest.product | default: product -%}
+          {%- assign comparison_image = section.settings.image -%}
+          {%- if comparison_image == blank and sl_product != blank and sl_product.images.size > 0 -%}
+            {%- assign sl_cmp_idx = 2 | modulo: sl_product.images.size -%}
+            {%- assign comparison_image = sl_product.images[sl_cmp_idx] | default: sl_product.featured_image -%}
+          {%- endif -%}
+          {%- if comparison_image != blank -%}
+            <img loading="lazy" src="{{ comparison_image | image_url: width: 800 }}" alt="{{ section.settings.title | escape }}">
+          {%- else -%}
+            <div class="sl-cmp2__media-fallback" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" width="56" height="56">
+                <rect x="6" y="12" width="52" height="40" rx="6" stroke="currentColor" stroke-width="2.5" opacity="0.5"/>
+                <circle cx="22" cy="26" r="5" stroke="currentColor" stroke-width="2.5" opacity="0.5"/>
+                <path d="M12 46l13-13 9 9 8-8 10 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+              </svg>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="sl-cmp2__col">
+        {% for block in section.blocks %}{% if block.type == 'block-right' %}
+          <div class="sl-cmp2__feature" {{ block.shopify_attributes }}>
+            <div class="sl-cmp2__icon">
+              {% if block.settings.block-icon != blank %}
+                <img loading="lazy" src="{{ block.settings.block-icon | image_url: width: 100 }}" alt="">
+              {% else %}
+  {%- assign icon_choice = block.settings.icon_right | default: 'check' -%}
+  {%- case icon_choice -%}
+    {%- when 'check' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><polyline points="20 6 9 17 4 12"/></svg>
+    {%- when 'star' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    {%- when 'heart' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 21s-7-4.35-9.5-8.5C.5 8.5 3 4 7 4c2 0 3.5 1 5 3 1.5-2 3-3 5-3 4 0 6.5 4.5 4.5 8.5C19 16.65 12 21 12 21z"/></svg>
+    {%- when 'leaf' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19.2 2.96c.97 6.93-2.78 18.4-8.2 17.04z"/><path d="M2 21c0-3 1.85-5.36 5.08-6"/></svg>
+    {%- when 'shield' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    {%- when 'sparkle' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 2l1.8 5.4L19 9.3l-5 1.7L12 17l-2-6L5 9.3l5.2-1.9L12 2z"/></svg>
+    {%- when 'bolt' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+    {%- when 'droplet' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+    {%- when 'sun' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    {%- when 'moon' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    {%- when 'smile' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+    {%- when 'thumb-up' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M2 21h4V9H2v12zM23 10a2 2 0 0 0-2-2h-6.31l.95-4.57.03-.32a1.5 1.5 0 0 0-.44-1.06L14.17 1 7.59 7.59A2 2 0 0 0 7 9v10a2 2 0 0 0 2 2h9a2 2 0 0 0 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+    {%- when 'clock' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    {%- when 'gift' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+    {%- when 'flame' -%}<svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14a8 8 0 0 0 16 0C20 9.33 17.06 5.32 13.5.67z"/></svg>
+    {%- when 'target' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    {%- when 'award' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+    {%- when 'package' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    {%- when 'truck' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    {%- when 'lock' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    {%- else -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><polyline points="20 6 9 17 4 12"/></svg>
+  {%- endcase -%}
+{% endif %}
+            </div>
+            <h4>{{ block.settings.block-title }}</h4>
+            {{ block.settings.block-des }}
+          </div>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- if section.settings.sl_fade_up != false -%}
+<script>
+(function(){
+  var root=document.getElementById('shopify-section-{{ section.id }}');
+  if(!root||root.dataset.slFadeBound)return;root.dataset.slFadeBound='1';
+  var targets=root.querySelectorAll(':scope > .shopify-section, :scope > div, :scope > section');
+  targets.forEach(function(t){t.classList.add('sl-fadeup');});
+  if(!('IntersectionObserver' in window)){targets.forEach(function(t){t.classList.add('is-in');});return;}
+  var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target);}});},{threshold:0.12,rootMargin:'0px 0px -8% 0px'});
+  targets.forEach(function(t){io.observe(t);});
+})();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "SL Comparison Features",
+  "tag": "section",
+  "class": "sl-comparison-features",
+  "settings": [
+    {
+      "type": "font_picker",
+      "id": "sl_mt_font",
+      "label": "Font family",
+      "default": "montserrat_n4"
+    },
+    {
+      "type": "checkbox",
+      "id": "sl_fade_up",
+      "label": "Entrance animation (fade up on scroll)",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Why Choose Us"
+    },
+    {
+      "type": "richtext",
+      "id": "des",
+      "label": "Description",
+      "default": "<p>See what makes our product different.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Center image"
+    },
+    {
+      "type": "range",
+      "id": "page_width",
+      "min": 800,
+      "max": 1600,
+      "step": 100,
+      "default": 1200,
+      "unit": "px",
+      "label": "Max width"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#a891f6"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#121212"
+    },
+    {
+      "type": "header",
+      "content": "Font Sizes"
+    },
+    { "type": "range", "id": "heading_fs", "min": 18, "max": 64, "step": 1, "unit": "px", "label": "Heading size (desktop)", "default": 38 },
+    { "type": "range", "id": "heading_fs_m", "min": 16, "max": 48, "step": 1, "unit": "px", "label": "Heading size (mobile)", "default": 26 },
+    { "type": "range", "id": "description_fs", "min": 11, "max": 28, "step": 1, "unit": "px", "label": "Description size (desktop)", "default": 17 },
+    { "type": "range", "id": "description_fs_m", "min": 11, "max": 24, "step": 1, "unit": "px", "label": "Description size (mobile)", "default": 15 },
+    { "type": "range", "id": "feature_title_fs", "min": 12, "max": 30, "step": 1, "unit": "px", "label": "Feature title size (desktop)", "default": 17 },
+    { "type": "range", "id": "feature_title_fs_m", "min": 12, "max": 26, "step": 1, "unit": "px", "label": "Feature title size (mobile)", "default": 16 },
+    { "type": "range", "id": "feature_text_fs", "min": 11, "max": 24, "step": 1, "unit": "px", "label": "Feature text size (desktop)", "default": 15 },
+    { "type": "range", "id": "feature_text_fs_m", "min": 11, "max": 22, "step": 1, "unit": "px", "label": "Feature text size (mobile)", "default": 14 },
+    {
+      "type": "header",
+      "content": "Section Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 52
+    }
+  ],
+  "blocks": [
+    {
+      "type": "block-left",
+      "name": "Feature (left)",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon_left",
+          "label": "Icon",
+          "default": "check",
+          "options": [
+            {
+              "value": "check",
+              "label": "Check"
+            },
+            {
+              "value": "star",
+              "label": "Star"
+            },
+            {
+              "value": "heart",
+              "label": "Heart"
+            },
+            {
+              "value": "leaf",
+              "label": "Leaf"
+            },
+            {
+              "value": "shield",
+              "label": "Shield"
+            },
+            {
+              "value": "sparkle",
+              "label": "Sparkle"
+            },
+            {
+              "value": "bolt",
+              "label": "Bolt"
+            },
+            {
+              "value": "droplet",
+              "label": "Droplet"
+            },
+            {
+              "value": "sun",
+              "label": "Sun"
+            },
+            {
+              "value": "moon",
+              "label": "Moon"
+            },
+            {
+              "value": "smile",
+              "label": "Smile"
+            },
+            {
+              "value": "thumb-up",
+              "label": "Thumb up"
+            },
+            {
+              "value": "clock",
+              "label": "Clock"
+            },
+            {
+              "value": "gift",
+              "label": "Gift"
+            },
+            {
+              "value": "flame",
+              "label": "Flame"
+            },
+            {
+              "value": "target",
+              "label": "Target"
+            },
+            {
+              "value": "award",
+              "label": "Award"
+            },
+            {
+              "value": "package",
+              "label": "Package"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "lock",
+              "label": "Lock"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "block-icon-left",
+          "label": "Custom icon image (overrides icon)"
+        },
+        {
+          "type": "text",
+          "id": "block-title-left",
+          "label": "Title",
+          "default": "Easy to Use"
+        },
+        {
+          "type": "richtext",
+          "id": "block-des-left",
+          "label": "Description",
+          "default": "<p>Simple and effective.</p>"
+        }
+      ]
+    },
+    {
+      "type": "block-right",
+      "name": "Feature (right)",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon_right",
+          "label": "Icon",
+          "default": "check",
+          "options": [
+            {
+              "value": "check",
+              "label": "Check"
+            },
+            {
+              "value": "star",
+              "label": "Star"
+            },
+            {
+              "value": "heart",
+              "label": "Heart"
+            },
+            {
+              "value": "leaf",
+              "label": "Leaf"
+            },
+            {
+              "value": "shield",
+              "label": "Shield"
+            },
+            {
+              "value": "sparkle",
+              "label": "Sparkle"
+            },
+            {
+              "value": "bolt",
+              "label": "Bolt"
+            },
+            {
+              "value": "droplet",
+              "label": "Droplet"
+            },
+            {
+              "value": "sun",
+              "label": "Sun"
+            },
+            {
+              "value": "moon",
+              "label": "Moon"
+            },
+            {
+              "value": "smile",
+              "label": "Smile"
+            },
+            {
+              "value": "thumb-up",
+              "label": "Thumb up"
+            },
+            {
+              "value": "clock",
+              "label": "Clock"
+            },
+            {
+              "value": "gift",
+              "label": "Gift"
+            },
+            {
+              "value": "flame",
+              "label": "Flame"
+            },
+            {
+              "value": "target",
+              "label": "Target"
+            },
+            {
+              "value": "award",
+              "label": "Award"
+            },
+            {
+              "value": "package",
+              "label": "Package"
+            },
+            {
+              "value": "truck",
+              "label": "Truck"
+            },
+            {
+              "value": "lock",
+              "label": "Lock"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "block-icon",
+          "label": "Custom icon image (overrides icon)"
+        },
+        {
+          "type": "text",
+          "id": "block-title",
+          "label": "Title",
+          "default": "Long Lasting"
+        },
+        {
+          "type": "richtext",
+          "id": "block-des",
+          "label": "Description",
+          "default": "<p>Built to last.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "SL Comparison Features",
+      "blocks": [
+        {
+          "type": "block-left"
+        },
+        {
+          "type": "block-left"
+        },
+        {
+          "type": "block-right"
+        },
+        {
+          "type": "block-right"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
