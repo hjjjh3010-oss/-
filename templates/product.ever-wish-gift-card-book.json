@@ -28,7 +28,7 @@
           "type": "benefits_list",
           "settings": {
             "benefit_1": "Vibrant Holographic Design",
-            "benefit_2": "Personalization Made Easy",
+            "benefit_2": "Personalized Touch",
             "benefit_3": "Perfect for Everyone"
           }
         },
@@ -44,14 +44,14 @@
           "type": "collapsible_row",
           "settings": {
             "title": "How It Works",
-            "content": "<p>Make Gifting Magical This Season!</p>"
+            "content": "<p>Make Gifting Unforgettable This Holiday!</p>"
           }
         },
         "b_how_use": {
           "type": "collapsible_row",
           "settings": {
             "title": "How to Use",
-            "content": "<p>Perfect for any occasion, this booklet not only brings joy but also allows you to express your creativity.</p>"
+            "content": "<p>Transform your gifts into unforgettable experiences with personalized messages and vibrant designs.</p>"
           }
         },
         "b_shipping": {
@@ -82,7 +82,7 @@
         "b_return"
       ],
       "settings": {
-        "accent_color": "#FF4B4B"
+        "accent_color": "#A12B4E"
       }
     },
     "sl_features": {
@@ -92,28 +92,28 @@
           "type": "block-left",
           "settings": {
             "block-title-left": "Vibrant Holographic Design",
-            "block-des-left": "<p>Captivate your loved ones with brilliant colors that sparkle and shine, making every gift feel special.</p>"
+            "block-des-left": "<p>The captivating colors of our gift card booklet shine bright, making every gift memorable and festive.</p>"
           }
         },
         "f_l2_1": {
           "type": "block-left",
           "settings": {
-            "block-title-left": "Personalization Made Easy",
-            "block-des-left": "<p>With multiple pages ready for your personal messages and wishes, transform gifts into cherished memories.</p>"
+            "block-title-left": "Personalized Touch",
+            "block-des-left": "<p>With multi-page formats, you can easily add your heartfelt messages, turning ordinary gifts into cherished…</p>"
           }
         },
         "f_r1_0": {
           "type": "block-right",
           "settings": {
             "block-title": "Perfect for Everyone",
-            "block-des": "<p>Whether for kids or adults, this gift card booklet is the ideal way to spread holiday cheer to anyone on your…</p>"
+            "block-des": "<p>This gift card booklet is ideal for all ages, making it a versatile choice for friends and family.</p>"
           }
         },
         "f_r2_1": {
           "type": "block-right",
           "settings": {
             "block-title": "User-Friendly Spiral-Bound",
-            "block-des": "<p>Easily flip through pages and write down your thoughtful messages, making gift-giving a breeze!</p>"
+            "block-des": "<p>Its spiral-bound design allows for easy flipping and writing, ensuring a hassle-free gifting experience.</p>"
           }
         }
       },
@@ -125,7 +125,7 @@
       ],
       "settings": {
         "title": "Why You'll Love It",
-        "des": "<p>Make Gifting Magical This Season!</p>",
+        "des": "<p>Make Gifting Unforgettable This Holiday!</p>",
         "page_width": 1200,
         "bg_color": "#ffffff",
         "accent_color": "#a891f6",
@@ -149,7 +149,7 @@
           "type": "bar",
           "settings": {
             "bar_no": 84,
-            "bar_des": "<p>Personalization Made Easy</p>"
+            "bar_des": "<p>Personalized Touch</p>"
           }
         },
         "b3_2": {
@@ -168,7 +168,7 @@
       "settings": {
         "heading": "See It In Action",
         "video_url": "",
-        "pre_btn": "<p>Make Gifting Magical This Season!</p>",
+        "pre_btn": "<p>Make Gifting Unforgettable This Holiday!</p>",
         "buybutton": "Shop now",
         "page_width": 1200,
         "bg_color": "#ffffff",
@@ -197,7 +197,7 @@
         "c2_1": {
           "type": "feature",
           "settings": {
-            "title": "Personalization Made Easy",
+            "title": "Personalized Touch",
             "this_store": "yes",
             "other_store": "no"
           }
@@ -226,8 +226,8 @@
         "c4_3"
       ],
       "settings": {
-        "title": "Why Choose Our Booklet?",
-        "des": "<p>Unlike traditional gift cards, this booklet adds a personal touch, ensuring that your gifts not only convey love but also creativity.</p>",
+        "title": "Why Choose Us?",
+        "des": "<p>Experience the joy of giving with our uniquely designed gift card booklet that stands out with vibrant colors and easy customization…</p>",
         "store_name": "This product",
         "other": "Typical listing",
         "page_width": 1200,
@@ -254,7 +254,7 @@
       ],
       "settings": {
         "heading": "See It In Action",
-        "body": "<p>Make Gifting Magical This Season!</p>",
+        "body": "<p>Make Gifting Unforgettable This Holiday!</p>",
         "rating_text": "",
         "button_label": "Shop now",
         "page_width": 1200,
@@ -275,24 +275,24 @@
         "t1_0": {
           "type": "review",
           "settings": {
-            "rev_title": "Absolutely Stunning!",
-            "rev_description": "<p>The holographic design is even more beautiful in person! My family loved the personalized touch.</p>",
+            "rev_title": "The Perfect Holiday Gift!",
+            "rev_description": "<p>I used this gift card booklet for my kids, and they loved the colorful design! It made giving more special.</p>",
             "author": "Emily R."
           }
         },
         "t2_1": {
           "type": "review",
           "settings": {
-            "rev_title": "Perfect Holiday Gift!",
-            "rev_description": "<p>This booklet made giving gift cards so much more special. Highly recommend it!</p>",
-            "author": "James T."
+            "rev_title": "A Unique Touch",
+            "rev_description": "<p>I personalized each page with notes and coupons. It truly made my gifts stand out this holiday season!</p>",
+            "author": "Jason T."
           }
         },
         "t3_2": {
           "type": "review",
           "settings": {
-            "rev_title": "Great Quality!",
-            "rev_description": "<p>The pages are durable and easy to write on. I will be buying more for next year!</p>",
+            "rev_title": "Easy and Fun!",
+            "rev_description": "<p>The spiral-bound feature makes it so user-friendly! I can take it anywhere and fill it out on the go.</p>",
             "author": "Sophie L."
           }
         }
@@ -321,36 +321,36 @@
         "q1_0": {
           "type": "question",
           "settings": {
-            "question": "Is this booklet suitable for all ages?",
-            "answer": "<p>Absolutely! It's designed to be a fun and festive gift option for everyone.</p>"
+            "question": "What is the size of the booklet?",
+            "answer": "<p>The booklet is compact and easily portable, perfect for on-the-go gifting.</p>"
           }
         },
         "q2_1": {
           "type": "question",
           "settings": {
-            "question": "Can I customize the pages?",
-            "answer": "<p>Yes! Each page is perfect for your personal messages, wishes, or coupons.</p>"
+            "question": "What material is it made of?",
+            "answer": "<p>It is made from durable high-quality paper that ensures lasting use.</p>"
           }
         },
         "q3_2": {
           "type": "question",
           "settings": {
-            "question": "What is the size of the booklet?",
-            "answer": "<p>It's compact and lightweight, making it easy to carry around.</p>"
+            "question": "Can I personalize the pages?",
+            "answer": "<p>Absolutely! You can add your own messages, thoughts, or coupons to each page.</p>"
           }
         },
         "q4_3": {
           "type": "question",
           "settings": {
-            "question": "What material is used for the booklet?",
-            "answer": "<p>We use high-quality, durable paper for a premium feel and lasting use.</p>"
+            "question": "Is it suitable for all ages?",
+            "answer": "<p>Yes, this gift card booklet is designed to be perfect for everyone, from kids to adults.</p>"
           }
         },
         "q5_4": {
           "type": "question",
           "settings": {
             "question": "What is Ever Wish Gift Card book?",
-            "answer": "<p>Make Gifting Magical This Season!</p>"
+            "answer": "<p>Make Gifting Unforgettable This Holiday!</p>"
           }
         },
         "q6_5": {
